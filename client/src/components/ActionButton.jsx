@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Loader2, Check, AlertTriangle, DollarSign } from 'lucide-react';
 import { getEstimate } from '../services/api';
 import { useStore } from '../store/useStore';
@@ -25,7 +25,6 @@ export default function ActionButton({
 
   const handleClick = async () => {
     if (disabled || loading || completed) return;
-
     if (autonomousMode) {
       await execute();
     } else {
@@ -46,24 +45,27 @@ export default function ActionButton({
   return (
     <>
       <motion.button
-        whileHover={!disabled && !completed ? { scale: 1.02 } : undefined}
-        whileTap={!disabled && !completed ? { scale: 0.98 } : undefined}
+        whileHover={!disabled && !completed ? { y: -2 } : undefined}
+        whileTap={!disabled && !completed ? { scale: 0.985 } : undefined}
+        transition={{ type: 'spring', stiffness: 400, damping: 25 }}
         onClick={handleClick}
         disabled={disabled || loading}
-        className={`relative w-full text-left p-5 rounded-2xl border transition-all ${
+        className={`group relative w-full text-left p-5 rounded-2xl border transition-all duration-300 ${
           completed
-            ? 'border-green-600/50 bg-green-900/10 dark:bg-green-900/10 bg-green-50'
+            ? 'bg-green-500/5 dark:bg-green-500/10 border-green-500/20'
             : disabled
-            ? 'border-surface-border bg-surface-card opacity-50 cursor-not-allowed'
-            : 'border-surface-border bg-surface-card hover:border-brand-purple/50 hover:bg-surface-raised cursor-pointer'
+            ? 'bg-surface-card border-surface-border opacity-40 cursor-not-allowed'
+            : 'bg-surface-card border-surface-border hover:border-brand-purple/30 hover:shadow-glass-lg cursor-pointer'
         }`}
       >
         <div className="flex items-start gap-4">
           <div
-            className={`p-3 rounded-xl ${
+            className={`p-3 rounded-2xl transition-all duration-300 ${
               completed
-                ? 'bg-green-900/30 dark:bg-green-900/30 bg-green-100 text-green-600 dark:text-green-400'
-                : 'bg-brand-purple/10 text-brand-purple'
+                ? 'bg-green-500/10 text-green-500'
+                : loading
+                ? 'bg-brand-purple/10 text-brand-purple'
+                : 'bg-surface-raised text-content-muted group-hover:bg-brand-purple/10 group-hover:text-brand-purple'
             }`}
           >
             {loading ? (
@@ -76,16 +78,16 @@ export default function ActionButton({
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between">
-              <h3 className="font-semibold text-content-primary">{label}</h3>
+              <h3 className="font-semibold text-content-primary text-[15px]">{label}</h3>
               {estimate && !completed && (
-                <span className="text-xs text-content-muted flex items-center gap-1">
-                  <DollarSign className="w-3 h-3" />~${estimate.estimatedCost}
+                <span className="text-[11px] text-content-muted flex items-center gap-0.5 font-mono">
+                  <DollarSign className="w-3 h-3" />{estimate.estimatedCost}
                 </span>
               )}
             </div>
-            <p className="text-sm text-content-secondary mt-1">{description}</p>
+            <p className="text-[13px] text-content-secondary mt-0.5 leading-relaxed">{description}</p>
             {disabled && disabledReason && (
-              <p className="text-xs text-orange-400 mt-2 flex items-center gap-1">
+              <p className="text-[11px] text-orange-500 mt-2 flex items-center gap-1">
                 <AlertTriangle className="w-3 h-3" />
                 {disabledReason}
               </p>
@@ -95,48 +97,59 @@ export default function ActionButton({
       </motion.button>
 
       {/* Confirm Modal */}
-      {confirmOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 dark:bg-black/70 backdrop-blur-sm">
-          <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            className="bg-surface-card border border-surface-border rounded-2xl p-6 max-w-md w-full mx-4"
-          >
-            <h3 className="text-lg font-semibold text-content-primary mb-2">Confirm & Generate?</h3>
-            <p className="text-content-secondary text-sm mb-4">{label}</p>
-            {estimate && (
-              <div className="bg-surface-raised rounded-lg p-3 mb-4 text-sm">
-                <div className="flex justify-between text-content-secondary">
-                  <span>Estimated cost</span>
-                  <span className="text-brand-purple-light font-mono">
-                    ~${estimate.estimatedCost}
-                  </span>
-                </div>
-                {estimate.breakdown.images > 0 && (
-                  <div className="flex justify-between text-content-muted text-xs mt-1">
-                    <span>Includes {estimate.breakdown.images} image(s)</span>
-                    <span>${estimate.breakdown.imageCost}</span>
+      <AnimatePresence>
+        {confirmOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setConfirmOpen(false)}
+              className="absolute inset-0 bg-black/40 dark:bg-black/60 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0, y: 10 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.95, opacity: 0, y: 10 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+              className="relative glass border border-surface-border rounded-3xl p-6 max-w-sm w-full shadow-elevated-lg"
+            >
+              <h3 className="text-lg font-semibold text-content-primary mb-1">Confirm & Generate?</h3>
+              <p className="text-content-secondary text-sm mb-5">{label}</p>
+              {estimate && (
+                <div className="bg-surface-raised rounded-2xl p-4 mb-5">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-content-secondary">Estimated cost</span>
+                    <span className="text-brand-purple font-mono font-semibold">
+                      ~${estimate.estimatedCost}
+                    </span>
                   </div>
-                )}
+                  {estimate.breakdown.images > 0 && (
+                    <div className="flex justify-between text-content-muted text-xs mt-1.5">
+                      <span>Includes {estimate.breakdown.images} image(s)</span>
+                      <span>${estimate.breakdown.imageCost}</span>
+                    </div>
+                  )}
+                </div>
+              )}
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setConfirmOpen(false)}
+                  className="flex-1 py-3 rounded-2xl bg-surface-raised text-content-secondary hover:text-content-primary text-sm font-medium transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={execute}
+                  className="flex-1 py-3 rounded-2xl bg-brand-purple hover:bg-brand-purple-dark text-white text-sm font-semibold transition-colors shadow-lg shadow-brand-purple/25"
+                >
+                  Generate
+                </button>
               </div>
-            )}
-            <div className="flex gap-3">
-              <button
-                onClick={() => setConfirmOpen(false)}
-                className="flex-1 py-2.5 rounded-xl bg-surface-raised border border-surface-border text-content-secondary hover:text-content-primary transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={execute}
-                className="flex-1 py-2.5 rounded-xl bg-brand-purple hover:bg-brand-purple-dark text-white font-semibold transition-colors"
-              >
-                Generate
-              </button>
-            </div>
-          </motion.div>
-        </div>
-      )}
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </>
   );
 }

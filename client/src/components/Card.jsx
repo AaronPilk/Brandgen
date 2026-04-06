@@ -9,22 +9,22 @@ export default function Card({
 }) {
   return (
     <motion.div
-      whileHover={!disabled ? { scale: 1.02, y: -2 } : undefined}
-      whileTap={!disabled ? { scale: 0.98 } : undefined}
+      whileHover={!disabled ? { y: -3, scale: 1.01 } : undefined}
+      whileTap={!disabled ? { scale: 0.985 } : undefined}
+      transition={{ type: 'spring', stiffness: 400, damping: 25 }}
       onClick={disabled ? undefined : onClick}
-      className={`relative rounded-2xl border p-6 transition-all ${
+      className={`relative rounded-3xl p-6 transition-all duration-300 ${
         selected
-          ? 'border-brand-purple bg-brand-purple/10 shadow-lg shadow-brand-purple/10'
-          : 'border-surface-border bg-surface-card hover:border-brand-purple/30'
-      } ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'} ${className}`}
+          ? 'bg-surface-card border-2 border-brand-purple shadow-purple'
+          : 'bg-surface-card border border-surface-border shadow-glass hover:shadow-glass-lg hover:border-brand-purple/20'
+      } ${disabled ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'} ${className}`}
     >
       {selected && (
-        <motion.div
-          layoutId="card-glow"
-          className="absolute inset-0 rounded-2xl border-2 border-brand-purple pointer-events-none"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-        />
+        <div className="absolute -top-px -right-px w-6 h-6 bg-brand-purple rounded-bl-2xl rounded-tr-[1.4rem] flex items-center justify-center">
+          <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" strokeWidth={3} stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+          </svg>
+        </div>
       )}
       {children}
     </motion.div>

@@ -9,16 +9,16 @@ export default function CostTracker() {
   const isWarning = pct > 80;
 
   return (
-    <div className="flex items-center gap-3 px-3 py-1.5 rounded-lg bg-surface-card border border-surface-border text-sm">
+    <div className="flex items-center gap-2.5 px-3 py-1.5 rounded-xl glass border border-surface-border mr-1">
       <div className="flex flex-col items-end">
-        <span className={`font-mono font-semibold ${isWarning ? 'text-orange-400' : 'text-brand-purple-light'}`}>
+        <span className={`text-xs font-mono font-semibold tracking-tight ${isWarning ? 'text-orange-500' : 'text-brand-purple'}`}>
           ${totalSpent.toFixed(3)}
         </span>
-        <span className="text-[10px] text-content-muted">of ${dailyLimit} limit</span>
+        <span className="text-[9px] text-content-muted leading-tight">of ${dailyLimit}</span>
       </div>
-      <div className="w-16 h-1.5 bg-surface-border rounded-full overflow-hidden">
+      <div className="w-12 h-1 bg-surface-border rounded-full overflow-hidden">
         <div
-          className={`h-full rounded-full transition-all ${isWarning ? 'bg-orange-400' : 'bg-brand-purple'}`}
+          className={`h-full rounded-full transition-all duration-500 ${isWarning ? 'bg-orange-500' : 'bg-brand-purple'}`}
           style={{ width: `${Math.min(pct, 100)}%` }}
         />
       </div>

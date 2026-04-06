@@ -17,14 +17,14 @@ export default function AssetViewer({ title, data, type, onClose }) {
     if (type === 'html') {
       return (
         <div className="space-y-4">
-          <div className="bg-white rounded-lg overflow-hidden">
+          <div className="bg-white rounded-2xl overflow-hidden shadow-elevated">
             <iframe
               srcDoc={typeof data === 'string' ? data : ''}
               className="w-full h-[400px] border-0"
               title="Preview"
             />
           </div>
-          <pre className="bg-surface-raised text-sm text-content-secondary p-4 rounded-lg overflow-x-auto max-h-60">
+          <pre className="bg-surface-raised text-[13px] text-content-secondary p-4 rounded-2xl overflow-x-auto max-h-60 font-mono">
             {typeof data === 'string' ? data : JSON.stringify(data, null, 2)}
           </pre>
         </div>
@@ -40,65 +40,56 @@ export default function AssetViewer({ title, data, type, onClose }) {
               {item.image?.mock ? (
                 <ImagePlaceholder label={item.name} />
               ) : (
-                <img
-                  src={item.image?.url}
-                  alt={item.name}
-                  className="w-full rounded-lg"
-                />
+                <img src={item.image?.url} alt={item.name} className="w-full rounded-2xl" />
               )}
-              <p className="text-sm text-content-secondary">{item.name}</p>
+              <p className="text-sm text-content-secondary text-center">{item.name}</p>
             </div>
           ))}
         </div>
       );
     }
 
-    // JSON / text
     let display = data;
     if (typeof data === 'string') {
-      try {
-        display = JSON.parse(data);
-      } catch {
-        display = data;
-      }
-    }
-
-    if (typeof display === 'object') {
-      return (
-        <pre className="bg-surface-raised text-sm text-content-secondary p-4 rounded-lg overflow-x-auto whitespace-pre-wrap max-h-[60vh]">
-          {JSON.stringify(display, null, 2)}
-        </pre>
-      );
+      try { display = JSON.parse(data); } catch { display = data; }
     }
 
     return (
-      <div className="bg-surface-raised text-sm text-content-secondary p-4 rounded-lg whitespace-pre-wrap max-h-[60vh] overflow-y-auto">
-        {display}
-      </div>
+      <pre className="bg-surface-raised text-[13px] text-content-secondary p-5 rounded-2xl overflow-x-auto whitespace-pre-wrap max-h-[60vh] font-mono">
+        {typeof display === 'object' ? JSON.stringify(display, null, 2) : display}
+      </pre>
     );
   };
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 dark:bg-black/70 backdrop-blur-sm">
+      <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
         <motion.div
-          initial={{ scale: 0.9, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          exit={{ scale: 0.9, opacity: 0 }}
-          className="bg-surface-card border border-surface-border rounded-2xl p-6 max-w-3xl w-full mx-4 max-h-[85vh] overflow-y-auto"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          onClick={onClose}
+          className="absolute inset-0 bg-black/40 dark:bg-black/60 backdrop-blur-sm"
+        />
+        <motion.div
+          initial={{ scale: 0.95, opacity: 0, y: 10 }}
+          animate={{ scale: 1, opacity: 1, y: 0 }}
+          exit={{ scale: 0.95, opacity: 0, y: 10 }}
+          transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+          className="relative glass border border-surface-border rounded-3xl p-6 max-w-3xl w-full max-h-[85vh] overflow-y-auto shadow-elevated-lg"
         >
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-content-primary">{title}</h3>
-            <div className="flex items-center gap-2">
+          <div className="flex items-center justify-between mb-5">
+            <h3 className="text-lg font-semibold text-content-primary capitalize">{title}</h3>
+            <div className="flex items-center gap-1">
               <button
                 onClick={copyToClipboard}
-                className="p-2 rounded-lg hover:bg-surface-raised text-content-secondary hover:text-content-primary transition-colors"
+                className="w-9 h-9 rounded-xl flex items-center justify-center hover:bg-surface-raised text-content-muted hover:text-content-primary transition-colors"
               >
-                {copied ? <Check className="w-4 h-4 text-green-400" /> : <Copy className="w-4 h-4" />}
+                {copied ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
               </button>
               <button
                 onClick={onClose}
-                className="p-2 rounded-lg hover:bg-surface-raised text-content-secondary hover:text-content-primary transition-colors"
+                className="w-9 h-9 rounded-xl flex items-center justify-center hover:bg-surface-raised text-content-muted hover:text-content-primary transition-colors"
               >
                 <X className="w-4 h-4" />
               </button>

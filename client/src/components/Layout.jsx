@@ -1,52 +1,75 @@
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { Settings, FolderOpen, Zap, Sun, Moon } from 'lucide-react';
 import { useStore } from '../store/useStore';
 import CostTracker from './CostTracker';
 
 export default function Layout({ children }) {
   const { theme, toggleTheme } = useStore();
+  const location = useLocation();
+  const isHome = location.pathname === '/';
 
   return (
-    <div className="min-h-screen bg-surface-bg transition-colors duration-300">
-      {/* Top Nav */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-surface-bg/80 backdrop-blur-xl border-b border-surface-border transition-colors duration-300">
-        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2">
-            <Zap className="w-6 h-6 text-brand-purple" />
-            <span className="text-xl font-bold tracking-tight text-content-primary">
-              Brand<span className="text-brand-purple">Gen</span>
+    <div className="min-h-screen bg-surface-bg transition-colors duration-500">
+      {/* Ambient glow */}
+      <div className="fixed top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-brand-purple/[0.03] dark:bg-brand-purple/[0.06] rounded-full blur-3xl pointer-events-none" />
+
+      {/* Nav */}
+      <nav className="fixed top-0 left-0 right-0 z-50 glass-strong border-b border-surface-border transition-colors duration-500">
+        <div className="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between">
+          <Link to="/" className="flex items-center gap-2.5 group">
+            <div className="w-8 h-8 rounded-xl bg-brand-purple flex items-center justify-center shadow-lg shadow-brand-purple/25 group-hover:shadow-brand-purple/40 transition-shadow">
+              <Zap className="w-4 h-4 text-white" />
+            </div>
+            <span className="text-[15px] font-semibold tracking-tight text-content-primary">
+              BrandGen
             </span>
           </Link>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1">
             <CostTracker />
-            <button
-              onClick={toggleTheme}
-              className="p-2 rounded-lg hover:bg-surface-raised transition-colors text-content-secondary hover:text-content-primary"
-              title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-            >
-              {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-            </button>
-            <Link
-              to="/profiles"
-              className="p-2 rounded-lg hover:bg-surface-raised transition-colors text-content-secondary hover:text-content-primary"
-            >
-              <FolderOpen className="w-5 h-5" />
-            </Link>
-            <Link
-              to="/settings"
-              className="p-2 rounded-lg hover:bg-surface-raised transition-colors text-content-secondary hover:text-content-primary"
-            >
-              <Settings className="w-5 h-5" />
-            </Link>
+            <NavButton onClick={toggleTheme} title={theme === 'dark' ? 'Light mode' : 'Dark mode'}>
+              {theme === 'dark' ? <Sun className="w-[18px] h-[18px]" /> : <Moon className="w-[18px] h-[18px]" />}
+            </NavButton>
+            <NavLink to="/profiles" title="Profiles">
+              <FolderOpen className="w-[18px] h-[18px]" />
+            </NavLink>
+            <NavLink to="/settings" title="Settings">
+              <Settings className="w-[18px] h-[18px]" />
+            </NavLink>
           </div>
         </div>
       </nav>
 
-      {/* Main Content */}
-      <main className="pt-16 min-h-screen">
-        <div className="max-w-5xl mx-auto px-6 py-10">{children}</div>
+      {/* Content */}
+      <main className="pt-14 min-h-screen">
+        <div className={`mx-auto px-6 ${isHome ? 'max-w-5xl' : 'max-w-3xl'} py-12`}>
+          {children}
+        </div>
       </main>
     </div>
+  );
+}
+
+function NavButton({ children, onClick, title }) {
+  return (
+    <button
+      onClick={onClick}
+      title={title}
+      className="w-9 h-9 rounded-xl flex items-center justify-center text-content-muted hover:text-content-primary hover:bg-surface-raised transition-all duration-200"
+    >
+      {children}
+    </button>
+  );
+}
+
+function NavLink({ children, to, title }) {
+  return (
+    <Link
+      to={to}
+      title={title}
+      className="w-9 h-9 rounded-xl flex items-center justify-center text-content-muted hover:text-content-primary hover:bg-surface-raised transition-all duration-200"
+    >
+      {children}
+    </Link>
   );
 }
