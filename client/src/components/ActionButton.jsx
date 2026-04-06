@@ -50,12 +50,12 @@ export default function ActionButton({
         transition={{ type: 'spring', stiffness: 400, damping: 25 }}
         onClick={handleClick}
         disabled={disabled || loading}
-        className={`group relative w-full text-left p-5 rounded-2xl border transition-all duration-300 ${
+        className={`group relative w-full text-left p-5 rounded-2xl transition-all duration-300 ${
           completed
-            ? 'bg-green-500/5 dark:bg-green-500/10 border-green-500/20'
+            ? 'glossy border-green-500/20'
             : disabled
-            ? 'bg-surface-card border-surface-border opacity-40 cursor-not-allowed'
-            : 'bg-surface-card border-surface-border hover:border-brand-purple/30 hover:shadow-glass-lg cursor-pointer'
+            ? 'glossy opacity-40 cursor-not-allowed'
+            : 'glossy hover:shadow-elevated-lg cursor-pointer'
         }`}
       >
         <div className="flex items-start gap-4">

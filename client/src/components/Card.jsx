@@ -14,19 +14,17 @@ export default function Card({
       transition={{ type: 'spring', stiffness: 400, damping: 25 }}
       onClick={disabled ? undefined : onClick}
       className={`relative rounded-3xl p-6 transition-all duration-300 ${
-        selected
-          ? 'bg-surface-card border-2 border-brand-purple shadow-purple'
-          : 'bg-surface-card border border-surface-border shadow-glass hover:shadow-glass-lg hover:border-brand-purple/20'
+        selected ? 'glossy-selected' : 'glossy hover:shadow-elevated-lg'
       } ${disabled ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'} ${className}`}
     >
       {selected && (
-        <div className="absolute -top-px -right-px w-6 h-6 bg-brand-purple rounded-bl-2xl rounded-tr-[1.4rem] flex items-center justify-center">
+        <div className="absolute top-3 right-3 w-5 h-5 bg-brand-purple rounded-full flex items-center justify-center shadow-lg shadow-brand-purple/30 z-10">
           <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" strokeWidth={3} stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
           </svg>
         </div>
       )}
-      {children}
+      <div className="relative z-10">{children}</div>
     </motion.div>
   );
 }

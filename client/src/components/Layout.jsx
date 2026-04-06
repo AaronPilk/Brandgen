@@ -14,7 +14,7 @@ export default function Layout({ children }) {
       <div className="fixed top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-brand-purple/[0.03] dark:bg-brand-purple/[0.06] rounded-full blur-3xl pointer-events-none" />
 
       {/* Nav */}
-      <nav className="fixed top-0 left-0 right-0 z-50 glass-strong border-b border-surface-border transition-colors duration-500">
+      <nav className="fixed top-0 left-0 right-0 z-50 glossy-nav transition-colors duration-500">
         <div className="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2.5 group">
             <span className="text-[15px] font-bold tracking-tight text-content-primary">
