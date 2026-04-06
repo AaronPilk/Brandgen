@@ -1,0 +1,33 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #8B5CF6 #0A0A0F;
+}
+
+*::-webkit-scrollbar {
+  width: 6px;
+}
+
+*::-webkit-scrollbar-track {
+  background: #0A0A0F;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: #8B5CF6;
+  border-radius: 3px;
+}
+
+::selection {
+  background: rgba(139, 92, 246, 0.3);
+}
+
+input, textarea, select {
+  @apply bg-brand-dark-card border border-brand-dark-border text-white rounded-lg px-4 py-3 w-full focus:outline-none focus:border-brand-purple focus:ring-1 focus:ring-brand-purple transition-colors;
+}
+
+input::placeholder, textarea::placeholder {
+  @apply text-gray-500;
+}
