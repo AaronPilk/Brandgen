@@ -98,19 +98,19 @@ export default function ApiSettings() {
     >
       <button
         onClick={() => navigate(-1)}
-        className="flex items-center gap-2 text-gray-400 hover:text-white mb-6 transition-colors"
+        className="flex items-center gap-2 text-content-secondary hover:text-content-primary mb-6 transition-colors"
       >
         <ArrowLeft className="w-4 h-4" /> Back
       </button>
 
       <h1 className="text-3xl font-bold mb-2">API Configuration</h1>
-      <p className="text-gray-400 mb-6">
+      <p className="text-content-secondary mb-6">
         {connected}/{total} APIs connected. The system works end-to-end with only the Anthropic API key. Add others to unlock more features.
       </p>
 
-      <div className="bg-brand-dark-card border border-brand-dark-border rounded-2xl p-4 mb-6">
+      <div className="bg-surface-card border border-surface-border rounded-2xl p-4 mb-6">
         <div className="flex items-center justify-between">
-          <span className="text-sm text-gray-400">Connection status</span>
+          <span className="text-sm text-content-secondary">Connection status</span>
           <div className="flex gap-1">
             {API_LIST.map((api) => (
               <div
@@ -128,7 +128,7 @@ export default function ApiSettings() {
       {apiStatus?.mockImages && (
         <div className="mb-6 p-4 bg-brand-purple/5 border border-brand-purple/20 rounded-xl">
           <p className="text-sm text-brand-purple-light">
-            Mock Image Mode is ON — DALL-E calls will show placeholder boxes instead of generating images. Set <code className="bg-brand-dark px-1 rounded">MOCK_IMAGES=false</code> and add your OpenAI key to enable real image generation.
+            Mock Image Mode is ON — DALL-E calls will show placeholder boxes instead of generating images. Set <code className="bg-surface-bg px-1 rounded">MOCK_IMAGES=false</code> and add your OpenAI key to enable real image generation.
           </p>
         </div>
       )}
@@ -142,7 +142,7 @@ export default function ApiSettings() {
               className={`p-4 rounded-xl border transition-all ${
                 isConnected
                   ? 'border-green-800/50 bg-green-900/5'
-                  : 'border-brand-dark-border bg-brand-dark-card'
+                  : 'border-surface-border bg-surface-card'
               }`}
             >
               <div className="flex items-center justify-between">
@@ -151,7 +151,7 @@ export default function ApiSettings() {
                     className={`w-8 h-8 rounded-lg flex items-center justify-center ${
                       isConnected
                         ? 'bg-green-900/30 text-green-400'
-                        : 'bg-brand-dark-surface text-gray-600'
+                        : 'bg-surface-raised text-content-muted'
                     }`}
                   >
                     {isConnected ? (
@@ -169,26 +169,26 @@ export default function ApiSettings() {
                         </span>
                       )}
                     </div>
-                    <p className="text-xs text-gray-500">{api.description}</p>
+                    <p className="text-xs text-content-muted">{api.description}</p>
                   </div>
                 </div>
-                <code className="text-xs text-gray-600 bg-brand-dark px-2 py-1 rounded hidden md:block">
+                <code className="text-xs text-content-muted bg-surface-bg px-2 py-1 rounded hidden md:block">
                   {api.envVar}
                 </code>
               </div>
               {api.note && !isConnected && (
-                <p className="text-xs text-gray-600 mt-2 ml-11">{api.note}</p>
+                <p className="text-xs text-content-muted mt-2 ml-11">{api.note}</p>
               )}
             </div>
           );
         })}
       </div>
 
-      <div className="mt-8 p-4 bg-brand-dark-surface rounded-xl border border-brand-dark-border">
+      <div className="mt-8 p-4 bg-surface-raised rounded-xl border border-surface-border">
         <h3 className="text-sm font-semibold mb-2">How to connect APIs</h3>
-        <p className="text-xs text-gray-400 leading-relaxed">
-          Add your API keys to the <code className="bg-brand-dark px-1 rounded">.env</code> file in the server
-          directory, then restart the server. Copy <code className="bg-brand-dark px-1 rounded">.env.example</code> to
+        <p className="text-xs text-content-secondary leading-relaxed">
+          Add your API keys to the <code className="bg-surface-bg px-1 rounded">.env</code> file in the server
+          directory, then restart the server. Copy <code className="bg-surface-bg px-1 rounded">.env.example</code> to
           get started. All APIs are optional except Anthropic — skip any and come back later.
         </p>
       </div>

@@ -23,8 +23,8 @@ export default function Button({
     primary:
       'bg-brand-purple hover:bg-brand-purple-dark text-white shadow-lg shadow-brand-purple/25',
     secondary:
-      'bg-brand-dark-surface border border-brand-dark-border text-white hover:border-brand-purple/50',
-    ghost: 'text-gray-400 hover:text-white hover:bg-brand-dark-surface',
+      'bg-surface-raised border border-surface-border text-content-primary hover:border-brand-purple/50',
+    ghost: 'text-content-secondary hover:text-content-primary hover:bg-surface-raised',
     danger: 'bg-red-600 hover:bg-red-700 text-white',
   };
 

@@ -111,13 +111,13 @@ export default function LeadGenIntake() {
     >
       <button
         onClick={() => navigate('/')}
-        className="flex items-center gap-2 text-gray-400 hover:text-white mb-6 transition-colors"
+        className="flex items-center gap-2 text-content-secondary hover:text-white mb-6 transition-colors"
       >
         <ArrowLeft className="w-4 h-4" /> Back
       </button>
 
       <h1 className="text-3xl font-bold mb-2">Lead Gen Profile</h1>
-      <p className="text-gray-400 mb-6">Tell us about your business so we can build your lead generation system.</p>
+      <p className="text-content-secondary mb-6">Tell us about your business so we can build your lead generation system.</p>
 
       <ProgressBar steps={STEPS} currentStep={step} />
 
@@ -134,7 +134,7 @@ export default function LeadGenIntake() {
                 <Rocket className="w-6 h-6 text-brand-purple" />
                 <h3 className="font-semibold text-lg">Starting a Business</h3>
               </div>
-              <p className="text-sm text-gray-400">I'm launching something new and need a complete setup.</p>
+              <p className="text-sm text-content-secondary">I'm launching something new and need a complete setup.</p>
             </Card>
             <Card
               selected={form.businessStage === 'operating'}
@@ -144,7 +144,7 @@ export default function LeadGenIntake() {
                 <Building2 className="w-6 h-6 text-brand-purple" />
                 <h3 className="font-semibold text-lg">Already Operating</h3>
               </div>
-              <p className="text-sm text-gray-400">I have a business and need more leads.</p>
+              <p className="text-sm text-content-secondary">I have a business and need more leads.</p>
               <p className="text-xs text-brand-purple/70 mt-2">We'll skip brand setup and focus on getting you more leads.</p>
             </Card>
           </div>
@@ -162,7 +162,7 @@ export default function LeadGenIntake() {
           <h2 className="text-xl font-semibold mb-4">Business Details</h2>
 
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1">Industry</label>
+            <label className="block text-sm font-medium text-content-secondary mb-1">Industry</label>
             <input
               value={form.industry}
               onChange={(e) => set('industry', e.target.value)}
@@ -171,7 +171,7 @@ export default function LeadGenIntake() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1">Business Type</label>
+            <label className="block text-sm font-medium text-content-secondary mb-1">Business Type</label>
             <div className="flex gap-3">
               {['Local', 'Regional', 'National'].map((t) => (
                 <button
@@ -180,7 +180,7 @@ export default function LeadGenIntake() {
                   className={`flex-1 py-3 rounded-xl border text-sm font-medium transition-all ${
                     form.businessType === t.toLowerCase()
                       ? 'border-brand-purple bg-brand-purple/10 text-white'
-                      : 'border-brand-dark-border bg-brand-dark-card text-gray-400 hover:border-brand-dark-border/80'
+                      : 'border-surface-border bg-surface-card text-content-secondary hover:border-surface-border/80'
                   }`}
                 >
                   {t}
@@ -190,7 +190,7 @@ export default function LeadGenIntake() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1">Geographic Targets</label>
+            <label className="block text-sm font-medium text-content-secondary mb-1">Geographic Targets</label>
             <input
               value={form.geoTargets}
               onChange={(e) => set('geoTargets', e.target.value)}
@@ -199,7 +199,7 @@ export default function LeadGenIntake() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1">Current CRM</label>
+            <label className="block text-sm font-medium text-content-secondary mb-1">Current CRM</label>
             <div className="flex gap-3">
               {['GoHighLevel', 'HubSpot', 'None'].map((c) => (
                 <button
@@ -208,7 +208,7 @@ export default function LeadGenIntake() {
                   className={`flex-1 py-3 rounded-xl border text-sm font-medium transition-all ${
                     form.currentCRM === c
                       ? 'border-brand-purple bg-brand-purple/10 text-white'
-                      : 'border-brand-dark-border bg-brand-dark-card text-gray-400'
+                      : 'border-surface-border bg-surface-card text-content-secondary'
                   }`}
                 >
                   {c}
@@ -220,7 +220,7 @@ export default function LeadGenIntake() {
           {isOperating && (
             <>
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1">Monthly Revenue</label>
+                <label className="block text-sm font-medium text-content-secondary mb-1">Monthly Revenue</label>
                 <div className="grid grid-cols-2 gap-2">
                   {REVENUES.map((r) => (
                     <button
@@ -229,7 +229,7 @@ export default function LeadGenIntake() {
                       className={`py-2.5 rounded-xl border text-sm transition-all ${
                         form.monthlyRevenue === r
                           ? 'border-brand-purple bg-brand-purple/10 text-white'
-                          : 'border-brand-dark-border bg-brand-dark-card text-gray-400'
+                          : 'border-surface-border bg-surface-card text-content-secondary'
                       }`}
                     >
                       {r}
@@ -238,7 +238,7 @@ export default function LeadGenIntake() {
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1">Current Monthly Lead Volume</label>
+                <label className="block text-sm font-medium text-content-secondary mb-1">Current Monthly Lead Volume</label>
                 <input
                   value={form.leadVolume}
                   onChange={(e) => set('leadVolume', e.target.value)}
@@ -246,7 +246,7 @@ export default function LeadGenIntake() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1">Existing Website URL</label>
+                <label className="block text-sm font-medium text-content-secondary mb-1">Existing Website URL</label>
                 <input
                   value={form.websiteUrl}
                   onChange={(e) => set('websiteUrl', e.target.value)}
@@ -254,7 +254,7 @@ export default function LeadGenIntake() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1">Current Marketing Channels</label>
+                <label className="block text-sm font-medium text-content-secondary mb-1">Current Marketing Channels</label>
                 <div className="flex flex-wrap gap-2">
                   {CHANNELS.map((ch) => (
                     <button
@@ -263,7 +263,7 @@ export default function LeadGenIntake() {
                       className={`px-3 py-2 rounded-xl border text-sm transition-all ${
                         form.marketingChannels.includes(ch)
                           ? 'border-brand-purple bg-brand-purple/10 text-white'
-                          : 'border-brand-dark-border bg-brand-dark-card text-gray-400'
+                          : 'border-surface-border bg-surface-card text-content-secondary'
                       }`}
                     >
                       {ch}
@@ -291,7 +291,7 @@ export default function LeadGenIntake() {
           <h2 className="text-xl font-semibold mb-4">Goals & Budget</h2>
 
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1">Monthly Ad Budget</label>
+            <label className="block text-sm font-medium text-content-secondary mb-1">Monthly Ad Budget</label>
             <div className="flex flex-wrap gap-2">
               {BUDGETS.map((b) => (
                 <button
@@ -300,7 +300,7 @@ export default function LeadGenIntake() {
                   className={`px-4 py-2.5 rounded-xl border text-sm transition-all ${
                     form.adBudget === b
                       ? 'border-brand-purple bg-brand-purple/10 text-white'
-                      : 'border-brand-dark-border bg-brand-dark-card text-gray-400'
+                      : 'border-surface-border bg-surface-card text-content-secondary'
                   }`}
                 >
                   {b}
@@ -310,7 +310,7 @@ export default function LeadGenIntake() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1">Primary Goal</label>
+            <label className="block text-sm font-medium text-content-secondary mb-1">Primary Goal</label>
             <div className="grid grid-cols-2 gap-2">
               {GOALS.map((g) => (
                 <button
@@ -319,7 +319,7 @@ export default function LeadGenIntake() {
                   className={`py-2.5 rounded-xl border text-sm transition-all ${
                     form.primaryGoal === g
                       ? 'border-brand-purple bg-brand-purple/10 text-white'
-                      : 'border-brand-dark-border bg-brand-dark-card text-gray-400'
+                      : 'border-surface-border bg-surface-card text-content-secondary'
                   }`}
                 >
                   {g}
@@ -329,7 +329,7 @@ export default function LeadGenIntake() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1">Average Customer LTV</label>
+            <label className="block text-sm font-medium text-content-secondary mb-1">Average Customer LTV</label>
             <input
               value={form.customerLTV}
               onChange={(e) => set('customerLTV', e.target.value)}
@@ -338,7 +338,7 @@ export default function LeadGenIntake() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1">Average Sales Cycle Length</label>
+            <label className="block text-sm font-medium text-content-secondary mb-1">Average Sales Cycle Length</label>
             <div className="flex flex-wrap gap-2">
               {SALES_CYCLES.map((s) => (
                 <button
@@ -347,7 +347,7 @@ export default function LeadGenIntake() {
                   className={`px-3 py-2 rounded-xl border text-sm transition-all ${
                     form.salesCycle === s
                       ? 'border-brand-purple bg-brand-purple/10 text-white'
-                      : 'border-brand-dark-border bg-brand-dark-card text-gray-400'
+                      : 'border-surface-border bg-surface-card text-content-secondary'
                   }`}
                 >
                   {s}
@@ -373,7 +373,7 @@ export default function LeadGenIntake() {
           <h2 className="text-xl font-semibold mb-4">Tell Us More</h2>
 
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1">
+            <label className="block text-sm font-medium text-content-secondary mb-1">
               Biggest Pain Point in Getting Leads
             </label>
             <textarea
@@ -385,7 +385,7 @@ export default function LeadGenIntake() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1">
+            <label className="block text-sm font-medium text-content-secondary mb-1">
               What Makes You Different From Competitors
             </label>
             <textarea
@@ -411,13 +411,13 @@ export default function LeadGenIntake() {
       {step === 'files' && (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
           <h2 className="text-xl font-semibold mb-4">Upload Supporting Files</h2>
-          <p className="text-gray-400 text-sm mb-4">
+          <p className="text-content-secondary text-sm mb-4">
             PDFs, competitor screenshots, images — max 5 files. Optional.
           </p>
 
-          <label className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-brand-dark-border rounded-2xl cursor-pointer hover:border-brand-purple/50 transition-colors">
-            <Upload className="w-8 h-8 text-gray-500 mb-2" />
-            <span className="text-sm text-gray-400">
+          <label className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-surface-border rounded-2xl cursor-pointer hover:border-brand-purple/50 transition-colors">
+            <Upload className="w-8 h-8 text-content-muted mb-2" />
+            <span className="text-sm text-content-secondary">
               {files.length > 0
                 ? `${files.length} file(s) selected`
                 : 'Click to upload or drag and drop'}
@@ -434,9 +434,9 @@ export default function LeadGenIntake() {
           {files.length > 0 && (
             <div className="space-y-2">
               {files.map((f, i) => (
-                <div key={i} className="flex items-center gap-2 text-sm text-gray-400 bg-brand-dark-surface rounded-lg px-3 py-2">
+                <div key={i} className="flex items-center gap-2 text-sm text-content-secondary bg-surface-raised rounded-lg px-3 py-2">
                   <span className="truncate">{f.name}</span>
-                  <span className="text-gray-600">{(f.size / 1024).toFixed(0)} KB</span>
+                  <span className="text-content-muted">{(f.size / 1024).toFixed(0)} KB</span>
                 </div>
               ))}
             </div>

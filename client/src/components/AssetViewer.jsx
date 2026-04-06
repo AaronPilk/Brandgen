@@ -24,7 +24,7 @@ export default function AssetViewer({ title, data, type, onClose }) {
               title="Preview"
             />
           </div>
-          <pre className="bg-brand-dark text-sm text-gray-300 p-4 rounded-lg overflow-x-auto max-h-60">
+          <pre className="bg-surface-raised text-sm text-content-secondary p-4 rounded-lg overflow-x-auto max-h-60">
             {typeof data === 'string' ? data : JSON.stringify(data, null, 2)}
           </pre>
         </div>
@@ -46,7 +46,7 @@ export default function AssetViewer({ title, data, type, onClose }) {
                   className="w-full rounded-lg"
                 />
               )}
-              <p className="text-sm text-gray-400">{item.name}</p>
+              <p className="text-sm text-content-secondary">{item.name}</p>
             </div>
           ))}
         </div>
@@ -65,14 +65,14 @@ export default function AssetViewer({ title, data, type, onClose }) {
 
     if (typeof display === 'object') {
       return (
-        <pre className="bg-brand-dark text-sm text-gray-300 p-4 rounded-lg overflow-x-auto whitespace-pre-wrap max-h-[60vh]">
+        <pre className="bg-surface-raised text-sm text-content-secondary p-4 rounded-lg overflow-x-auto whitespace-pre-wrap max-h-[60vh]">
           {JSON.stringify(display, null, 2)}
         </pre>
       );
     }
 
     return (
-      <div className="bg-brand-dark text-sm text-gray-300 p-4 rounded-lg whitespace-pre-wrap max-h-[60vh] overflow-y-auto">
+      <div className="bg-surface-raised text-sm text-content-secondary p-4 rounded-lg whitespace-pre-wrap max-h-[60vh] overflow-y-auto">
         {display}
       </div>
     );
@@ -80,25 +80,25 @@ export default function AssetViewer({ title, data, type, onClose }) {
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 dark:bg-black/70 backdrop-blur-sm">
         <motion.div
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           exit={{ scale: 0.9, opacity: 0 }}
-          className="bg-brand-dark-card border border-brand-dark-border rounded-2xl p-6 max-w-3xl w-full mx-4 max-h-[85vh] overflow-y-auto"
+          className="bg-surface-card border border-surface-border rounded-2xl p-6 max-w-3xl w-full mx-4 max-h-[85vh] overflow-y-auto"
         >
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold">{title}</h3>
+            <h3 className="text-lg font-semibold text-content-primary">{title}</h3>
             <div className="flex items-center gap-2">
               <button
                 onClick={copyToClipboard}
-                className="p-2 rounded-lg hover:bg-brand-dark-surface text-gray-400 hover:text-white transition-colors"
+                className="p-2 rounded-lg hover:bg-surface-raised text-content-secondary hover:text-content-primary transition-colors"
               >
                 {copied ? <Check className="w-4 h-4 text-green-400" /> : <Copy className="w-4 h-4" />}
               </button>
               <button
                 onClick={onClose}
-                className="p-2 rounded-lg hover:bg-brand-dark-surface text-gray-400 hover:text-white transition-colors"
+                className="p-2 rounded-lg hover:bg-surface-raised text-content-secondary hover:text-content-primary transition-colors"
               >
                 <X className="w-4 h-4" />
               </button>

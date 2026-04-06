@@ -2,9 +2,35 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Light theme (default) */
+:root {
+  --bg: #F8F8FC;
+  --card: #FFFFFF;
+  --border: #E2E2EA;
+  --surface: #F0F0F6;
+  --text-primary: #111118;
+  --text-secondary: #555566;
+  --text-muted: #8888A0;
+  --scrollbar-track: #F0F0F6;
+  --scrollbar-thumb: #8B5CF6;
+}
+
+/* Dark theme */
+.dark {
+  --bg: #0A0A0F;
+  --card: #111118;
+  --border: #1E1E2E;
+  --surface: #16161F;
+  --text-primary: #FFFFFF;
+  --text-secondary: #A0A0B8;
+  --text-muted: #555566;
+  --scrollbar-track: #0A0A0F;
+  --scrollbar-thumb: #8B5CF6;
+}
+
 * {
   scrollbar-width: thin;
-  scrollbar-color: #8B5CF6 #0A0A0F;
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
 }
 
 *::-webkit-scrollbar {
@@ -12,11 +38,11 @@
 }
 
 *::-webkit-scrollbar-track {
-  background: #0A0A0F;
+  background: var(--scrollbar-track);
 }
 
 *::-webkit-scrollbar-thumb {
-  background-color: #8B5CF6;
+  background-color: var(--scrollbar-thumb);
   border-radius: 3px;
 }
 
@@ -25,9 +51,9 @@
 }
 
 input, textarea, select {
-  @apply bg-brand-dark-card border border-brand-dark-border text-white rounded-lg px-4 py-3 w-full focus:outline-none focus:border-brand-purple focus:ring-1 focus:ring-brand-purple transition-colors;
+  @apply bg-surface-card border border-surface-border text-content-primary rounded-lg px-4 py-3 w-full focus:outline-none focus:border-brand-purple focus:ring-1 focus:ring-brand-purple transition-colors;
 }
 
 input::placeholder, textarea::placeholder {
-  @apply text-gray-500;
+  @apply text-content-muted;
 }

@@ -41,7 +41,7 @@ export default function BudgetGate() {
       <h1 className="text-3xl font-bold mb-2 text-center">
         Welcome to Brand<span className="text-brand-purple">Gen</span>
       </h1>
-      <p className="text-gray-400 text-center mb-8 max-w-md">
+      <p className="text-content-secondary text-center mb-8 max-w-md">
         Before we start, set your daily API spend limit. This keeps your costs under control.
       </p>
 
@@ -57,7 +57,7 @@ export default function BudgetGate() {
               <DollarSign className="w-4 h-4 text-brand-purple" />
               <span className="text-2xl font-bold">{amount}</span>
             </div>
-            <p className="text-xs text-gray-500 mt-1">per day</p>
+            <p className="text-xs text-content-muted mt-1">per day</p>
           </Card>
         ))}
       </div>
@@ -68,9 +68,9 @@ export default function BudgetGate() {
           onClick={() => setSelected('custom')}
         >
           <div className="flex items-center gap-3">
-            <span className="text-gray-400 text-sm">Custom:</span>
+            <span className="text-content-secondary text-sm">Custom:</span>
             <div className="flex items-center gap-1 flex-1">
-              <span className="text-gray-500">$</span>
+              <span className="text-content-muted">$</span>
               <input
                 type="number"
                 value={custom}
@@ -94,7 +94,7 @@ export default function BudgetGate() {
         Continue
       </Button>
 
-      <p className="text-xs text-gray-600 mt-4 text-center max-w-sm">
+      <p className="text-xs text-content-muted mt-4 text-center max-w-sm">
         No money will be spent without your explicit approval. Every action shows its estimated cost first.
       </p>
     </motion.div>

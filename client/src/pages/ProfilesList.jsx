@@ -37,7 +37,7 @@ export default function ProfilesList() {
     >
       <button
         onClick={() => navigate('/')}
-        className="flex items-center gap-2 text-gray-400 hover:text-white mb-6 transition-colors"
+        className="flex items-center gap-2 text-content-secondary hover:text-content-primary mb-6 transition-colors"
       >
         <ArrowLeft className="w-4 h-4" /> Back
       </button>
@@ -58,10 +58,10 @@ export default function ProfilesList() {
       </div>
 
       {loading ? (
-        <div className="text-center py-20 text-gray-500">Loading...</div>
+        <div className="text-center py-20 text-content-muted">Loading...</div>
       ) : profiles.length === 0 ? (
         <div className="text-center py-20">
-          <p className="text-gray-500 mb-4">No profiles yet</p>
+          <p className="text-content-muted mb-4">No profiles yet</p>
           <button
             onClick={() => navigate('/')}
             className="text-brand-purple hover:text-brand-purple-light transition-colors"
@@ -76,7 +76,7 @@ export default function ProfilesList() {
               key={profile.id}
               whileHover={{ scale: 1.01 }}
               onClick={() => openProfile(profile)}
-              className="p-4 rounded-xl bg-brand-dark-card border border-brand-dark-border hover:border-brand-purple/30 cursor-pointer transition-colors"
+              className="p-4 rounded-xl bg-surface-card border border-surface-border hover:border-brand-purple/30 cursor-pointer transition-colors"
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -93,7 +93,7 @@ export default function ProfilesList() {
                         profile.intake?.industry ||
                         'Untitled'}
                     </p>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs text-content-muted">
                       {profile.mode === 'lead-gen'
                         ? 'Lead Gen'
                         : 'Brand'}{' '}
@@ -105,7 +105,7 @@ export default function ProfilesList() {
                 </div>
                 <button
                   onClick={(e) => handleDelete(profile.id, e)}
-                  className="p-2 rounded-lg text-gray-600 hover:text-red-400 hover:bg-red-900/20 transition-colors"
+                  className="p-2 rounded-lg text-content-muted hover:text-red-400 hover:bg-red-900/20 transition-colors"
                 >
                   <Trash2 className="w-4 h-4" />
                 </button>

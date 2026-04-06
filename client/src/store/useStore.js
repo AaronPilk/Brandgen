@@ -51,6 +51,18 @@ export const useStore = create(
       currentStep: 'mode-select',
       setStep: (step) => set({ currentStep: step }),
 
+      // Theme
+      theme: 'dark',
+      setTheme: (theme) => {
+        document.documentElement.classList.toggle('dark', theme === 'dark');
+        set({ theme });
+      },
+      toggleTheme: () => {
+        const next = get().theme === 'dark' ? 'light' : 'dark';
+        document.documentElement.classList.toggle('dark', next === 'dark');
+        set({ theme: next });
+      },
+
       // Autonomous mode
       autonomousMode: false,
       setAutonomousMode: (val) => set({ autonomousMode: val }),
@@ -70,6 +82,7 @@ export const useStore = create(
         budgetSet: state.budgetSet,
         profiles: state.profiles,
         sessionId: state.sessionId,
+        theme: state.theme,
       }),
     }
   )

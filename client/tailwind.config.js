@@ -1,6 +1,7 @@
 /** @type {import('tailwindcss').Config} */
 export default {
   content: ['./index.html', './src/**/*.{js,jsx}'],
+  darkMode: 'class',
   theme: {
     extend: {
       colors: {
@@ -8,10 +9,17 @@ export default {
           purple: '#8B5CF6',
           'purple-light': '#A78BFA',
           'purple-dark': '#6D28D9',
-          dark: '#0A0A0F',
-          'dark-card': '#111118',
-          'dark-border': '#1E1E2E',
-          'dark-surface': '#16161F',
+        },
+        surface: {
+          bg: 'var(--bg)',
+          card: 'var(--card)',
+          border: 'var(--border)',
+          raised: 'var(--surface)',
+        },
+        content: {
+          primary: 'var(--text-primary)',
+          secondary: 'var(--text-secondary)',
+          muted: 'var(--text-muted)',
         },
       },
       fontFamily: {

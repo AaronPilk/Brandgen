@@ -54,7 +54,7 @@ export default function Dashboard() {
   if (!profile) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="animate-pulse text-gray-500">Loading profile...</div>
+        <div className="animate-pulse text-content-muted">Loading profile...</div>
       </div>
     );
   }
@@ -95,17 +95,17 @@ export default function Dashboard() {
     >
       <button
         onClick={() => navigate('/')}
-        className="flex items-center gap-2 text-gray-400 hover:text-white mb-6 transition-colors"
+        className="flex items-center gap-2 text-content-secondary hover:text-content-primary mb-6 transition-colors"
       >
         <ArrowLeft className="w-4 h-4" /> Back to Home
       </button>
 
       {/* Profile Header */}
-      <div className="bg-brand-dark-card border border-brand-dark-border rounded-2xl p-6 mb-6">
+      <div className="bg-surface-card border border-surface-border rounded-2xl p-6 mb-6">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold">{profileLabel}</h1>
-            <p className="text-gray-400 text-sm mt-1">
+            <p className="text-content-secondary text-sm mt-1">
               {isLeadGen ? 'Lead Generation' : 'Brand Building'} ·{' '}
               {intake.businessType || intake.targetCustomer || intake.geoMarket || ''}
             </p>
@@ -125,7 +125,7 @@ export default function Dashboard() {
 
         {/* Research Preview */}
         {profile.research && (
-          <div className="mt-4 pt-4 border-t border-brand-dark-border">
+          <div className="mt-4 pt-4 border-t border-surface-border">
             <button
               onClick={() =>
                 setViewing({
@@ -143,19 +143,19 @@ export default function Dashboard() {
       </div>
 
       {/* Autonomous Mode Toggle */}
-      <div className="bg-brand-dark-card border border-brand-dark-border rounded-2xl p-4 mb-6">
+      <div className="bg-surface-card border border-surface-border rounded-2xl p-4 mb-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Zap className="w-5 h-5 text-yellow-500" />
             <div>
               <p className="text-sm font-medium">Autonomous Mode</p>
-              <p className="text-xs text-gray-500">Skip confirmation dialogs</p>
+              <p className="text-xs text-content-muted">Skip confirmation dialogs</p>
             </div>
           </div>
           <button
             onClick={() => setAutonomousMode(!autonomousMode)}
             className={`relative w-12 h-6 rounded-full transition-colors ${
-              autonomousMode ? 'bg-yellow-600' : 'bg-brand-dark-border'
+              autonomousMode ? 'bg-yellow-600' : 'bg-surface-border'
             }`}
           >
             <div
@@ -367,12 +367,12 @@ export default function Dashboard() {
                       : data;
                   setViewing({ title: key.replace(/-/g, ' '), data: displayData, type });
                 }}
-                className="p-4 rounded-xl bg-brand-dark-surface border border-brand-dark-border hover:border-brand-purple/50 transition-colors text-left"
+                className="p-4 rounded-xl bg-surface-raised border border-surface-border hover:border-brand-purple/50 transition-colors text-left"
               >
                 <p className="text-sm font-medium capitalize">
                   {key.replace(/-/g, ' ')}
                 </p>
-                <p className="text-xs text-gray-500 mt-1">Click to view</p>
+                <p className="text-xs text-content-muted mt-1">Click to view</p>
               </button>
             ))}
           </div>

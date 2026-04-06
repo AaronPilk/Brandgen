@@ -97,13 +97,13 @@ export default function BrandIntake() {
     >
       <button
         onClick={() => (step === 'submode' ? navigate('/') : prevStep())}
-        className="flex items-center gap-2 text-gray-400 hover:text-white mb-6 transition-colors"
+        className="flex items-center gap-2 text-content-secondary hover:text-white mb-6 transition-colors"
       >
         <ArrowLeft className="w-4 h-4" /> Back
       </button>
 
       <h1 className="text-3xl font-bold mb-2">Build a Brand</h1>
-      <p className="text-gray-400 mb-6">Let's create something iconic.</p>
+      <p className="text-content-secondary mb-6">Let's create something iconic.</p>
 
       <ProgressBar steps={steps} currentStep={step} />
 
@@ -120,7 +120,7 @@ export default function BrandIntake() {
                 <Lightbulb className="w-6 h-6 text-brand-purple" />
                 <h3 className="font-semibold text-lg">Build My Brand</h3>
               </div>
-              <p className="text-sm text-gray-400">
+              <p className="text-sm text-content-secondary">
                 I already have a brand idea — help me build it out.
               </p>
             </Card>
@@ -132,7 +132,7 @@ export default function BrandIntake() {
                 <Compass className="w-6 h-6 text-brand-purple" />
                 <h3 className="font-semibold text-lg">Discover & Build</h3>
               </div>
-              <p className="text-sm text-gray-400">
+              <p className="text-sm text-content-secondary">
                 Help me find a winning product or niche first, then build the brand.
               </p>
             </Card>
@@ -151,7 +151,7 @@ export default function BrandIntake() {
           <h2 className="text-xl font-semibold mb-4">Brand Details</h2>
 
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1">Brand Name or Idea</label>
+            <label className="block text-sm font-medium text-content-secondary mb-1">Brand Name or Idea</label>
             <input
               value={buildForm.brandName}
               onChange={(e) => setB('brandName', e.target.value)}
@@ -160,7 +160,7 @@ export default function BrandIntake() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1">What Do You Sell?</label>
+            <label className="block text-sm font-medium text-content-secondary mb-1">What Do You Sell?</label>
             <input
               value={buildForm.whatYouSell}
               onChange={(e) => setB('whatYouSell', e.target.value)}
@@ -169,7 +169,7 @@ export default function BrandIntake() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1">Who Is Your Customer?</label>
+            <label className="block text-sm font-medium text-content-secondary mb-1">Who Is Your Customer?</label>
             <textarea
               rows={2}
               value={buildForm.targetCustomer}
@@ -179,7 +179,7 @@ export default function BrandIntake() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1">Competitor Website URLs</label>
+            <label className="block text-sm font-medium text-content-secondary mb-1">Competitor Website URLs</label>
             <textarea
               rows={2}
               value={buildForm.competitorUrls}
@@ -189,7 +189,7 @@ export default function BrandIntake() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1">Competitor/Inspiration Instagram URLs</label>
+            <label className="block text-sm font-medium text-content-secondary mb-1">Competitor/Inspiration Instagram URLs</label>
             <textarea
               rows={2}
               value={buildForm.instagramUrls}
@@ -215,7 +215,7 @@ export default function BrandIntake() {
           <h2 className="text-xl font-semibold mb-4">Brand Personality</h2>
 
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1">Describe Yourself in 3 Words</label>
+            <label className="block text-sm font-medium text-content-secondary mb-1">Describe Yourself in 3 Words</label>
             <input
               value={buildForm.personalityWords}
               onChange={(e) => setB('personalityWords', e.target.value)}
@@ -224,7 +224,7 @@ export default function BrandIntake() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1">Tone</label>
+            <label className="block text-sm font-medium text-content-secondary mb-1">Tone</label>
             <div className="flex gap-3">
               {['Formal', 'Casual', 'Mix of Both'].map((t) => (
                 <button
@@ -233,7 +233,7 @@ export default function BrandIntake() {
                   className={`flex-1 py-3 rounded-xl border text-sm font-medium transition-all ${
                     buildForm.formalOrCasual === t.toLowerCase()
                       ? 'border-brand-purple bg-brand-purple/10 text-white'
-                      : 'border-brand-dark-border bg-brand-dark-card text-gray-400'
+                      : 'border-surface-border bg-surface-card text-content-secondary'
                   }`}
                 >
                   {t}
@@ -243,7 +243,7 @@ export default function BrandIntake() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1">What's Your Brand's Vibe?</label>
+            <label className="block text-sm font-medium text-content-secondary mb-1">What's Your Brand's Vibe?</label>
             <input
               value={buildForm.brandVibe}
               onChange={(e) => setB('brandVibe', e.target.value)}
@@ -268,8 +268,8 @@ export default function BrandIntake() {
           <h2 className="text-xl font-semibold mb-4">Market Discovery</h2>
 
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1">
-              Trend Data Links <span className="text-gray-500">(optional)</span>
+            <label className="block text-sm font-medium text-content-secondary mb-1">
+              Trend Data Links <span className="text-content-muted">(optional)</span>
             </label>
             <textarea
               rows={2}
@@ -280,7 +280,7 @@ export default function BrandIntake() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1">Monthly Ad Budget</label>
+            <label className="block text-sm font-medium text-content-secondary mb-1">Monthly Ad Budget</label>
             <input
               value={discoverForm.adBudget}
               onChange={(e) => setD('adBudget', e.target.value)}
@@ -289,7 +289,7 @@ export default function BrandIntake() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1">Target Age Range</label>
+            <label className="block text-sm font-medium text-content-secondary mb-1">Target Age Range</label>
             <input
               value={discoverForm.targetAge}
               onChange={(e) => setD('targetAge', e.target.value)}
@@ -298,7 +298,7 @@ export default function BrandIntake() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1">Geographic Market</label>
+            <label className="block text-sm font-medium text-content-secondary mb-1">Geographic Market</label>
             <input
               value={discoverForm.geoMarket}
               onChange={(e) => setD('geoMarket', e.target.value)}
@@ -307,8 +307,8 @@ export default function BrandIntake() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1">
-              Product Category <span className="text-gray-500">(optional)</span>
+            <label className="block text-sm font-medium text-content-secondary mb-1">
+              Product Category <span className="text-content-muted">(optional)</span>
             </label>
             <input
               value={discoverForm.productCategory}
@@ -332,13 +332,13 @@ export default function BrandIntake() {
       {step === 'files' && (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
           <h2 className="text-xl font-semibold mb-4">Upload Research Files</h2>
-          <p className="text-gray-400 text-sm mb-4">
+          <p className="text-content-secondary text-sm mb-4">
             PDFs, competitor screenshots, research images — max 5 files. Optional.
           </p>
 
-          <label className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-brand-dark-border rounded-2xl cursor-pointer hover:border-brand-purple/50 transition-colors">
-            <Upload className="w-8 h-8 text-gray-500 mb-2" />
-            <span className="text-sm text-gray-400">
+          <label className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-surface-border rounded-2xl cursor-pointer hover:border-brand-purple/50 transition-colors">
+            <Upload className="w-8 h-8 text-content-muted mb-2" />
+            <span className="text-sm text-content-secondary">
               {files.length > 0 ? `${files.length} file(s) selected` : 'Click to upload'}
             </span>
             <input
@@ -353,9 +353,9 @@ export default function BrandIntake() {
           {files.length > 0 && (
             <div className="space-y-2">
               {files.map((f, i) => (
-                <div key={i} className="flex items-center gap-2 text-sm text-gray-400 bg-brand-dark-surface rounded-lg px-3 py-2">
+                <div key={i} className="flex items-center gap-2 text-sm text-content-secondary bg-brand-dark-surface rounded-lg px-3 py-2">
                   <span className="truncate">{f.name}</span>
-                  <span className="text-gray-600">{(f.size / 1024).toFixed(0)} KB</span>
+                  <span className="text-content-muted">{(f.size / 1024).toFixed(0)} KB</span>
                 </div>
               ))}
             </div>

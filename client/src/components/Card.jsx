@@ -15,7 +15,7 @@ export default function Card({
       className={`relative rounded-2xl border p-6 transition-all ${
         selected
           ? 'border-brand-purple bg-brand-purple/10 shadow-lg shadow-brand-purple/10'
-          : 'border-brand-dark-border bg-brand-dark-card hover:border-brand-dark-border/80'
+          : 'border-surface-border bg-surface-card hover:border-brand-purple/30'
       } ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'} ${className}`}
     >
       {selected && (

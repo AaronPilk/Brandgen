@@ -13,7 +13,12 @@ import ApiSettings from './pages/ApiSettings';
 import ProfilesList from './pages/ProfilesList';
 
 export default function App() {
-  const { setApiStatus, budgetSet } = useStore();
+  const { setApiStatus, budgetSet, theme } = useStore();
+
+  // Sync theme class on mount
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', theme === 'dark');
+  }, []);
 
   useEffect(() => {
     getApiStatus().then(setApiStatus).catch(console.error);
