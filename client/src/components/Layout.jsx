@@ -1,10 +1,10 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Settings, FolderOpen, Zap, Sun, Moon } from 'lucide-react';
+import { Settings, FolderOpen, Zap, Sun, Moon, ArrowRight } from 'lucide-react';
 import { useStore } from '../store/useStore';
 import CostTracker from './CostTracker';
 
 export default function Layout({ children }) {
-  const { theme, toggleTheme } = useStore();
+  const { theme, toggleTheme, currentProfile } = useStore();
   const location = useLocation();
   const isHome = location.pathname === '/';
 
@@ -17,16 +17,23 @@ export default function Layout({ children }) {
       <nav className="fixed top-0 left-0 right-0 z-50 glass-strong border-b border-surface-border transition-colors duration-500">
         <div className="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2.5 group">
-            <div className="w-8 h-8 rounded-xl bg-brand-purple flex items-center justify-center shadow-lg shadow-brand-purple/25 group-hover:shadow-brand-purple/40 transition-shadow">
-              <Zap className="w-4 h-4 text-white" />
-            </div>
-            <span className="text-[15px] font-semibold tracking-tight text-content-primary">
-              BrandGen
+            <span className="text-[15px] font-bold tracking-tight text-content-primary">
+              Brand<span className="text-brand-purple">Gen</span>
             </span>
           </Link>
 
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-2">
             <CostTracker />
+
+            {currentProfile && (
+              <Link
+                to={`/dashboard/${currentProfile.id}`}
+                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-brand-purple/10 text-brand-purple text-[12px] font-semibold hover:bg-brand-purple/20 transition-colors"
+              >
+                Dashboard <ArrowRight className="w-3 h-3" />
+              </Link>
+            )}
+
             <NavButton onClick={toggleTheme} title={theme === 'dark' ? 'Light mode' : 'Dark mode'}>
               {theme === 'dark' ? <Sun className="w-[18px] h-[18px]" /> : <Moon className="w-[18px] h-[18px]" />}
             </NavButton>
