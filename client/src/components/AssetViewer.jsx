@@ -153,30 +153,33 @@ export default function AssetViewer({ title, data, type, onClose }) {
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onClose} className="absolute inset-0 bg-black/40 dark:bg-black/60 backdrop-blur-sm" />
-        <motion.div
-          initial={{ scale: 0.95, opacity: 0, y: 10 }}
-          animate={{ scale: 1, opacity: 1, y: 0 }}
-          exit={{ scale: 0.95, opacity: 0, y: 10 }}
-          transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-          className="relative glossy rounded-3xl p-6 max-w-3xl w-full max-h-[85vh] overflow-y-auto shadow-elevated-lg"
-        >
-          <div className="relative z-10">
-            <div className="flex items-center justify-between mb-5">
-              <h3 className="text-lg font-semibold text-content-primary capitalize">{title}</h3>
-              <div className="flex items-center gap-1">
-                <button onClick={copyToClipboard} className="w-9 h-9 rounded-xl flex items-center justify-center hover:bg-surface-raised text-content-muted hover:text-content-primary transition-colors">
-                  {copied ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
-                </button>
-                <button onClick={onClose} className="w-9 h-9 rounded-xl flex items-center justify-center hover:bg-surface-raised text-content-muted hover:text-content-primary transition-colors">
-                  <X className="w-4 h-4" />
-                </button>
+      <div className="fixed inset-0 z-50 overflow-y-auto">
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onClose} className="fixed inset-0 bg-black/40 dark:bg-black/60 backdrop-blur-sm" />
+        <div className="min-h-full flex items-start justify-center px-4 py-10">
+          <motion.div
+            initial={{ scale: 0.95, opacity: 0, y: 10 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            exit={{ scale: 0.95, opacity: 0, y: 10 }}
+            transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+            className="relative glossy rounded-3xl p-6 max-w-3xl w-full shadow-elevated-lg"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="relative z-10">
+              <div className="flex items-center justify-between mb-5 sticky top-0 z-20">
+                <h3 className="text-lg font-semibold text-content-primary capitalize">{title}</h3>
+                <div className="flex items-center gap-1">
+                  <button onClick={copyToClipboard} className="w-9 h-9 rounded-xl flex items-center justify-center hover:bg-surface-raised text-content-muted hover:text-content-primary transition-colors">
+                    {copied ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
+                  </button>
+                  <button onClick={onClose} className="w-9 h-9 rounded-xl flex items-center justify-center hover:bg-surface-raised text-content-muted hover:text-content-primary transition-colors">
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
+              {renderContent()}
             </div>
-            {renderContent()}
-          </div>
-        </motion.div>
+          </motion.div>
+        </div>
       </div>
     </AnimatePresence>
   );
