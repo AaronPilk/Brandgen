@@ -207,9 +207,7 @@ export default function Dashboard() {
             />
             <ActionButton icon={Mail} label="Build Email Sequences" description="Industry-specific 5-email nurture sequence" actionKey="email-sequences" completed={!!assets['email-sequences']} onExecute={() => executeAction('email-sequences')} />
             <ActionButton icon={MessageSquare} label="Build SMS Sequences" description="5-message SMS follow-up sequence" actionKey="sms-sequences" completed={!!assets['sms-sequences']} onExecute={() => executeAction('sms-sequences')} />
-            <ActionButton icon={Link2} label="Connect GoHighLevel" description="CRM integration for lead routing" actionKey="gohighlevel" disabled disabledReason={apiStatus?.goHighLevel ? undefined : 'Not connected — configure in Settings'} onExecute={() => {}} />
-            <ActionButton icon={Link2} label="Connect HubSpot" description="CRM integration for lead management" actionKey="hubspot" disabled disabledReason={apiStatus?.hubspot ? undefined : 'Not connected — configure in Settings'} onExecute={() => {}} />
-            <ActionButton icon={BarChart3} label="Set Up Tracking Pixels" description="Meta, TikTok, Google Analytics, Pinterest" actionKey="tracking-pixels" completed={!!assets['tracking-pixels']} onExecute={() => executeAction('tracking-pixels')} />
+            <ActionButton icon={BarChart3} label="Set Up Tracking Pixels" description="Generate tracking pixel installation guide" actionKey="tracking-pixels" completed={!!assets['tracking-pixels']} onExecute={() => executeAction('tracking-pixels')} />
           </>
         )}
 
@@ -239,11 +237,9 @@ export default function Dashboard() {
                 ],
               })}
             />
-            <ActionButton icon={Package} label="Connect Printful" description="Fulfillment for t-shirt and merch brands" actionKey="printful" disabled disabledReason={apiStatus?.printful ? undefined : 'Not connected — configure in Settings'} onExecute={() => {}} />
             <ActionButton icon={Instagram} label="Set Up Instagram" description="Profile setup with content strategy" actionKey="social-instagram" completed={!!assets['social-instagram']} onExecute={() => executeAction('social-setup', { platform: 'Instagram' })} />
             <ActionButton icon={Facebook} label="Set Up Facebook Page" description="Business page with content plan" actionKey="social-facebook" completed={!!assets['social-facebook']} onExecute={() => executeAction('social-setup', { platform: 'Facebook' })} />
-            <ActionButton icon={ShoppingBag} label="Connect Meta Ads" description="Campaign structure and setup guide" actionKey="meta-ads-setup" completed={!!assets['meta-ads-setup']} onExecute={() => executeAction('social-setup', { platform: 'Meta Ads' })} />
-            <ActionButton icon={BarChart3} label="Set Up Tracking Pixels" description="Meta, TikTok, Google Analytics, Pinterest" actionKey="tracking-pixels" completed={!!assets['tracking-pixels']} onExecute={() => executeAction('tracking-pixels')} />
+            <ActionButton icon={BarChart3} label="Set Up Tracking Pixels" description="Generate tracking pixel installation guide" actionKey="tracking-pixels" completed={!!assets['tracking-pixels']} onExecute={() => executeAction('tracking-pixels')} />
           </>
         )}
       </div>
@@ -384,6 +380,7 @@ const PROFILE_PLATFORMS = [
   { key: 'gohighlevel', icon: Target, color: 'bg-green-600', name: 'GoHighLevel', desc: 'CRM for lead routing' },
   { key: 'hubspot', icon: Users, color: 'bg-orange-500', name: 'HubSpot', desc: 'CRM for contacts & deals' },
   { key: 'canva', icon: Palette, color: 'bg-cyan-500', name: 'Canva', desc: 'Design assets & templates' },
+  { key: 'printful', icon: Package, color: 'bg-violet-600', name: 'Printful', desc: 'T-shirt & merch fulfillment' },
 ];
 
 function ProfileConnections({ profileId, connections, setConnections, connectingPlatform, setConnectingPlatform }) {
