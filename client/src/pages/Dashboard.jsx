@@ -166,20 +166,25 @@ export default function Dashboard() {
 
         {isLeadGen && (
           <>
-            <ActionButton icon={Globe} label="Build Landing Page" description="Landing page with lead capture — add reference links & files" actionKey="landing-page" completed={!!assets['landing-page']}
+            <ActionButton skipConfirm icon={Globe} label="Build Landing Page" description="Add reference links, docs & images for best results" actionKey="landing-page" completed={!!assets['landing-page']}
               onExecute={() => handleActionWithInput('landing-page', {
                 title: 'Landing Page References',
+                subtitle: 'The more reference material you provide, the better the output.',
                 fields: [
-                  { key: 'referenceLinks', label: 'Reference landing page URLs (one per line)', type: 'textarea', placeholder: 'https://example.com/landing1\nhttps://example.com/landing2' },
-                  { key: 'files', label: 'Upload reference images or PDFs', type: 'file' },
+                  { key: 'referenceLinks', label: 'Landing pages you like (one URL per line)', type: 'textarea', placeholder: 'https://example.com/landing1\nhttps://competitor.com/offer' },
+                  { key: 'notes', label: 'What do you want on this page? Any specific sections, copy, or style?', type: 'textarea', placeholder: 'I want a hero section with a bold headline, a benefits section, testimonials, and a form...' },
+                  { key: 'files', label: 'Upload reference screenshots, PDFs, or design files', type: 'file' },
                 ],
               })}
             />
-            <ActionButton icon={Megaphone} label="Create Ad Creatives" description="10 ad concepts — add inspiration ad links" actionKey="ad-creatives" completed={!!assets['ad-creatives']}
+            <ActionButton skipConfirm icon={Megaphone} label="Create Ad Creatives" description="Add links to ads you like for inspiration" actionKey="ad-creatives" completed={!!assets['ad-creatives']}
               onExecute={() => handleActionWithInput('ad-creatives', {
                 title: 'Ad Creative Inspiration',
+                subtitle: 'Share ads you like so AI can match the style, tone, and format.',
                 fields: [
-                  { key: 'inspirationLinks', label: 'Links to ads you like (one per line)', type: 'textarea', placeholder: 'https://facebook.com/ads/...\nhttps://tiktok.com/...' },
+                  { key: 'inspirationLinks', label: 'Links to ads you like (Facebook Ad Library, TikTok, etc.)', type: 'textarea', placeholder: 'https://www.facebook.com/ads/library/?id=...\nhttps://tiktok.com/@brand/video/...' },
+                  { key: 'adNotes', label: 'What angles or hooks do you want? Any specific offers to highlight?', type: 'textarea', placeholder: 'Focus on pain points, use urgency, highlight free consultation offer...' },
+                  { key: 'files', label: 'Upload screenshot examples of ads you like', type: 'file' },
                 ],
               })}
             />
@@ -194,21 +199,26 @@ export default function Dashboard() {
         {isBrand && (
           <>
             <ActionButton icon={Palette} label="Generate Logo Concepts" description="3 distinct logo variations" actionKey="logo-concepts" completed={!!assets['logo-concepts']} onExecute={() => executeAction('logo-concepts')} />
-            <ActionButton icon={Globe} label="Build Website" description="Conversion-optimized site — add reference links & files" actionKey="landing-page" completed={!!assets['landing-page']}
+            <ActionButton skipConfirm icon={Globe} label="Build Website" description="Add reference sites, docs & images for best results" actionKey="landing-page" completed={!!assets['landing-page']}
               onExecute={() => handleActionWithInput('landing-page', {
                 title: 'Website References',
+                subtitle: 'The more reference material you provide, the better the output.',
                 fields: [
-                  { key: 'referenceLinks', label: 'Reference website URLs (one per line)', type: 'textarea', placeholder: 'https://example.com\nhttps://competitor.com' },
-                  { key: 'files', label: 'Upload reference images or PDFs', type: 'file' },
+                  { key: 'referenceLinks', label: 'Websites you like (one URL per line)', type: 'textarea', placeholder: 'https://example.com\nhttps://competitor.com' },
+                  { key: 'notes', label: 'What do you want on this site? Specific sections, copy, or style?', type: 'textarea', placeholder: 'I want a hero section, product showcase, about section, and contact form...' },
+                  { key: 'files', label: 'Upload reference screenshots, PDFs, or design files', type: 'file' },
                 ],
               })}
             />
             <ActionButton icon={Image} label="Create Product Mockups" description="T-shirts, packaging, lifestyle shots" actionKey="product-mockups" completed={!!assets['product-mockups']} onExecute={() => executeAction('product-mockups')} />
-            <ActionButton icon={Megaphone} label="Create 10 Ad Creatives" description="Meta and TikTok — add inspiration links" actionKey="ad-creatives" completed={!!assets['ad-creatives']}
+            <ActionButton skipConfirm icon={Megaphone} label="Create 10 Ad Creatives" description="Add links to ads you like for inspiration" actionKey="ad-creatives" completed={!!assets['ad-creatives']}
               onExecute={() => handleActionWithInput('ad-creatives', {
                 title: 'Ad Creative Inspiration',
+                subtitle: 'Share ads you like so AI can match the style, tone, and format.',
                 fields: [
-                  { key: 'inspirationLinks', label: 'Links to ads you like (one per line)', type: 'textarea', placeholder: 'https://facebook.com/ads/...\nhttps://tiktok.com/...' },
+                  { key: 'inspirationLinks', label: 'Links to ads you like (Facebook Ad Library, TikTok, etc.)', type: 'textarea', placeholder: 'https://www.facebook.com/ads/library/?id=...\nhttps://tiktok.com/@brand/video/...' },
+                  { key: 'adNotes', label: 'What angles or hooks do you want? Specific offers to highlight?', type: 'textarea', placeholder: 'Focus on pain points, use urgency, highlight free consultation offer...' },
+                  { key: 'files', label: 'Upload screenshot examples of ads you like', type: 'file' },
                 ],
               })}
             />
@@ -296,7 +306,9 @@ function InputModal({ config, onClose, onSubmit }) {
       >
         <div className="relative z-10">
           <h3 className="text-lg font-semibold text-content-primary mb-1">{config.title}</h3>
-          <p className="text-[13px] text-content-muted mb-5">Optional — add references for better results</p>
+          <p className="text-[13px] text-content-secondary mb-5">
+            {config.subtitle || 'Add references for better results. You can skip any field.'}
+          </p>
 
           <div className="space-y-4">
             {config.fields?.map((field) => (

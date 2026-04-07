@@ -13,6 +13,7 @@ export default function ActionButton({
   completed,
   disabled,
   disabledReason,
+  skipConfirm,
 }) {
   const [loading, setLoading] = useState(false);
   const [estimate, setEstimate] = useState(null);
@@ -25,6 +26,10 @@ export default function ActionButton({
 
   const handleClick = async () => {
     if (disabled || loading || completed) return;
+    if (skipConfirm) {
+      await onExecute();
+      return;
+    }
     if (autonomousMode) {
       await execute();
     } else {
