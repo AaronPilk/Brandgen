@@ -51,7 +51,7 @@ export default function Dashboard() {
   }
 
   const isLeadGen = profile.mode === 'lead-gen';
-  const isBrand = profile.mode === 'build-brand' || profile.mode === 'discover-build';
+  const isBrand = profile.mode === 'build-brand' || profile.mode === 'discover-build' || profile.mode === 'existing-brand';
   const intake = profile.intake || {};
   const assets = profile.assets || {};
 
