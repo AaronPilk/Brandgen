@@ -1,10 +1,10 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Settings, FolderOpen, Zap, Sun, Moon, ArrowRight, Plug } from 'lucide-react';
+import { Settings, FolderOpen, Zap, Sun, Moon, ArrowRight, Plug, LogOut } from 'lucide-react';
 import { useStore } from '../store/useStore';
 import CostTracker from './CostTracker';
 
 export default function Layout({ children }) {
-  const { theme, toggleTheme, currentProfile } = useStore();
+  const { theme, toggleTheme, currentProfile, user, logout } = useStore();
   const location = useLocation();
   const isHome = location.pathname === '/';
 
@@ -46,6 +46,9 @@ export default function Layout({ children }) {
             <NavLink to="/settings" title="Settings">
               <Settings className="w-[18px] h-[18px]" />
             </NavLink>
+            <NavButton onClick={logout} title="Sign out">
+              <LogOut className="w-[18px] h-[18px]" />
+            </NavButton>
           </div>
         </div>
       </nav>

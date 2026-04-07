@@ -63,6 +63,18 @@ export const useStore = create(
         set({ theme: next });
       },
 
+      // Auth
+      user: null,
+      token: null,
+      setAuth: (user, token) => {
+        localStorage.setItem('brandgen-token', token);
+        set({ user, token });
+      },
+      logout: () => {
+        localStorage.removeItem('brandgen-token');
+        set({ user: null, token: null, currentProfile: null });
+      },
+
       // Autonomous mode
       autonomousMode: false,
       setAutonomousMode: (val) => set({ autonomousMode: val }),
@@ -83,6 +95,8 @@ export const useStore = create(
         profiles: state.profiles,
         sessionId: state.sessionId,
         theme: state.theme,
+        user: state.user,
+        token: state.token,
       }),
     }
   )

@@ -109,7 +109,14 @@ export default function Dashboard() {
           {profile.research && (
             <div className="mt-4 pt-4 border-t border-surface-border">
               <button
-                onClick={() => setViewing({ title: 'Market Research', data: profile.research, type: 'json' })}
+                onClick={() => {
+                  // research might be a string, or an object like { research: "...", usage, cost }
+                  let researchData = profile.research;
+                  if (researchData && typeof researchData === 'object' && researchData.research) {
+                    researchData = researchData.research;
+                  }
+                  setViewing({ title: 'Market Research', data: researchData, type: 'json' });
+                }}
                 className="flex items-center gap-1.5 text-sm text-brand-purple hover:text-brand-purple-dark font-medium transition-colors"
               >
                 <Eye className="w-3.5 h-3.5" /> View Research <ChevronRight className="w-3.5 h-3.5" />

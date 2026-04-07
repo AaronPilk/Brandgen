@@ -1,8 +1,15 @@
 const BASE = '/api';
 
+function getAuthHeaders() {
+  const token = localStorage.getItem('brandgen-token');
+  const headers = { 'Content-Type': 'application/json' };
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+  return headers;
+}
+
 async function request(path, options = {}) {
   const res = await fetch(`${BASE}${path}`, {
-    headers: { 'Content-Type': 'application/json' },
+    headers: getAuthHeaders(),
     ...options,
   });
   if (!res.ok) {
@@ -67,3 +74,12 @@ export const startOAuthConnect = (platform, userId) =>
 
 export const disconnectOAuth = (platform, userId) =>
   request(`/oauth/disconnect/${platform}?userId=${userId}`, { method: 'DELETE' });
+
+// Auth
+export const register = (email, password, name) =>
+  request('/auth/register', { method: 'POST', body: JSON.stringify({ email, password, name }) });
+
+export const login = (email, password) =>
+  request('/auth/login', { method: 'POST', body: JSON.stringify({ email, password }) });
+
+export const getMe = () => request('/auth/me');
