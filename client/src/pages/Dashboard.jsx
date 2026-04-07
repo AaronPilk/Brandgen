@@ -207,7 +207,6 @@ export default function Dashboard() {
             />
             <ActionButton icon={Mail} label="Build Email Sequences" description="Industry-specific 5-email nurture sequence" actionKey="email-sequences" completed={!!assets['email-sequences']} onExecute={() => executeAction('email-sequences')} />
             <ActionButton icon={MessageSquare} label="Build SMS Sequences" description="5-message SMS follow-up sequence" actionKey="sms-sequences" completed={!!assets['sms-sequences']} onExecute={() => executeAction('sms-sequences')} />
-            <ActionButton icon={BarChart3} label="Set Up Tracking Pixels" description="Generate tracking pixel installation guide" actionKey="tracking-pixels" completed={!!assets['tracking-pixels']} onExecute={() => executeAction('tracking-pixels')} />
           </>
         )}
 
@@ -239,7 +238,6 @@ export default function Dashboard() {
             />
             <ActionButton icon={Instagram} label="Set Up Instagram" description="Profile setup with content strategy" actionKey="social-instagram" completed={!!assets['social-instagram']} onExecute={() => executeAction('social-setup', { platform: 'Instagram' })} />
             <ActionButton icon={Facebook} label="Set Up Facebook Page" description="Business page with content plan" actionKey="social-facebook" completed={!!assets['social-facebook']} onExecute={() => executeAction('social-setup', { platform: 'Facebook' })} />
-            <ActionButton icon={BarChart3} label="Set Up Tracking Pixels" description="Generate tracking pixel installation guide" actionKey="tracking-pixels" completed={!!assets['tracking-pixels']} onExecute={() => executeAction('tracking-pixels')} />
           </>
         )}
       </div>
@@ -470,6 +468,30 @@ function ProfileConnections({ profileId, connections, setConnections, connecting
             </div>
           );
         })}
+      </div>
+
+      {/* Tracking Pixels */}
+      <div className="mt-6">
+        <h3 className="text-[14px] font-semibold text-content-primary mb-3 flex items-center gap-2">
+          <BarChart3 className="w-4 h-4 text-brand-purple" />
+          Tracking Pixels
+          <span className="text-[11px] text-content-muted font-normal">Auto-injected into generated pages</span>
+        </h3>
+        <div className="grid grid-cols-2 gap-2.5">
+          {[
+            { label: 'Meta Pixel', env: 'META_PIXEL_ID' },
+            { label: 'TikTok Pixel', env: 'TIKTOK_PIXEL_ID' },
+            { label: 'Google Analytics', env: 'GOOGLE_ANALYTICS_ID' },
+            { label: 'Pinterest Tag', env: 'PINTEREST_TAG_ID' },
+          ].map((pixel) => (
+            <div key={pixel.env} className="glossy rounded-xl p-3">
+              <div className="relative z-10">
+                <p className="text-[12px] font-medium text-content-primary">{pixel.label}</p>
+                <p className="text-[10px] text-content-muted">Set {pixel.env} in .env</p>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
