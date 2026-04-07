@@ -180,6 +180,7 @@ export default function BrandIntake() {
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-5">
           <h2 className="text-lg font-semibold">About Your Brand</h2>
           <div><Label>Brand Name</Label><input value={existingForm.brandName} onChange={(e) => setE('brandName', e.target.value)} placeholder="Your brand name" /></div>
+          <div><Label>Brand Website</Label><input value={existingForm.websiteUrl} onChange={(e) => setE('websiteUrl', e.target.value)} placeholder="https://yourbrand.com" /></div>
           <div><Label>Industry</Label><input value={existingForm.industry} onChange={(e) => setE('industry', e.target.value)} placeholder="e.g. Fitness, Beauty, Real Estate, Restaurant" /></div>
           <div><Label>What Do You Sell?</Label><input value={existingForm.whatYouSell} onChange={(e) => setE('whatYouSell', e.target.value)} placeholder="Products, services, or both" /></div>
           <div><Label>Who Is Your Customer?</Label><textarea rows={2} value={existingForm.targetCustomer} onChange={(e) => setE('targetCustomer', e.target.value)} placeholder="Age, demographics, lifestyle, pain points" /></div>
