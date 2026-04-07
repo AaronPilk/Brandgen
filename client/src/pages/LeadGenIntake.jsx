@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft, ArrowRight, Upload, Building2, Rocket } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Upload, Building2, Rocket, Plus, X, Globe } from 'lucide-react';
 import Card from '../components/Card';
 import Button from '../components/Button';
 import ProgressBar from '../components/ProgressBar';
@@ -34,6 +34,79 @@ function Chip({ label, selected, onClick }) {
 
 function Label({ children }) {
   return <label className="block text-[13px] font-medium text-content-secondary mb-2">{children}</label>;
+}
+
+function UrlListInput({ label, sublabel, value, onChange }) {
+  // value is a comma or newline separated string of URLs
+  const urls = (value || '').split(/[\n,]+/).map(s => s.trim()).filter(Boolean);
+  const [draft, setDraft] = useState('');
+
+  const addUrl = () => {
+    const cleaned = draft.trim();
+    if (!cleaned) return;
+    const next = [...urls, cleaned];
+    onChange(next.join('\n'));
+    setDraft('');
+  };
+
+  const removeUrl = (idx) => {
+    const next = urls.filter((_, i) => i !== idx);
+    onChange(next.join('\n'));
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); addUrl(); }
+  };
+
+  return (
+    <div>
+      <Label>{label}</Label>
+      {sublabel && <p className="text-[11px] text-content-muted -mt-1 mb-3">{sublabel}</p>}
+
+      {/* Existing URLs */}
+      {urls.length > 0 && (
+        <div className="space-y-2 mb-3">
+          {urls.map((url, i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, y: -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="flex items-center gap-2 glossy rounded-xl px-3 py-2.5"
+            >
+              <Globe className="w-4 h-4 text-brand-purple shrink-0 relative z-10" />
+              <span className="text-[13px] text-content-primary truncate flex-1 relative z-10">{url}</span>
+              <button onClick={() => removeUrl(i)} className="w-6 h-6 rounded-lg flex items-center justify-center hover:bg-red-500/10 text-content-muted hover:text-red-500 transition-colors relative z-10">
+                <X className="w-3.5 h-3.5" />
+              </button>
+            </motion.div>
+          ))}
+        </div>
+      )}
+
+      {/* Add URL input */}
+      <div className="flex gap-2">
+        <input
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          onKeyDown={handleKeyDown}
+          placeholder="https://competitor.com"
+          className="flex-1"
+        />
+        <button
+          type="button"
+          onClick={addUrl}
+          disabled={!draft.trim()}
+          className={`px-4 rounded-2xl text-[13px] font-medium flex items-center gap-1.5 transition-all ${
+            draft.trim()
+              ? 'glossy-btn text-white'
+              : 'bg-surface-raised text-content-muted cursor-not-allowed'
+          }`}
+        >
+          <Plus className="w-3.5 h-3.5" /> Add
+        </button>
+      </div>
+    </div>
+  );
 }
 
 export default function LeadGenIntake() {
@@ -141,10 +214,12 @@ export default function LeadGenIntake() {
             <Label>Geographic Targets</Label>
             <input value={form.geoTargets} onChange={(e) => set('geoTargets', e.target.value)} placeholder="e.g. Dallas TX, Houston TX, Austin TX" />
           </div>
-          <div>
-            <Label>Competitor Website URLs</Label>
-            <textarea rows={3} value={form.competitorUrls} onChange={(e) => set('competitorUrls', e.target.value)} placeholder="Paste competitor websites — one per line&#10;https://competitor1.com&#10;https://competitor2.com" />
-          </div>
+          <UrlListInput
+            label="Competitor Websites"
+            sublabel="We'll analyze these to shape your strategy"
+            value={form.competitorUrls}
+            onChange={(val) => set('competitorUrls', val)}
+          />
           <div>
             <Label>Current CRM</Label>
             <div className="flex gap-2">
