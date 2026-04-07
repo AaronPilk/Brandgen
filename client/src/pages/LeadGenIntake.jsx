@@ -46,7 +46,7 @@ export default function LeadGenIntake() {
   const [form, setForm] = useState({
     businessStage: '', industry: '', businessType: '', geoTargets: '',
     adBudget: '', primaryGoal: '', customerLTV: '', currentCRM: '',
-    painPoint: '', salesCycle: '', differentiator: '',
+    painPoint: '', salesCycle: '', differentiator: '', competitorUrls: '',
     monthlyRevenue: '', leadVolume: '', websiteUrl: '', marketingChannels: [],
   });
 
@@ -140,6 +140,10 @@ export default function LeadGenIntake() {
           <div>
             <Label>Geographic Targets</Label>
             <input value={form.geoTargets} onChange={(e) => set('geoTargets', e.target.value)} placeholder="e.g. Dallas TX, Houston TX, Austin TX" />
+          </div>
+          <div>
+            <Label>Competitor Website URLs</Label>
+            <textarea rows={3} value={form.competitorUrls} onChange={(e) => set('competitorUrls', e.target.value)} placeholder="Paste competitor websites — one per line&#10;https://competitor1.com&#10;https://competitor2.com" />
           </div>
           <div>
             <Label>Current CRM</Label>
