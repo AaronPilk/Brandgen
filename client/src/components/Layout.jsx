@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Settings, FolderOpen, Zap, Sun, Moon, ArrowRight } from 'lucide-react';
+import { Settings, FolderOpen, Zap, Sun, Moon, ArrowRight, Plug } from 'lucide-react';
 import { useStore } from '../store/useStore';
 import CostTracker from './CostTracker';
 
@@ -37,6 +37,9 @@ export default function Layout({ children }) {
             <NavButton onClick={toggleTheme} title={theme === 'dark' ? 'Light mode' : 'Dark mode'}>
               {theme === 'dark' ? <Sun className="w-[18px] h-[18px]" /> : <Moon className="w-[18px] h-[18px]" />}
             </NavButton>
+            <NavLink to="/connections" title="Connections">
+              <Plug className="w-[18px] h-[18px]" />
+            </NavLink>
             <NavLink to="/profiles" title="Profiles">
               <FolderOpen className="w-[18px] h-[18px]" />
             </NavLink>

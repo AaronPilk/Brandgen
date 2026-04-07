@@ -55,3 +55,15 @@ export const uploadFiles = async (files) => {
   const res = await fetch(`${BASE}/uploads`, { method: 'POST', body: formData });
   return res.json();
 };
+
+// OAuth
+export const getOAuthPlatforms = () => request('/oauth/platforms');
+
+export const getOAuthConnections = (userId) =>
+  request(`/oauth/connections/${userId}`);
+
+export const startOAuthConnect = (platform, userId) =>
+  request(`/oauth/connect/${platform}?userId=${userId}`);
+
+export const disconnectOAuth = (platform, userId) =>
+  request(`/oauth/disconnect/${platform}?userId=${userId}`, { method: 'DELETE' });

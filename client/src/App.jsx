@@ -11,6 +11,7 @@ import BrandIntake from './pages/BrandIntake';
 import Dashboard from './pages/Dashboard';
 import ApiSettings from './pages/ApiSettings';
 import ProfilesList from './pages/ProfilesList';
+import Connections from './pages/Connections';
 
 export default function App() {
   const { setApiStatus, budgetSet, theme } = useStore();
@@ -33,6 +34,7 @@ export default function App() {
           <Route path="/build-brand" element={<BrandIntake />} />
           <Route path="/dashboard/:id" element={<Dashboard />} />
           <Route path="/settings" element={<ApiSettings />} />
+          <Route path="/connections" element={<Connections />} />
           <Route path="/profiles" element={<ProfilesList />} />
         </Routes>
       </AnimatePresence>
