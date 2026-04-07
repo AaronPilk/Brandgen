@@ -61,6 +61,14 @@ const PLATFORMS = {
     clientIdEnv: 'GOOGLE_CLIENT_ID',
     clientSecretEnv: 'GOOGLE_CLIENT_SECRET',
   },
+  canva: {
+    name: 'Canva',
+    authUrl: 'https://www.canva.com/api/oauth/authorize',
+    tokenUrl: 'https://www.canva.com/api/oauth/token',
+    scopes: 'design:content:read design:content:write asset:read asset:write',
+    clientIdEnv: 'CANVA_CLIENT_ID',
+    clientSecretEnv: 'CANVA_CLIENT_SECRET',
+  },
 };
 
 export function getPlatformConfig(platform) {

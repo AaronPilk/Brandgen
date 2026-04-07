@@ -39,6 +39,12 @@ const PLATFORM_META = {
     description: 'Google Drive',
     features: ['Pull client docs & sheets', 'Import brand assets', 'Sync research files'],
   },
+  canva: {
+    icon: Share2,
+    color: 'bg-cyan-500',
+    description: 'Canva',
+    features: ['Import design assets', 'Export to Canva', 'Pull brand templates'],
+  },
   gohighlevel: {
     icon: Target,
     color: 'bg-green-600',

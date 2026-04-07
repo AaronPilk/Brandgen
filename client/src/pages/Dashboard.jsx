@@ -383,6 +383,7 @@ const PROFILE_PLATFORMS = [
   { key: 'google', icon: HardDrive, color: 'bg-blue-600', name: 'Google Drive', desc: 'Pull docs, sheets & files' },
   { key: 'gohighlevel', icon: Target, color: 'bg-green-600', name: 'GoHighLevel', desc: 'CRM for lead routing' },
   { key: 'hubspot', icon: Users, color: 'bg-orange-500', name: 'HubSpot', desc: 'CRM for contacts & deals' },
+  { key: 'canva', icon: Palette, color: 'bg-cyan-500', name: 'Canva', desc: 'Design assets & templates' },
 ];
 
 function ProfileConnections({ profileId, connections, setConnections, connectingPlatform, setConnectingPlatform }) {
