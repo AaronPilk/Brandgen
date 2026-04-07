@@ -6,7 +6,7 @@ import {
   Facebook, Instagram, Twitter, Share2, Target, Users, HardDrive,
 } from 'lucide-react';
 import { useStore } from '../store/useStore';
-import { getOAuthPlatforms, getOAuthConnections, startOAuthConnect, disconnectOAuth } from '../services/api';
+import { getOAuthPlatforms, getOAuthConnections, startOAuthConnect, disconnectOAuth, getApiStatus } from '../services/api';
 
 const PLATFORM_META = {
   meta: {
@@ -72,8 +72,10 @@ export default function Connections() {
   const [loading, setLoading] = useState(true);
   const [connecting, setConnecting] = useState(null);
   const [toast, setToast] = useState(null);
+  const [apiStatus, setApiStatus] = useState(null);
 
   useEffect(() => {
+    getApiStatus().then(setApiStatus).catch(() => {});
     Promise.all([
       getOAuthPlatforms(),
       getOAuthConnections(sessionId),
@@ -269,9 +271,9 @@ export default function Connections() {
       </div>
 
       <div className="space-y-2.5">
-        <ApiKeyStatus label="Anthropic Claude" envKey="ANTHROPIC_API_KEY" required />
-        <ApiKeyStatus label="OpenAI DALL-E" envKey="OPENAI_API_KEY" note="Set MOCK_IMAGES=true for placeholders" />
-        <ApiKeyStatus label="Printful" envKey="PRINTFUL_API_KEY" />
+        <ApiKeyStatus label="Anthropic Claude (AI)" envKey="ANTHROPIC_API_KEY" connected={apiStatus?.anthropic} required />
+        <ApiKeyStatus label="OpenAI / DALL-E 3 (Images)" envKey="OPENAI_API_KEY" connected={apiStatus?.dalle} note={apiStatus?.mockImages ? 'Mock mode ON — using placeholders' : undefined} />
+        <ApiKeyStatus label="Printful (Fulfillment)" envKey="PRINTFUL_API_KEY" connected={apiStatus?.printful} />
       </div>
     </motion.div>
   );
@@ -291,20 +293,30 @@ function PixelInput({ label, envKey }) {
   );
 }
 
-function ApiKeyStatus({ label, envKey, required, note }) {
+function ApiKeyStatus({ label, envKey, required, note, connected }) {
   return (
-    <div className="glossy rounded-2xl p-4">
+    <div className={`glossy rounded-2xl p-4 ${connected ? '!border-green-500/20' : ''}`}>
       <div className="relative z-10 flex items-center justify-between">
-        <div>
-          <div className="flex items-center gap-2">
-            <p className="text-[14px] font-medium text-content-primary">{label}</p>
-            {required && (
-              <span className="text-[10px] px-1.5 py-0.5 bg-brand-purple/10 text-brand-purple rounded-full font-semibold">Required</span>
-            )}
+        <div className="flex items-center gap-3">
+          <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${
+            connected ? 'bg-green-500/10 text-green-500' : 'bg-surface-raised text-content-muted'
+          }`}>
+            {connected ? <Check className="w-4 h-4" /> : <div className="w-2 h-2 rounded-full bg-content-muted" />}
           </div>
-          {note && <p className="text-[11px] text-content-muted mt-0.5">{note}</p>}
+          <div>
+            <div className="flex items-center gap-2">
+              <p className="text-[14px] font-medium text-content-primary">{label}</p>
+              {required && (
+                <span className="text-[10px] px-1.5 py-0.5 bg-brand-purple/10 text-brand-purple rounded-full font-semibold">Required</span>
+              )}
+              {connected && (
+                <span className="text-[10px] px-1.5 py-0.5 bg-green-500/10 text-green-500 rounded-full font-semibold">Connected</span>
+              )}
+            </div>
+            {note && <p className="text-[11px] text-content-muted mt-0.5">{note}</p>}
+            {!connected && <p className="text-[11px] text-content-muted mt-0.5">Add {envKey} to server/.env</p>}
+          </div>
         </div>
-        <code className="text-[11px] text-content-muted bg-surface-raised px-2 py-1 rounded-lg font-mono">{envKey}</code>
       </div>
     </div>
   );
