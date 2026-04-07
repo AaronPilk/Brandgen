@@ -4,10 +4,11 @@ import { motion } from 'framer-motion';
 import {
   ArrowLeft, Globe, Image, Mail, MessageSquare, Palette, ShoppingBag,
   Instagram, Facebook, BarChart3, Megaphone, Link2, AlertTriangle,
-  Eye, Zap, Package, ChevronRight, Upload,
+  Eye, Zap, Package, ChevronRight, Upload, ExternalLink, Check, Unplug,
+  Share2, Target, Users, HardDrive,
 } from 'lucide-react';
 import { useStore } from '../store/useStore';
-import { getProfile, runAiAction, updateProfile, uploadFiles } from '../services/api';
+import { getProfile, runAiAction, updateProfile, uploadFiles, getOAuthConnections, startOAuthConnect, disconnectOAuth } from '../services/api';
 import ActionButton from '../components/ActionButton';
 import AssetViewer from '../components/AssetViewer';
 import LoadingOverlay from '../components/LoadingOverlay';
@@ -24,11 +25,20 @@ export default function Dashboard() {
   const [error, setError] = useState('');
   const [loadingAction, setLoadingAction] = useState(null);
   const [inputModal, setInputModal] = useState(null);
+  const [connections, setConnections] = useState({});
+  const [connectingPlatform, setConnectingPlatform] = useState(null);
   const profile = currentProfile;
 
   useEffect(() => {
     if (!profile || profile.id !== id) {
       getProfile(id).then(setCurrentProfile).catch(() => navigate('/'));
+    }
+  }, [id]);
+
+  // Load connections for this profile
+  useEffect(() => {
+    if (id) {
+      getOAuthConnections(id).then(setConnections).catch(() => {});
     }
   }, [id]);
 
@@ -238,6 +248,15 @@ export default function Dashboard() {
         )}
       </div>
 
+      {/* Connected Accounts */}
+      <ProfileConnections
+        profileId={id}
+        connections={connections}
+        setConnections={setConnections}
+        connectingPlatform={connectingPlatform}
+        setConnectingPlatform={setConnectingPlatform}
+      />
+
       {/* Generated Assets */}
       {Object.keys(assets).length > 0 && (
         <div className="mt-10">
@@ -352,6 +371,108 @@ function InputModal({ config, onClose, onSubmit }) {
           </div>
         </div>
       </motion.div>
+    </div>
+  );
+}
+
+const PROFILE_PLATFORMS = [
+  { key: 'meta', icon: Facebook, color: 'bg-blue-500', name: 'Facebook & Instagram', desc: 'Pages, Instagram, Meta Ads' },
+  { key: 'tiktok', icon: Share2, color: 'bg-gray-900 dark:bg-white dark:text-black', name: 'TikTok', desc: 'TikTok for Business' },
+  { key: 'pinterest', icon: Share2, color: 'bg-red-600', name: 'Pinterest', desc: 'Pinterest Business' },
+  { key: 'twitter', icon: Share2, color: 'bg-black dark:bg-white dark:text-black', name: 'X (Twitter)', desc: 'Social account' },
+  { key: 'google', icon: HardDrive, color: 'bg-blue-600', name: 'Google Drive', desc: 'Pull docs, sheets & files' },
+  { key: 'gohighlevel', icon: Target, color: 'bg-green-600', name: 'GoHighLevel', desc: 'CRM for lead routing' },
+  { key: 'hubspot', icon: Users, color: 'bg-orange-500', name: 'HubSpot', desc: 'CRM for contacts & deals' },
+];
+
+function ProfileConnections({ profileId, connections, setConnections, connectingPlatform, setConnectingPlatform }) {
+  const connectedCount = Object.keys(connections).length;
+
+  const handleConnect = async (platformKey) => {
+    setConnectingPlatform(platformKey);
+    try {
+      const { url } = await startOAuthConnect(platformKey, profileId);
+      window.location.href = url;
+    } catch (err) {
+      alert(err.message);
+      setConnectingPlatform(null);
+    }
+  };
+
+  const handleDisconnect = async (platformKey) => {
+    try {
+      await disconnectOAuth(platformKey, profileId);
+      setConnections((c) => {
+        const next = { ...c };
+        delete next[platformKey];
+        return next;
+      });
+    } catch (err) {
+      alert(err.message);
+    }
+  };
+
+  return (
+    <div className="mt-10 mb-2">
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-lg font-semibold text-content-primary">Connected Accounts</h2>
+        {connectedCount > 0 && (
+          <span className="text-[11px] font-semibold text-green-500 bg-green-500/10 px-2.5 py-1 rounded-full">
+            {connectedCount} connected
+          </span>
+        )}
+      </div>
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5">
+        {PROFILE_PLATFORMS.map((platform) => {
+          const Icon = platform.icon;
+          const isConnected = !!connections[platform.key];
+          const isConnecting = connectingPlatform === platform.key;
+
+          return (
+            <div
+              key={platform.key}
+              className={`glossy rounded-2xl p-4 transition-all duration-300 ${
+                isConnected ? '!border-green-500/20' : ''
+              }`}
+            >
+              <div className="relative z-10">
+                <div className="flex items-center gap-2.5 mb-3">
+                  <div className={`w-8 h-8 rounded-lg ${platform.color} flex items-center justify-center text-white shrink-0`}>
+                    <Icon className="w-4 h-4" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-[13px] font-semibold text-content-primary truncate">{platform.name}</p>
+                    <p className="text-[10px] text-content-muted">{platform.desc}</p>
+                  </div>
+                </div>
+
+                {isConnected ? (
+                  <div className="flex items-center justify-between">
+                    <span className="flex items-center gap-1 text-[10px] font-semibold text-green-500">
+                      <Check className="w-3 h-3" /> Connected
+                    </span>
+                    <button
+                      onClick={() => handleDisconnect(platform.key)}
+                      className="text-[10px] text-red-400 hover:text-red-500 transition-colors"
+                    >
+                      Disconnect
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => handleConnect(platform.key)}
+                    disabled={isConnecting}
+                    className="w-full py-2 rounded-xl text-[12px] font-semibold flex items-center justify-center gap-1.5 bg-surface-raised hover:bg-brand-purple/10 hover:text-brand-purple text-content-secondary transition-all"
+                  >
+                    <ExternalLink className="w-3 h-3" />
+                    {isConnecting ? 'Connecting...' : 'Connect'}
+                  </button>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }

@@ -53,6 +53,14 @@ const PLATFORMS = {
     clientIdEnv: 'HUBSPOT_CLIENT_ID',
     clientSecretEnv: 'HUBSPOT_CLIENT_SECRET',
   },
+  google: {
+    name: 'Google Drive',
+    authUrl: 'https://accounts.google.com/o/oauth2/v2/auth',
+    tokenUrl: 'https://oauth2.googleapis.com/token',
+    scopes: 'https://www.googleapis.com/auth/drive.readonly https://www.googleapis.com/auth/userinfo.email',
+    clientIdEnv: 'GOOGLE_CLIENT_ID',
+    clientSecretEnv: 'GOOGLE_CLIENT_SECRET',
+  },
 };
 
 export function getPlatformConfig(platform) {

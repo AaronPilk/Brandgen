@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
   ArrowLeft, Check, ExternalLink, Unplug, Loader2,
-  Facebook, Instagram, Twitter, Share2, Target, Users,
+  Facebook, Instagram, Twitter, Share2, Target, Users, HardDrive,
 } from 'lucide-react';
 import { useStore } from '../store/useStore';
 import { getOAuthPlatforms, getOAuthConnections, startOAuthConnect, disconnectOAuth } from '../services/api';
@@ -32,6 +32,12 @@ const PLATFORM_META = {
     color: 'bg-black dark:bg-white dark:text-black',
     description: 'X (Twitter) Account',
     features: ['Post tweets', 'Pull trending topics', 'Social listening data'],
+  },
+  google: {
+    icon: HardDrive,
+    color: 'bg-blue-600',
+    description: 'Google Drive',
+    features: ['Pull client docs & sheets', 'Import brand assets', 'Sync research files'],
   },
   gohighlevel: {
     icon: Target,
