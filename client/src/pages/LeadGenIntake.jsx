@@ -5,6 +5,7 @@ import { ArrowLeft, ArrowRight, Upload, Building2, Rocket } from 'lucide-react';
 import Card from '../components/Card';
 import Button from '../components/Button';
 import ProgressBar from '../components/ProgressBar';
+import LoadingOverlay from '../components/LoadingOverlay';
 import { useStore } from '../store/useStore';
 import { createProfile, runAiAction, uploadFiles } from '../services/api';
 
@@ -89,6 +90,7 @@ export default function LeadGenIntake() {
 
   return (
     <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
+      <LoadingOverlay visible={loading} label="Running Market Research..." />
       <button onClick={() => navigate('/')} className="flex items-center gap-2 text-content-muted hover:text-content-primary mb-8 transition-colors text-sm">
         <ArrowLeft className="w-4 h-4" /> Back
       </button>
