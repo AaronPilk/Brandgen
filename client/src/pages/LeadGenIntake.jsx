@@ -7,7 +7,7 @@ import Button from '../components/Button';
 import ProgressBar from '../components/ProgressBar';
 import LoadingOverlay from '../components/LoadingOverlay';
 import { useStore } from '../store/useStore';
-import { createProfile, runAiAction, uploadFiles } from '../services/api';
+import { createProfile, runAiAction, uploadFiles, updateProfile } from '../services/api';
 
 const BUDGETS = ['$500', '$1k', '$2.5k', '$5k', '$10k+'];
 const GOALS = ['Book a Call', 'Fill Out a Form', 'Get a Quote', 'Download a Lead Magnet'];
@@ -153,6 +153,8 @@ export default function LeadGenIntake() {
       const research = await runAiAction('market-research', { profile, sessionId });
       profile.research = research.research;
       if (research.cost) addSpend(research.cost);
+      // Persist research to server so it survives restarts
+      await updateProfile(profile.id, { research: profile.research });
       setCurrentProfile(profile);
       navigate(`/dashboard/${profile.id}`);
     } catch (err) {

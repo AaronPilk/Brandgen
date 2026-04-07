@@ -3,83 +3,81 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Copy, Check, Users, TrendingUp, Target, MessageSquare, BarChart3, Lightbulb } from 'lucide-react';
 import ImagePlaceholder from './ImagePlaceholder';
 
-// Renders research data as nice formatted cards instead of raw JSON
-function parseJsonString(str) {
-  if (typeof str !== 'string') return str;
-  // Try direct parse first
+function tryParseJson(input) {
+  if (!input) return null;
+
+  // If already an object, return it
+  if (typeof input === 'object' && input !== null) return input;
+
+  if (typeof input !== 'string') return null;
+
+  const str = input.trim();
+  if (!str) return null;
+
+  // Strategy 1: direct parse
   try { return JSON.parse(str); } catch {}
-  // Strip markdown code fences (handles whitespace, newlines, different positions)
-  let cleaned = str.replace(/```json\s*/gi, '').replace(/```\s*/g, '').trim();
-  try { return JSON.parse(cleaned); } catch {}
-  // Try to find JSON object in the string
-  const jsonMatch = str.match(/\{[\s\S]*\}/);
-  if (jsonMatch) {
-    try { return JSON.parse(jsonMatch[0]); } catch {}
+
+  // Strategy 2: strip code fences globally
+  const stripped = str.replace(/```json\b/gi, '').replace(/```/g, '').trim();
+  try { return JSON.parse(stripped); } catch {}
+
+  // Strategy 3: find the outermost { ... } in the string
+  let depth = 0;
+  let start = -1;
+  for (let i = 0; i < str.length; i++) {
+    if (str[i] === '{') {
+      if (depth === 0) start = i;
+      depth++;
+    } else if (str[i] === '}') {
+      depth--;
+      if (depth === 0 && start >= 0) {
+        const candidate = str.substring(start, i + 1);
+        try { return JSON.parse(candidate); } catch {}
+      }
+    }
   }
+
   return null;
 }
 
-function ResearchView({ data }) {
-  let parsed = data;
-  if (typeof data === 'string') {
-    parsed = parseJsonString(data);
-    if (!parsed) {
-      return <p className="text-content-secondary text-sm whitespace-pre-wrap">{data}</p>;
-    }
+function extractResearchData(data) {
+  if (!data) return { parsed: null, raw: '' };
+
+  // If it's an object with a .research key, unwrap
+  if (typeof data === 'object' && data.research) {
+    return extractResearchData(data.research);
   }
-  if (typeof parsed !== 'object' || parsed === null) {
-    return <p className="text-content-secondary text-sm whitespace-pre-wrap">{String(data)}</p>;
+  // If it's an object with a .text key, unwrap
+  if (typeof data === 'object' && data.text) {
+    return extractResearchData(data.text);
+  }
+  // If it's already a parsed object with known keys, use it directly
+  if (typeof data === 'object' && (data.targetAudience || data.competitors || data.marketSize)) {
+    return { parsed: data, raw: JSON.stringify(data, null, 2) };
   }
 
-  const sections = [
-    { key: 'targetAudience', label: 'Target Audience', icon: Users },
-    { key: 'competitors', label: 'Competitors', icon: BarChart3 },
-    { key: 'marketSize', label: 'Market Size', icon: TrendingUp },
-    { key: 'opportunities', label: 'Opportunities', icon: Lightbulb },
-    { key: 'positioning', label: 'Positioning', icon: Target },
-    { key: 'messagingAngles', label: 'Messaging Angles', icon: MessageSquare },
-  ];
+  const raw = typeof data === 'string' ? data : JSON.stringify(data, null, 2);
+  const parsed = tryParseJson(data);
+  return { parsed, raw };
+}
 
-  const renderValue = (val, depth = 0) => {
-    if (val === null || val === undefined) return null;
-    if (typeof val === 'string') return <p className="text-content-secondary text-[13px] leading-relaxed">{val}</p>;
-    if (Array.isArray(val)) {
-      return (
-        <ul className="space-y-1.5">
-          {val.map((item, i) => (
-            <li key={i} className="flex items-start gap-2 text-[13px] text-content-secondary">
-              <span className="text-brand-purple mt-0.5 shrink-0">•</span>
-              <span>{typeof item === 'object' ? JSON.stringify(item) : String(item)}</span>
-            </li>
-          ))}
-        </ul>
-      );
-    }
-    if (typeof val === 'object') {
-      return (
-        <div className="space-y-2">
-          {Object.entries(val).map(([k, v]) => (
-            <div key={k}>
-              <p className="text-[11px] font-semibold text-content-muted uppercase tracking-wider mb-1">
-                {k.replace(/([A-Z])/g, ' $1').replace(/^./, s => s.toUpperCase())}
-              </p>
-              {renderValue(v, depth + 1)}
-            </div>
-          ))}
-        </div>
-      );
-    }
-    return <p className="text-content-secondary text-[13px]">{String(val)}</p>;
-  };
+const SECTION_CONFIG = [
+  { key: 'targetAudience', label: 'Target Audience', icon: Users },
+  { key: 'competitors', label: 'Competitors', icon: BarChart3 },
+  { key: 'marketSize', label: 'Market Size', icon: TrendingUp },
+  { key: 'opportunities', label: 'Opportunities', icon: Lightbulb },
+  { key: 'positioning', label: 'Positioning', icon: Target },
+  { key: 'messagingAngles', label: 'Messaging Angles', icon: MessageSquare },
+];
 
-  // Try to render known sections, fall back to all keys
-  const knownKeys = sections.map(s => s.key);
-  const extraKeys = Object.keys(parsed).filter(k => !knownKeys.includes(k));
+function ResearchCards({ data }) {
+  const knownKeys = SECTION_CONFIG.map((s) => s.key);
+  const extraKeys = Object.keys(data).filter((k) => !knownKeys.includes(k));
 
   return (
     <div className="space-y-4">
-      {sections.map(({ key, label, icon: Icon }) => {
-        if (!parsed[key]) return null;
+      {SECTION_CONFIG.map(({ key, label, icon: Icon }) => {
+        if (!data[key]) return null;
         return (
           <div key={key} className="glossy rounded-2xl p-5">
             <div className="relative z-10">
@@ -87,7 +85,7 @@ function ResearchView({ data }) {
                 <Icon className="w-4 h-4 text-brand-purple" />
                 <h4 className="text-[14px] font-semibold text-content-primary">{label}</h4>
               </div>
-              {renderValue(parsed[key])}
+              <RenderValue val={data[key]} />
             </div>
           </div>
         );
@@ -96,14 +94,47 @@ function ResearchView({ data }) {
         <div key={key} className="glossy rounded-2xl p-5">
           <div className="relative z-10">
             <h4 className="text-[14px] font-semibold text-content-primary mb-3 capitalize">
-              {key.replace(/([A-Z])/g, ' $1')}
+              {key.replace(/([A-Z])/g, ' $1').replace(/^./, (s) => s.toUpperCase())}
             </h4>
-            {renderValue(parsed[key])}
+            <RenderValue val={data[key]} />
           </div>
         </div>
       ))}
     </div>
   );
+}
+
+function RenderValue({ val }) {
+  if (val === null || val === undefined) return null;
+  if (typeof val === 'string') return <p className="text-content-secondary text-[13px] leading-relaxed">{val}</p>;
+  if (typeof val === 'number' || typeof val === 'boolean') return <p className="text-content-secondary text-[13px]">{String(val)}</p>;
+  if (Array.isArray(val)) {
+    return (
+      <ul className="space-y-1.5">
+        {val.map((item, i) => (
+          <li key={i} className="flex items-start gap-2 text-[13px] text-content-secondary">
+            <span className="text-brand-purple mt-0.5 shrink-0">•</span>
+            <span>{typeof item === 'object' ? JSON.stringify(item) : String(item)}</span>
+          </li>
+        ))}
+      </ul>
+    );
+  }
+  if (typeof val === 'object') {
+    return (
+      <div className="space-y-2.5">
+        {Object.entries(val).map(([k, v]) => (
+          <div key={k}>
+            <p className="text-[11px] font-semibold text-content-muted uppercase tracking-wider mb-1">
+              {k.replace(/([A-Z])/g, ' $1').replace(/[_-]/g, ' ').replace(/^./, (s) => s.toUpperCase())}
+            </p>
+            <RenderValue val={v} />
+          </div>
+        ))}
+      </div>
+    );
+  }
+  return <p className="text-content-secondary text-[13px]">{String(val)}</p>;
 }
 
 export default function AssetViewer({ title, data, type, onClose }) {
@@ -117,12 +148,20 @@ export default function AssetViewer({ title, data, type, onClose }) {
   };
 
   const renderContent = () => {
-    // Research gets special formatted view — match any research-like content
+    // Always try to show research as formatted cards
     const isResearch = title.toLowerCase().includes('research');
     if (type === 'json' || isResearch) {
-      const parsed = typeof data === 'string' ? parseJsonString(data) : data;
+      const { parsed, raw } = extractResearchData(data);
       if (parsed && typeof parsed === 'object') {
-        return <ResearchView data={parsed} />;
+        return <ResearchCards data={parsed} />;
+      }
+      // Couldn't parse — show raw text nicely
+      if (raw) {
+        return (
+          <div className="bg-surface-raised text-[13px] text-content-secondary p-5 rounded-2xl whitespace-pre-wrap leading-relaxed">
+            {raw}
+          </div>
+        );
       }
     }
 
@@ -153,15 +192,15 @@ export default function AssetViewer({ title, data, type, onClose }) {
       );
     }
 
-    // JSON / text — try to render nicely
-    let display = typeof data === 'string' ? parseJsonString(data) : data;
-    if (display && typeof display === 'object') {
-      return <ResearchView data={display} />;
+    // Fallback — try to render as cards, else show raw
+    const { parsed, raw } = extractResearchData(data);
+    if (parsed && typeof parsed === 'object') {
+      return <ResearchCards data={parsed} />;
     }
 
     return (
-      <div className="bg-surface-raised text-[13px] text-content-secondary p-5 rounded-2xl whitespace-pre-wrap max-h-[60vh] overflow-y-auto">
-        {String(display)}
+      <div className="bg-surface-raised text-[13px] text-content-secondary p-5 rounded-2xl whitespace-pre-wrap leading-relaxed">
+        {raw || String(data || '')}
       </div>
     );
   };
@@ -180,7 +219,7 @@ export default function AssetViewer({ title, data, type, onClose }) {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="relative z-10">
-              <div className="flex items-center justify-between mb-5 sticky top-0 z-20">
+              <div className="flex items-center justify-between mb-5">
                 <h3 className="text-lg font-semibold text-content-primary capitalize">{title}</h3>
                 <div className="flex items-center gap-1">
                   <button onClick={copyToClipboard} className="w-9 h-9 rounded-xl flex items-center justify-center hover:bg-surface-raised text-content-muted hover:text-content-primary transition-colors">

@@ -7,7 +7,7 @@ import Button from '../components/Button';
 import ProgressBar from '../components/ProgressBar';
 import LoadingOverlay from '../components/LoadingOverlay';
 import { useStore } from '../store/useStore';
-import { createProfile, runAiAction, uploadFiles } from '../services/api';
+import { createProfile, runAiAction, uploadFiles, updateProfile } from '../services/api';
 
 const BUILD_STEPS = ['submode', 'details', 'personality', 'files'];
 const DISCOVER_STEPS = ['submode', 'market', 'files'];
@@ -68,6 +68,7 @@ export default function BrandIntake() {
       const research = await runAiAction('market-research', { profile, sessionId });
       profile.research = research.research;
       if (research.cost) addSpend(research.cost);
+      await updateProfile(profile.id, { research: profile.research });
       setCurrentProfile(profile);
       navigate(`/dashboard/${profile.id}`);
     } catch (err) { alert('Error: ' + err.message); }
