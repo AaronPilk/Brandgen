@@ -4,12 +4,28 @@ import { X, Copy, Check, Users, TrendingUp, Target, MessageSquare, BarChart3, Li
 import ImagePlaceholder from './ImagePlaceholder';
 
 // Renders research data as nice formatted cards instead of raw JSON
+function parseJsonString(str) {
+  if (typeof str !== 'string') return str;
+  // Try direct parse first
+  try { return JSON.parse(str); } catch {}
+  // Strip markdown code fences (handles whitespace, newlines, different positions)
+  let cleaned = str.replace(/```json\s*/gi, '').replace(/```\s*/g, '').trim();
+  try { return JSON.parse(cleaned); } catch {}
+  // Try to find JSON object in the string
+  const jsonMatch = str.match(/\{[\s\S]*\}/);
+  if (jsonMatch) {
+    try { return JSON.parse(jsonMatch[0]); } catch {}
+  }
+  return null;
+}
+
 function ResearchView({ data }) {
   let parsed = data;
   if (typeof data === 'string') {
-    // Strip markdown code fences
-    let cleaned = data.replace(/^```json?\s*/i, '').replace(/```\s*$/i, '').trim();
-    try { parsed = JSON.parse(cleaned); } catch { return <p className="text-content-secondary text-sm whitespace-pre-wrap">{data}</p>; }
+    parsed = parseJsonString(data);
+    if (!parsed) {
+      return <p className="text-content-secondary text-sm whitespace-pre-wrap">{data}</p>;
+    }
   }
   if (typeof parsed !== 'object' || parsed === null) {
     return <p className="text-content-secondary text-sm whitespace-pre-wrap">{String(data)}</p>;
@@ -101,9 +117,13 @@ export default function AssetViewer({ title, data, type, onClose }) {
   };
 
   const renderContent = () => {
-    // Research gets special formatted view
-    if (type === 'json' && (title === 'Market Research' || title === 'market research')) {
-      return <ResearchView data={data} />;
+    // Research gets special formatted view — match any research-like content
+    const isResearch = title.toLowerCase().includes('research');
+    if (type === 'json' || isResearch) {
+      const parsed = typeof data === 'string' ? parseJsonString(data) : data;
+      if (parsed && typeof parsed === 'object') {
+        return <ResearchView data={parsed} />;
+      }
     }
 
     if (type === 'html') {
@@ -134,13 +154,8 @@ export default function AssetViewer({ title, data, type, onClose }) {
     }
 
     // JSON / text — try to render nicely
-    let display = data;
-    if (typeof data === 'string') {
-      let cleaned = data.replace(/^```json?\s*/i, '').replace(/```\s*$/i, '').trim();
-      try { display = JSON.parse(cleaned); } catch { display = data; }
-    }
-
-    if (typeof display === 'object' && display !== null) {
+    let display = typeof data === 'string' ? parseJsonString(data) : data;
+    if (display && typeof display === 'object') {
       return <ResearchView data={display} />;
     }
 
