@@ -57,6 +57,18 @@ const PLATFORM_META = {
     description: 'HubSpot CRM',
     features: ['Auto-route leads to CRM', 'Sync deals & contacts', 'Trigger email sequences'],
   },
+  shopify: {
+    icon: Share2,
+    color: 'bg-green-500',
+    description: 'Shopify Store',
+    features: ['Push products to store', 'Deploy landing pages', 'Manage themes & content'],
+  },
+  wordpress: {
+    icon: HardDrive,
+    color: 'bg-blue-800',
+    description: 'WordPress Site',
+    features: ['Publish landing pages', 'Push blog content', 'Manage site pages'],
+  },
 };
 
 const container = {

@@ -69,6 +69,22 @@ const PLATFORMS = {
     clientIdEnv: 'CANVA_CLIENT_ID',
     clientSecretEnv: 'CANVA_CLIENT_SECRET',
   },
+  shopify: {
+    name: 'Shopify',
+    authUrl: 'https://{shop}.myshopify.com/admin/oauth/authorize',
+    tokenUrl: 'https://{shop}.myshopify.com/admin/oauth/access_token',
+    scopes: 'read_products,write_products,read_themes,write_themes,read_content,write_content',
+    clientIdEnv: 'SHOPIFY_CLIENT_ID',
+    clientSecretEnv: 'SHOPIFY_CLIENT_SECRET',
+  },
+  wordpress: {
+    name: 'WordPress',
+    authUrl: 'https://public-api.wordpress.com/oauth2/authorize',
+    tokenUrl: 'https://public-api.wordpress.com/oauth2/token',
+    scopes: 'global',
+    clientIdEnv: 'WORDPRESS_CLIENT_ID',
+    clientSecretEnv: 'WORDPRESS_CLIENT_SECRET',
+  },
 };
 
 export function getPlatformConfig(platform) {

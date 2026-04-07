@@ -379,6 +379,8 @@ const PROFILE_PLATFORMS = [
   { key: 'hubspot', icon: Users, color: 'bg-orange-500', name: 'HubSpot', desc: 'CRM for contacts & deals' },
   { key: 'canva', icon: Palette, color: 'bg-cyan-500', name: 'Canva', desc: 'Design assets & templates' },
   { key: 'printful', icon: Package, color: 'bg-violet-600', name: 'Printful', desc: 'T-shirt & merch fulfillment' },
+  { key: 'shopify', icon: ShoppingBag, color: 'bg-green-500', name: 'Shopify', desc: 'Products, store & themes' },
+  { key: 'wordpress', icon: Globe, color: 'bg-blue-800', name: 'WordPress', desc: 'Publish pages & content' },
 ];
 
 function ProfileConnections({ profileId, connections, setConnections, connectingPlatform, setConnectingPlatform }) {
