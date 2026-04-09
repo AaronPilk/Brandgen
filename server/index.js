@@ -7,6 +7,7 @@ import { uploadRoutes } from './routes/uploads.js';
 import { apiConfigRoutes } from './routes/apiConfig.js';
 import { oauthRoutes } from './routes/oauth.js';
 import { authRoutes } from './routes/auth.js';
+import { metaAdsRoutes } from './routes/metaAds.js';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -21,6 +22,7 @@ app.use('/api/uploads', uploadRoutes);
 app.use('/api/config', apiConfigRoutes);
 app.use('/api/oauth', oauthRoutes);
 app.use('/api/auth', authRoutes);
+app.use('/api/meta-ads', metaAdsRoutes);
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: Date.now() });

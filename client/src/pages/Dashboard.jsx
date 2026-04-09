@@ -5,13 +5,14 @@ import {
   ArrowLeft, Globe, Image, Mail, MessageSquare, Palette, ShoppingBag,
   Instagram, Facebook, BarChart3, Megaphone, Link2, AlertTriangle,
   Eye, Zap, Package, ChevronRight, Upload, ExternalLink, Check, Unplug,
-  Share2, Target, Users, HardDrive,
+  Share2, Target, Users, HardDrive, Loader2,
 } from 'lucide-react';
 import { useStore } from '../store/useStore';
-import { getProfile, runAiAction, updateProfile, uploadFiles, getOAuthConnections, startOAuthConnect, disconnectOAuth } from '../services/api';
+import { getProfile, runAiAction, updateProfile, uploadFiles, getOAuthConnections, startOAuthConnect, disconnectOAuth, prepareMetaCampaign, getMetaAdsStatus } from '../services/api';
 import ActionButton from '../components/ActionButton';
 import AssetViewer from '../components/AssetViewer';
 import LoadingOverlay from '../components/LoadingOverlay';
+import ApprovalQueue from '../components/ApprovalQueue';
 
 export default function Dashboard() {
   const { id } = useParams();
@@ -27,6 +28,8 @@ export default function Dashboard() {
   const [inputModal, setInputModal] = useState(null);
   const [connections, setConnections] = useState({});
   const [connectingPlatform, setConnectingPlatform] = useState(null);
+  const [metaAdsConfigured, setMetaAdsConfigured] = useState(false);
+  const [metaCampaignModal, setMetaCampaignModal] = useState(false);
   const profile = currentProfile;
 
   useEffect(() => {
@@ -41,6 +44,11 @@ export default function Dashboard() {
       getOAuthConnections(id).then(setConnections).catch(() => {});
     }
   }, [id]);
+
+  // Check if Meta Ads is configured
+  useEffect(() => {
+    getMetaAdsStatus().then((s) => setMetaAdsConfigured(s.configured)).catch(() => {});
+  }, []);
 
   if (!profile) {
     return (
@@ -240,7 +248,30 @@ export default function Dashboard() {
             <ActionButton icon={Facebook} label="Set Up Facebook Page" description="Business page with content plan" actionKey="social-facebook" completed={!!assets['social-facebook']} onExecute={() => executeAction('social-setup', { platform: 'Facebook' })} />
           </>
         )}
+        {/* Meta Ads — available for both modes when configured */}
+        {metaAdsConfigured && (
+          <ActionButton
+            skipConfirm
+            icon={Megaphone}
+            label="Prepare Meta Ad Campaign"
+            description="AI designs a campaign — you approve before anything goes live"
+            actionKey="meta-campaign"
+            onExecute={() => setMetaCampaignModal(true)}
+          />
+        )}
       </div>
+
+      {/* Approval Queue — shows pending Meta actions */}
+      <ApprovalQueue profileId={id} />
+
+      {/* Meta Campaign Prep Modal */}
+      {metaCampaignModal && (
+        <MetaCampaignModal
+          profile={profile}
+          onClose={() => setMetaCampaignModal(false)}
+          onSubmitted={() => setMetaCampaignModal(false)}
+        />
+      )}
 
       {/* Connected Accounts */}
       <ProfileConnections
@@ -495,6 +526,125 @@ function ProfileConnections({ profileId, connections, setConnections, connecting
           ))}
         </div>
       </div>
+    </div>
+  );
+}
+
+function MetaCampaignModal({ profile, onClose, onSubmitted }) {
+  const [dailyBudget, setDailyBudget] = useState('20');
+  const [objective, setObjective] = useState('OUTCOME_LEADS');
+  const [notes, setNotes] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const objectives = [
+    { value: 'OUTCOME_LEADS', label: 'Lead Generation' },
+    { value: 'OUTCOME_TRAFFIC', label: 'Website Traffic' },
+    { value: 'OUTCOME_AWARENESS', label: 'Brand Awareness' },
+    { value: 'OUTCOME_SALES', label: 'Sales / Conversions' },
+  ];
+
+  const handleSubmit = async () => {
+    setLoading(true);
+    setError('');
+    try {
+      await prepareMetaCampaign({
+        profile,
+        dailyBudget: parseFloat(dailyBudget) || 20,
+        objective,
+        notes,
+      });
+      onSubmitted();
+    } catch (err) {
+      setError(err.message);
+    }
+    setLoading(false);
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} onClick={onClose} className="absolute inset-0 bg-black/40 dark:bg-black/60 backdrop-blur-sm" />
+      <motion.div
+        initial={{ scale: 0.95, opacity: 0, y: 10 }}
+        animate={{ scale: 1, opacity: 1, y: 0 }}
+        transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+        className="relative glossy rounded-3xl p-6 max-w-lg w-full shadow-elevated-lg"
+      >
+        <div className="relative z-10">
+          <h3 className="text-lg font-semibold text-content-primary mb-1">Prepare Meta Ad Campaign</h3>
+          <p className="text-[13px] text-content-secondary mb-5">
+            AI will design a campaign based on your profile. You'll review and approve before anything goes live.
+          </p>
+
+          <div className="space-y-4">
+            <div>
+              <label className="block text-[13px] font-medium text-content-secondary mb-2">Campaign Objective</label>
+              <div className="grid grid-cols-2 gap-2">
+                {objectives.map((obj) => (
+                  <button
+                    key={obj.value}
+                    onClick={() => setObjective(obj.value)}
+                    className={`px-4 py-2.5 rounded-2xl text-[13px] font-medium transition-all ${
+                      objective === obj.value
+                        ? 'bg-brand-purple text-white shadow-lg shadow-brand-purple/20'
+                        : 'bg-surface-raised text-content-secondary border border-surface-border'
+                    }`}
+                  >
+                    {obj.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-[13px] font-medium text-content-secondary mb-2">Daily Budget ($)</label>
+              <input
+                type="number"
+                value={dailyBudget}
+                onChange={(e) => setDailyBudget(e.target.value)}
+                placeholder="20"
+                min="5"
+              />
+            </div>
+
+            <div>
+              <label className="block text-[13px] font-medium text-content-secondary mb-2">Additional Notes</label>
+              <textarea
+                rows={3}
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                placeholder="Any specific targeting, messaging, or creative direction..."
+              />
+            </div>
+          </div>
+
+          {error && (
+            <p className="text-[12px] text-red-500 bg-red-500/10 px-3 py-2 rounded-xl mt-4">{error}</p>
+          )}
+
+          <div className="bg-yellow-500/5 border border-yellow-500/10 rounded-xl p-3 mt-4 flex items-start gap-2">
+            <AlertTriangle className="w-4 h-4 text-yellow-500 mt-0.5 shrink-0" />
+            <p className="text-[11px] text-yellow-700 dark:text-yellow-300">
+              Nothing will be sent to Meta until you review and click Approve.
+              Campaign will be created in PAUSED state — no spend until you activate.
+            </p>
+          </div>
+
+          <div className="flex gap-3 mt-5">
+            <button onClick={onClose} className="flex-1 py-3 rounded-2xl bg-surface-raised text-content-secondary text-sm font-medium transition-colors">
+              Cancel
+            </button>
+            <button
+              onClick={handleSubmit}
+              disabled={loading}
+              className="flex-1 py-3 rounded-2xl glossy-btn text-white text-sm font-semibold flex items-center justify-center gap-2 transition-all"
+            >
+              {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Megaphone className="w-4 h-4" />}
+              {loading ? 'AI Designing...' : 'Prepare Campaign'}
+            </button>
+          </div>
+        </div>
+      </motion.div>
     </div>
   );
 }

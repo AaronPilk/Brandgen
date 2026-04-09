@@ -83,3 +83,29 @@ export const login = (email, password) =>
   request('/auth/login', { method: 'POST', body: JSON.stringify({ email, password }) });
 
 export const getMe = () => request('/auth/me');
+
+// Meta Ads
+export const getMetaAdsStatus = () => request('/meta-ads/status');
+
+export const getMetaCampaigns = () => request('/meta-ads/campaigns');
+
+export const getMetaCampaignInsights = (id, datePreset) =>
+  request(`/meta-ads/campaigns/${id}/insights?datePreset=${datePreset || 'last_30d'}`);
+
+export const getMetaAccountInsights = (datePreset) =>
+  request(`/meta-ads/account/insights?datePreset=${datePreset || 'last_30d'}`);
+
+export const prepareMetaCampaign = (body) =>
+  request('/meta-ads/prepare-campaign', { method: 'POST', body: JSON.stringify(body) });
+
+export const getApprovalQueue = (profileId) =>
+  request(`/meta-ads/queue/${profileId}`);
+
+export const approveQueueItem = (id) =>
+  request(`/meta-ads/approve/${id}`, { method: 'POST' });
+
+export const rejectQueueItem = (id, reason) =>
+  request(`/meta-ads/reject/${id}`, { method: 'POST', body: JSON.stringify({ reason }) });
+
+export const clearApprovalQueue = (profileId) =>
+  request(`/meta-ads/queue/clear/${profileId}`, { method: 'DELETE' });

@@ -15,6 +15,7 @@ router.get('/status', (req, res) => {
     anthropic: !!process.env.ANTHROPIC_API_KEY,
     dalle: !!process.env.OPENAI_API_KEY && !isMockMode(),
     mockImages: isMockMode(),
+    metaAds: !!(process.env.META_SYSTEM_USER_TOKEN && process.env.META_AD_ACCOUNT_ID),
     printful: !!process.env.PRINTFUL_API_KEY,
     pinterest: !!process.env.PINTEREST_API_KEY,
     twitter: !!process.env.TWITTER_API_KEY,
