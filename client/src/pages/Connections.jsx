@@ -75,6 +75,12 @@ const PLATFORM_META = {
     description: 'Arcads AI',
     features: ['Generate UGC-style videos', 'AI avatar ad creatives', 'TikTok & Reels content'],
   },
+  kinsta: {
+    icon: HardDrive,
+    color: 'bg-indigo-600',
+    description: 'Kinsta Hosting',
+    features: ['Deploy landing pages live', 'Manage site environments', 'Custom domains & SSL'],
+  },
 };
 
 const container = {

@@ -93,6 +93,14 @@ const PLATFORMS = {
     clientIdEnv: 'ARCADS_CLIENT_ID',
     clientSecretEnv: 'ARCADS_CLIENT_SECRET',
   },
+  kinsta: {
+    name: 'Kinsta',
+    authUrl: null, // Kinsta uses API key, not OAuth
+    tokenUrl: null,
+    scopes: '',
+    clientIdEnv: 'KINSTA_API_KEY',
+    clientSecretEnv: 'KINSTA_COMPANY_ID',
+  },
 };
 
 export function getPlatformConfig(platform) {

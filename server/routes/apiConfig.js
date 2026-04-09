@@ -16,6 +16,7 @@ router.get('/status', (req, res) => {
     dalle: !!process.env.OPENAI_API_KEY && !isMockMode(),
     mockImages: isMockMode(),
     metaAds: !!(process.env.META_SYSTEM_USER_TOKEN && process.env.META_AD_ACCOUNT_ID),
+    kinsta: !!(process.env.KINSTA_API_KEY && process.env.KINSTA_COMPANY_ID),
     printful: !!process.env.PRINTFUL_API_KEY,
     pinterest: !!process.env.PINTEREST_API_KEY,
     twitter: !!process.env.TWITTER_API_KEY,
