@@ -69,6 +69,12 @@ const PLATFORM_META = {
     description: 'WordPress Site',
     features: ['Publish landing pages', 'Push blog content', 'Manage site pages'],
   },
+  arcads: {
+    icon: Share2,
+    color: 'bg-pink-600',
+    description: 'Arcads AI',
+    features: ['Generate UGC-style videos', 'AI avatar ad creatives', 'TikTok & Reels content'],
+  },
 };
 
 const container = {

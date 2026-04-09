@@ -5,7 +5,7 @@ import {
   ArrowLeft, Globe, Image, Mail, MessageSquare, Palette, ShoppingBag,
   Instagram, Facebook, BarChart3, Megaphone, Link2, AlertTriangle,
   Eye, Zap, Package, ChevronRight, Upload, ExternalLink, Check, Unplug,
-  Share2, Target, Users, HardDrive, Loader2,
+  Share2, Target, Users, HardDrive, Loader2, Video,
 } from 'lucide-react';
 import { useStore } from '../store/useStore';
 import { getProfile, runAiAction, updateProfile, uploadFiles, getOAuthConnections, startOAuthConnect, disconnectOAuth, prepareMetaCampaign, getMetaAdsStatus } from '../services/api';
@@ -412,6 +412,7 @@ const PROFILE_PLATFORMS = [
   { key: 'printful', icon: Package, color: 'bg-violet-600', name: 'Printful', desc: 'T-shirt & merch fulfillment' },
   { key: 'shopify', icon: ShoppingBag, color: 'bg-green-500', name: 'Shopify', desc: 'Products, store & themes' },
   { key: 'wordpress', icon: Globe, color: 'bg-blue-800', name: 'WordPress', desc: 'Publish pages & content' },
+  { key: 'arcads', icon: Video, color: 'bg-pink-600', name: 'Arcads', desc: 'AI UGC video generation' },
 ];
 
 function ProfileConnections({ profileId, connections, setConnections, connectingPlatform, setConnectingPlatform }) {

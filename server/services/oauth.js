@@ -85,6 +85,14 @@ const PLATFORMS = {
     clientIdEnv: 'WORDPRESS_CLIENT_ID',
     clientSecretEnv: 'WORDPRESS_CLIENT_SECRET',
   },
+  arcads: {
+    name: 'Arcads',
+    authUrl: 'https://app.arcads.ai/oauth/authorize',
+    tokenUrl: 'https://app.arcads.ai/oauth/token',
+    scopes: 'videos:create videos:read',
+    clientIdEnv: 'ARCADS_CLIENT_ID',
+    clientSecretEnv: 'ARCADS_CLIENT_SECRET',
+  },
 };
 
 export function getPlatformConfig(platform) {
