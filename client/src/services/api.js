@@ -109,3 +109,10 @@ export const rejectQueueItem = (id, reason) =>
 
 export const clearApprovalQueue = (profileId) =>
   request(`/meta-ads/queue/clear/${profileId}`, { method: 'DELETE' });
+
+// Activity Feed
+export const getActivityFeed = (profileId, limit) =>
+  request(`/activity/${profileId}?limit=${limit || 50}`);
+
+export const getAllActivity = (limit) =>
+  request(`/activity?limit=${limit || 100}`);

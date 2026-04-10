@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { generateWithClaude } from '../services/claude.js';
 import { generateImage, isMockMode } from '../services/imageGen.js';
 import { recordSpend, estimateCost, canAfford } from '../services/tokenBudget.js';
+import { logEvent } from '../services/activityFeed.js';
 
 const router = Router();
 
@@ -49,6 +50,7 @@ router.post('/market-research', checkBudget('market-research'), async (req, res)
     const result = await generateWithClaude(systemPrompt, userPrompt, 800);
     const cost = trackSpend(req.budgetInfo.sessionId, result.usage, 'market-research');
 
+    logEvent(profile.id, 'RESEARCH_COMPLETE', { industry: intake.industry || intake.brandName, cost, tokens: result.usage });
     res.json({ research: result.text, usage: result.usage, cost });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -76,6 +78,7 @@ router.post('/landing-page', checkBudget('landing-page'), async (req, res) => {
       html = html.replace('</head>', `${pixels}\n</head>`);
     }
 
+    logEvent(profile.id, 'LANDING_PAGE_GENERATED', { cost, tokens: result.usage });
     res.json({ html, usage: result.usage, cost });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -95,6 +98,7 @@ router.post('/ad-creatives', checkBudget('ad-creatives'), async (req, res) => {
     const result = await generateWithClaude(systemPrompt, userPrompt, 800);
     const cost = trackSpend(req.budgetInfo.sessionId, result.usage, 'ad-creatives');
 
+    logEvent(profile.id, 'AD_CREATIVES_GENERATED', { cost, tokens: result.usage });
     res.json({ creatives: result.text, usage: result.usage, cost });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -114,6 +118,7 @@ router.post('/email-sequences', checkBudget('email-sequences'), async (req, res)
     const result = await generateWithClaude(systemPrompt, userPrompt, 800);
     const cost = trackSpend(req.budgetInfo.sessionId, result.usage, 'email-sequences');
 
+    logEvent(profile.id, 'EMAIL_SEQUENCES_GENERATED', { cost });
     res.json({ sequences: result.text, usage: result.usage, cost });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -133,6 +138,7 @@ router.post('/sms-sequences', checkBudget('sms-sequences'), async (req, res) => 
     const result = await generateWithClaude(systemPrompt, userPrompt, 800);
     const cost = trackSpend(req.budgetInfo.sessionId, result.usage, 'sms-sequences');
 
+    logEvent(profile.id, 'SMS_SEQUENCES_GENERATED', { cost });
     res.json({ sequences: result.text, usage: result.usage, cost });
   } catch (err) {
     res.status(500).json({ error: err.message });

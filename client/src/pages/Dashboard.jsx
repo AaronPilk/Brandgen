@@ -13,6 +13,8 @@ import ActionButton from '../components/ActionButton';
 import AssetViewer from '../components/AssetViewer';
 import LoadingOverlay from '../components/LoadingOverlay';
 import ApprovalQueue from '../components/ApprovalQueue';
+import ActivityFeed from '../components/ActivityFeed';
+import PerformanceDashboard from '../components/PerformanceDashboard';
 
 export default function Dashboard() {
   const { id } = useParams();
@@ -179,6 +181,9 @@ export default function Dashboard() {
         </div>
       </div>
 
+      {/* Performance Dashboard */}
+      <PerformanceDashboard profileId={id} />
+
       {error && (
         <div className="mb-5 p-4 bg-red-500/5 border border-red-500/10 rounded-2xl text-red-600 dark:text-red-400 text-sm">
           {error}
@@ -281,6 +286,9 @@ export default function Dashboard() {
         connectingPlatform={connectingPlatform}
         setConnectingPlatform={setConnectingPlatform}
       />
+
+      {/* Activity Feed */}
+      <ActivityFeed profileId={id} />
 
       {/* Generated Assets */}
       {Object.keys(assets).length > 0 && (
