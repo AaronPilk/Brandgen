@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import {
   ArrowLeft, Globe, Image, Mail, MessageSquare, Palette, ShoppingBag,
   Instagram, Facebook, BarChart3, Megaphone, Link2, AlertTriangle,
-  Eye, Zap, Package, ChevronRight, Upload, ExternalLink, Check, Unplug,
+  Eye, Zap, Package, ChevronRight, Upload, ExternalLink, Check, Unplug, Edit3, X, DollarSign,
   Share2, Target, Users, HardDrive, Loader2, Video, Server,
 } from 'lucide-react';
 import { useStore } from '../store/useStore';
@@ -93,7 +93,18 @@ export default function Dashboard() {
     await executeAction(actionKey, extraData || {});
   };
 
+  const [editingName, setEditingName] = useState(false);
+  const [nameValue, setNameValue] = useState('');
   const profileLabel = intake.brandName || intake.industry || 'Brand Profile';
+
+  const handleSaveName = async () => {
+    if (nameValue.trim()) {
+      const updatedIntake = { ...intake, brandName: nameValue.trim() };
+      await updateProfile(profile.id, { intake: updatedIntake });
+      setCurrentProfile({ ...profile, intake: updatedIntake });
+    }
+    setEditingName(false);
+  };
 
   return (
     <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
@@ -111,11 +122,45 @@ export default function Dashboard() {
       <div className="glossy rounded-3xl p-6 mb-5">
         <div className="relative z-10">
           <div className="flex items-start justify-between">
-            <div>
-              <h1 className="text-title">{profileLabel}</h1>
-              <p className="text-content-secondary text-sm mt-1">
-                {isLeadGen ? 'Lead Generation' : 'Brand Building'} · {intake.businessType || intake.targetCustomer || intake.geoMarket || ''}
-              </p>
+            <div className="flex-1">
+              {editingName ? (
+                <div className="flex items-center gap-2">
+                  <input
+                    value={nameValue}
+                    onChange={(e) => setNameValue(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleSaveName()}
+                    className="!text-xl !font-bold !py-1 !px-2 !rounded-xl max-w-xs"
+                    autoFocus
+                  />
+                  <button onClick={handleSaveName} className="p-1.5 rounded-lg bg-green-500/10 text-green-500 hover:bg-green-500/20 transition-colors">
+                    <Check className="w-4 h-4" />
+                  </button>
+                  <button onClick={() => setEditingName(false)} className="p-1.5 rounded-lg bg-surface-raised text-content-muted hover:text-content-primary transition-colors">
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2 group">
+                  <h1 className="text-title">{profileLabel}</h1>
+                  <button
+                    onClick={() => { setNameValue(profileLabel); setEditingName(true); }}
+                    className="p-1 rounded-lg text-content-muted hover:text-content-primary hover:bg-surface-raised opacity-0 group-hover:opacity-100 transition-all"
+                  >
+                    <Edit3 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              )}
+              <div className="flex items-center gap-3 mt-1">
+                <p className="text-content-secondary text-sm">
+                  {isLeadGen ? 'Lead Generation' : 'Brand Building'} · {intake.businessType || intake.targetCustomer || intake.geoMarket || ''}
+                </p>
+                <button
+                  onClick={() => navigate(`/crm/${id}`)}
+                  className="text-[12px] font-semibold text-brand-purple bg-brand-purple/10 px-3 py-1 rounded-full hover:bg-brand-purple/20 transition-colors flex items-center gap-1"
+                >
+                  <Users className="w-3 h-3" /> CRM
+                </button>
+              </div>
             </div>
             <span className={`px-3 py-1.5 rounded-full text-[11px] font-semibold ${
               profile.research
@@ -146,38 +191,33 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Autonomous Mode */}
-      <div className="glossy rounded-3xl p-5 mb-5">
-        <div className="relative z-10">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-yellow-500/10 flex items-center justify-center">
-                <Zap className="w-4 h-4 text-yellow-600 dark:text-yellow-400" />
+      {/* AI Agents */}
+      <div className="mb-5">
+        <h2 className="text-lg font-semibold text-content-primary mb-3 flex items-center gap-2">
+          <Zap className="w-5 h-5 text-brand-purple" /> Agents
+        </h2>
+        <div className="grid grid-cols-3 md:grid-cols-6 gap-2.5">
+          {[
+            { name: 'Sales', icon: DollarSign, color: 'text-green-500', bg: 'bg-green-500/10', status: 'coming soon' },
+            { name: 'Campaign Mgmt', icon: Megaphone, color: 'text-blue-500', bg: 'bg-blue-500/10', status: 'coming soon' },
+            { name: 'Creative', icon: Palette, color: 'text-pink-500', bg: 'bg-pink-500/10', status: 'coming soon' },
+            { name: 'Project Mgmt', icon: Target, color: 'text-orange-500', bg: 'bg-orange-500/10', status: 'coming soon' },
+            { name: 'Analytics', icon: BarChart3, color: 'text-brand-purple', bg: 'bg-brand-purple/10', status: 'coming soon' },
+            { name: 'Retention', icon: Users, color: 'text-cyan-500', bg: 'bg-cyan-500/10', status: 'coming soon' },
+          ].map((agent) => {
+            const AgentIcon = agent.icon;
+            return (
+              <div key={agent.name} className="glossy rounded-2xl p-4 opacity-70 cursor-default">
+                <div className="relative z-10 text-center">
+                  <div className={`w-10 h-10 rounded-xl ${agent.bg} flex items-center justify-center mx-auto mb-2`}>
+                    <AgentIcon className={`w-5 h-5 ${agent.color}`} />
+                  </div>
+                  <p className="text-[11px] font-semibold text-content-primary">{agent.name}</p>
+                  <p className="text-[9px] text-content-muted mt-0.5 uppercase tracking-wider">{agent.status}</p>
+                </div>
               </div>
-              <div>
-                <p className="text-[14px] font-medium text-content-primary">Autonomous Mode</p>
-                <p className="text-[12px] text-content-muted">Skip confirmations</p>
-              </div>
-            </div>
-            <button
-              onClick={() => setAutonomousMode(!autonomousMode)}
-              className={`relative w-11 h-6 rounded-full transition-colors duration-300 ${
-                autonomousMode ? 'bg-yellow-500' : 'bg-surface-border'
-              }`}
-            >
-              <div className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow-sm transition-transform duration-300 ${
-                autonomousMode ? 'translate-x-[22px]' : 'translate-x-0.5'
-              }`} />
-            </button>
-          </div>
-          {autonomousMode && (
-            <div className="mt-3 p-3 bg-yellow-500/5 border border-yellow-500/10 rounded-2xl flex items-start gap-2">
-              <AlertTriangle className="w-4 h-4 text-yellow-600 dark:text-yellow-400 mt-0.5 shrink-0" />
-              <p className="text-[12px] text-yellow-700 dark:text-yellow-300">
-                Actions will execute immediately without cost confirmation.
-              </p>
-            </div>
-          )}
+            );
+          })}
         </div>
       </div>
 

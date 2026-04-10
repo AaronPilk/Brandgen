@@ -116,3 +116,18 @@ export const getActivityFeed = (profileId, limit) =>
 
 export const getAllActivity = (limit) =>
   request(`/activity?limit=${limit || 100}`);
+
+// CRM
+export const getContacts = (profileId, params = {}) => {
+  const q = new URLSearchParams(params).toString();
+  return request(`/crm/${profileId}/contacts${q ? '?' + q : ''}`);
+};
+export const getContactStats = (profileId) => request(`/crm/${profileId}/contacts/stats`);
+export const createContact = (profileId, data) => request(`/crm/${profileId}/contacts`, { method: 'POST', body: JSON.stringify(data) });
+export const updateContact = (id, data) => request(`/crm/contacts/${id}`, { method: 'PATCH', body: JSON.stringify(data) });
+export const deleteContactApi = (id) => request(`/crm/contacts/${id}`, { method: 'DELETE' });
+export const getDeals = (profileId) => request(`/crm/${profileId}/deals`);
+export const getDealStats = (profileId) => request(`/crm/${profileId}/deals/stats`);
+export const createDeal = (profileId, data) => request(`/crm/${profileId}/deals`, { method: 'POST', body: JSON.stringify(data) });
+export const updateDealApi = (id, data) => request(`/crm/deals/${id}`, { method: 'PATCH', body: JSON.stringify(data) });
+export const deleteDealApi = (id) => request(`/crm/deals/${id}`, { method: 'DELETE' });

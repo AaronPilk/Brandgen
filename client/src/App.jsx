@@ -13,6 +13,7 @@ import Dashboard from './pages/Dashboard';
 import ApiSettings from './pages/ApiSettings';
 import ProfilesList from './pages/ProfilesList';
 import Connections from './pages/Connections';
+import CRM from './pages/CRM';
 
 export default function App() {
   const { setApiStatus, budgetSet, theme, user, token, setAuth, logout } = useStore();
@@ -46,6 +47,7 @@ export default function App() {
           <Route path="/lead-gen" element={<LeadGenIntake />} />
           <Route path="/build-brand" element={<BrandIntake />} />
           <Route path="/dashboard/:id" element={<Dashboard />} />
+          <Route path="/crm/:id" element={<CRM />} />
           <Route path="/settings" element={<ApiSettings />} />
           <Route path="/connections" element={<Connections />} />
           <Route path="/profiles" element={<ProfilesList />} />
