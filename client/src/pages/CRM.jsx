@@ -1,50 +1,62 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useParams, useNavigate, Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import {
-  ArrowLeft, Plus, Search, Phone, Mail, Building2, User,
-  DollarSign, Trash2, Edit3, X, Check, Filter,
-  Users, TrendingUp, Target, ChevronDown,
+  ArrowLeft, Plus, Search, Phone, Mail, Building2, Users, UserPlus,
+  DollarSign, Trash2, TrendingUp, TrendingDown, Target, BarChart3,
+  Zap, Globe, Eye, MousePointer, ArrowUpRight, ArrowDownRight,
+  Calendar, Filter, Download, Megaphone, Clock, Star, AlertCircle,
 } from 'lucide-react';
+import {
+  AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell,
+  XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
+} from 'recharts';
 import {
   getContacts, getContactStats, createContact, updateContact, deleteContactApi,
   getDeals, getDealStats, createDeal, updateDealApi, deleteDealApi,
-  getProfile,
+  getProfile, getMetaAdsStatus, getMetaAccountInsights, getMetaCampaigns,
+  getActivityFeed,
 } from '../services/api';
 import { useStore } from '../store/useStore';
 
+const PURPLE = '#8B5CF6';
+const COLORS = ['#8B5CF6', '#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#EC4899'];
+
 const CONTACT_STATUSES = [
-  { value: 'new', label: 'New', color: 'bg-blue-500' },
-  { value: 'contacted', label: 'Contacted', color: 'bg-yellow-500' },
-  { value: 'qualified', label: 'Qualified', color: 'bg-orange-500' },
-  { value: 'proposal', label: 'Proposal', color: 'bg-purple-500' },
-  { value: 'won', label: 'Won', color: 'bg-green-500' },
-  { value: 'lost', label: 'Lost', color: 'bg-red-500' },
+  { value: 'new', label: 'New', color: '#3B82F6' },
+  { value: 'contacted', label: 'Contacted', color: '#F59E0B' },
+  { value: 'qualified', label: 'Qualified', color: '#F97316' },
+  { value: 'proposal', label: 'Proposal', color: '#8B5CF6' },
+  { value: 'won', label: 'Won', color: '#10B981' },
+  { value: 'lost', label: 'Lost', color: '#EF4444' },
 ];
 
 const DEAL_STAGES = [
-  { value: 'lead', label: 'Lead', color: 'bg-blue-500' },
-  { value: 'qualified', label: 'Qualified', color: 'bg-yellow-500' },
-  { value: 'proposal', label: 'Proposal', color: 'bg-orange-500' },
-  { value: 'negotiation', label: 'Negotiation', color: 'bg-purple-500' },
-  { value: 'won', label: 'Won', color: 'bg-green-500' },
-  { value: 'lost', label: 'Lost', color: 'bg-red-500' },
+  { value: 'lead', label: 'Lead', color: '#3B82F6' },
+  { value: 'qualified', label: 'Qualified', color: '#F59E0B' },
+  { value: 'proposal', label: 'Proposal', color: '#F97316' },
+  { value: 'negotiation', label: 'Negotiation', color: '#8B5CF6' },
+  { value: 'won', label: 'Won', color: '#10B981' },
+  { value: 'lost', label: 'Lost', color: '#EF4444' },
 ];
 
 export default function CRM() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { currentProfile, setCurrentProfile } = useStore();
-  const [tab, setTab] = useState('contacts');
+  const [tab, setTab] = useState('overview');
   const [contacts, setContacts] = useState([]);
   const [deals, setDeals] = useState([]);
-  const [contactStats, setContactStatsData] = useState(null);
-  const [dealStats, setDealStatsData] = useState(null);
+  const [contactStats, setCStats] = useState(null);
+  const [dealStats, setDStats] = useState(null);
+  const [metaInsights, setMetaInsights] = useState(null);
+  const [campaigns, setCampaigns] = useState([]);
+  const [activity, setActivity] = useState([]);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [showAddContact, setShowAddContact] = useState(false);
   const [showAddDeal, setShowAddDeal] = useState(false);
-  const [editingContact, setEditingContact] = useState(null);
+  const [metaConfigured, setMetaConfigured] = useState(false);
 
   const profileName = currentProfile?.intake?.brandName || currentProfile?.intake?.industry || 'Profile';
 
@@ -52,186 +64,335 @@ export default function CRM() {
     if (!currentProfile || currentProfile.id !== id) {
       getProfile(id).then(setCurrentProfile).catch(() => navigate('/'));
     }
+    loadAll();
   }, [id]);
 
-  useEffect(() => {
-    loadData();
-  }, [id, search, statusFilter]);
-
-  const loadData = async () => {
+  const loadAll = async () => {
     const params = {};
     if (search) params.search = search;
     if (statusFilter) params.status = statusFilter;
-    const [c, cs, d, ds] = await Promise.all([
+
+    const [c, cs, d, ds, act] = await Promise.all([
       getContacts(id, params).catch(() => []),
       getContactStats(id).catch(() => null),
       getDeals(id).catch(() => []),
       getDealStats(id).catch(() => null),
+      getActivityFeed(id, 10).catch(() => []),
     ]);
-    setContacts(c);
-    setContactStatsData(cs);
-    setDeals(d);
-    setDealStatsData(ds);
+    setContacts(c); setCStats(cs); setDeals(d); setDStats(ds); setActivity(act);
+
+    // Meta data
+    const metaStatus = await getMetaAdsStatus().catch(() => ({ configured: false }));
+    setMetaConfigured(metaStatus.configured);
+    if (metaStatus.configured) {
+      const [ins, camp] = await Promise.all([
+        getMetaAccountInsights('last_30d').catch(() => null),
+        getMetaCampaigns().catch(() => null),
+      ]);
+      if (ins?.data?.[0]) setMetaInsights(ins.data[0]);
+      if (camp?.data) setCampaigns(camp.data);
+    }
   };
 
-  const handleAddContact = async (data) => {
-    await createContact(id, data);
-    setShowAddContact(false);
-    loadData();
-  };
+  useEffect(() => { loadAll(); }, [search, statusFilter]);
 
-  const handleUpdateContact = async (contactId, data) => {
-    await updateContact(contactId, data);
-    setEditingContact(null);
-    loadData();
-  };
+  // Chart data
+  const pipelineData = DEAL_STAGES.slice(0, 4).map((s) => ({
+    name: s.label,
+    value: deals.filter((d) => d.stage === s.value).length,
+    amount: deals.filter((d) => d.stage === s.value).reduce((sum, d) => sum + (d.value || 0), 0),
+  }));
 
-  const handleDeleteContact = async (contactId) => {
-    if (!confirm('Delete this contact?')) return;
-    await deleteContactApi(contactId);
-    loadData();
-  };
+  const contactsByStatus = CONTACT_STATUSES.map((s) => ({
+    name: s.label,
+    value: contacts.filter((c) => c.status === s.value).length,
+    color: s.color,
+  })).filter((d) => d.value > 0);
 
-  const handleAddDeal = async (data) => {
-    await createDeal(id, data);
-    setShowAddDeal(false);
-    loadData();
-  };
+  // Mock trend data for visualization (replace with real time-series later)
+  const trendData = Array.from({ length: 14 }, (_, i) => ({
+    day: `${i + 1}`,
+    leads: Math.floor(Math.random() * 8 + (contactStats?.total || 2)),
+    spend: parseFloat(((Math.random() * 30 + 10) * (metaInsights ? 1 : 0.1)).toFixed(2)),
+    clicks: Math.floor(Math.random() * 200 + 50),
+  }));
+
+  const TABS = [
+    { key: 'overview', label: 'Overview' },
+    { key: 'contacts', label: `Contacts (${contactStats?.total || 0})` },
+    { key: 'deals', label: `Deals (${dealStats?.total || 0})` },
+    { key: 'campaigns', label: `Campaigns (${campaigns.length})` },
+  ];
 
   return (
-    <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="max-w-5xl mx-auto">
-      <button onClick={() => navigate(`/dashboard/${id}`)} className="flex items-center gap-2 text-content-muted hover:text-content-primary mb-6 transition-colors text-sm">
-        <ArrowLeft className="w-4 h-4" /> Back to {profileName}
-      </button>
-
-      <div className="flex items-center justify-between mb-6">
+    <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="max-w-6xl mx-auto px-6 py-8">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-title">{profileName} CRM</h1>
-          <p className="text-content-secondary text-sm mt-1">Manage contacts, deals, and pipeline</p>
+          <div className="flex items-center gap-3 mb-1">
+            <Link to={`/dashboard/${id}`} className="text-content-muted hover:text-content-primary transition-colors">
+              <ArrowLeft className="w-5 h-5" />
+            </Link>
+            <h1 className="text-2xl font-bold text-content-primary">{profileName}</h1>
+          </div>
+          <p className="text-content-secondary text-sm ml-8">Business Intelligence Dashboard</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <button className="px-4 py-2 rounded-xl bg-surface-raised text-content-secondary text-[13px] font-medium flex items-center gap-1.5 hover:text-content-primary transition-colors">
+            <Download className="w-3.5 h-3.5" /> Export
+          </button>
+          <button onClick={() => setShowAddContact(true)} className="px-4 py-2 rounded-xl glossy-btn text-white text-[13px] font-semibold flex items-center gap-1.5">
+            <UserPlus className="w-3.5 h-3.5" /> Add Contact
+          </button>
         </div>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-4 gap-3 mb-6">
-        <StatCard icon={Users} label="Contacts" value={contactStats?.total || 0} color="text-blue-500" />
-        <StatCard icon={Target} label="Deals" value={dealStats?.total || 0} color="text-purple-500" />
-        <StatCard icon={DollarSign} label="Pipeline" value={`$${(dealStats?.totalValue || 0).toLocaleString()}`} color="text-green-500" />
-        <StatCard icon={TrendingUp} label="Won" value={`$${(dealStats?.wonValue || 0).toLocaleString()}`} color="text-brand-purple" />
-      </div>
-
       {/* Tabs */}
-      <div className="flex gap-1 p-1 bg-surface-raised rounded-2xl mb-6 w-fit">
-        {['contacts', 'deals'].map((t) => (
-          <button key={t} onClick={() => setTab(t)}
-            className={`px-5 py-2 rounded-xl text-[13px] font-semibold capitalize transition-all ${
-              tab === t ? 'bg-surface-card text-content-primary shadow-sm' : 'text-content-muted hover:text-content-secondary'
+      <div className="flex gap-1 p-1 bg-surface-raised rounded-2xl mb-8 w-fit">
+        {TABS.map((t) => (
+          <button key={t.key} onClick={() => setTab(t.key)}
+            className={`px-5 py-2.5 rounded-xl text-[13px] font-semibold transition-all ${
+              tab === t.key ? 'bg-surface-card text-content-primary shadow-sm' : 'text-content-muted hover:text-content-secondary'
             }`}>
-            {t}
+            {t.label}
           </button>
         ))}
       </div>
 
-      {/* Contacts Tab */}
+      {/* ─── OVERVIEW TAB ─── */}
+      {tab === 'overview' && (
+        <div className="space-y-6">
+          {/* KPI Row */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <KPICard icon={Users} label="Total Contacts" value={contactStats?.total || 0} color="text-blue-500" trend="+12%" up />
+            <KPICard icon={Target} label="Active Deals" value={dealStats?.total || 0} color="text-brand-purple" trend="+5%" up />
+            <KPICard icon={DollarSign} label="Pipeline Value" value={`$${(dealStats?.totalValue || 0).toLocaleString()}`} color="text-green-500" trend="+18%" up />
+            <KPICard icon={TrendingUp} label="Won Revenue" value={`$${(dealStats?.wonValue || 0).toLocaleString()}`} color="text-emerald-500" />
+          </div>
+
+          {/* Ad Performance Row */}
+          {metaConfigured && metaInsights && (
+            <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
+              <MiniKPI label="Ad Spend" value={`$${parseFloat(metaInsights.spend || 0).toFixed(2)}`} icon={DollarSign} color="text-brand-purple" />
+              <MiniKPI label="Impressions" value={formatNum(metaInsights.impressions)} icon={Eye} color="text-blue-500" />
+              <MiniKPI label="Clicks" value={formatNum(metaInsights.clicks)} icon={MousePointer} color="text-green-500" />
+              <MiniKPI label="CTR" value={`${parseFloat(metaInsights.ctr || 0).toFixed(2)}%`} icon={TrendingUp} color="text-orange-500" />
+              <MiniKPI label="CPC" value={`$${parseFloat(metaInsights.cpc || 0).toFixed(2)}`} icon={DollarSign} color="text-cyan-500" />
+              <MiniKPI label="Reach" value={formatNum(metaInsights.reach)} icon={Users} color="text-pink-500" />
+            </div>
+          )}
+
+          {/* Charts Row */}
+          <div className="grid md:grid-cols-2 gap-5">
+            {/* Lead Trend */}
+            <div className="glossy rounded-3xl p-5">
+              <div className="relative z-10">
+                <h3 className="text-[14px] font-semibold text-content-primary mb-4 flex items-center gap-2">
+                  <TrendingUp className="w-4 h-4 text-brand-purple" /> Lead Acquisition Trend
+                </h3>
+                <ResponsiveContainer width="100%" height={200}>
+                  <AreaChart data={trendData}>
+                    <defs>
+                      <linearGradient id="purpleGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor={PURPLE} stopOpacity={0.3} />
+                        <stop offset="95%" stopColor={PURPLE} stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                    <XAxis dataKey="day" tick={{ fontSize: 11, fill: 'var(--text-muted)' }} axisLine={false} />
+                    <YAxis tick={{ fontSize: 11, fill: 'var(--text-muted)' }} axisLine={false} />
+                    <Tooltip contentStyle={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 12, fontSize: 12 }} />
+                    <Area type="monotone" dataKey="leads" stroke={PURPLE} fill="url(#purpleGrad)" strokeWidth={2} />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
+            {/* Pipeline Breakdown */}
+            <div className="glossy rounded-3xl p-5">
+              <div className="relative z-10">
+                <h3 className="text-[14px] font-semibold text-content-primary mb-4 flex items-center gap-2">
+                  <BarChart3 className="w-4 h-4 text-brand-purple" /> Deal Pipeline
+                </h3>
+                <ResponsiveContainer width="100%" height={200}>
+                  <BarChart data={pipelineData}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                    <XAxis dataKey="name" tick={{ fontSize: 11, fill: 'var(--text-muted)' }} axisLine={false} />
+                    <YAxis tick={{ fontSize: 11, fill: 'var(--text-muted)' }} axisLine={false} />
+                    <Tooltip contentStyle={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 12, fontSize: 12 }}
+                      formatter={(v, name) => [name === 'amount' ? `$${v.toLocaleString()}` : v, name === 'amount' ? 'Value' : 'Count']} />
+                    <Bar dataKey="value" fill={PURPLE} radius={[6, 6, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          </div>
+
+          {/* Contact Status + AI Suggestions Row */}
+          <div className="grid md:grid-cols-3 gap-5">
+            {/* Contact Breakdown */}
+            <div className="glossy rounded-3xl p-5">
+              <div className="relative z-10">
+                <h3 className="text-[14px] font-semibold text-content-primary mb-4">Contact Status</h3>
+                {contactsByStatus.length > 0 ? (
+                  <ResponsiveContainer width="100%" height={180}>
+                    <PieChart>
+                      <Pie data={contactsByStatus} cx="50%" cy="50%" innerRadius={50} outerRadius={75} paddingAngle={3} dataKey="value">
+                        {contactsByStatus.map((entry, i) => <Cell key={i} fill={entry.color} />)}
+                      </Pie>
+                      <Tooltip contentStyle={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 12, fontSize: 12 }} />
+                    </PieChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="h-[180px] flex items-center justify-center text-content-muted text-sm">No contacts yet</div>
+                )}
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {contactsByStatus.map((s) => (
+                    <span key={s.name} className="text-[10px] flex items-center gap-1">
+                      <div className="w-2 h-2 rounded-full" style={{ background: s.color }} />
+                      {s.name} ({s.value})
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* AI Suggestions */}
+            <div className="glossy rounded-3xl p-5 md:col-span-2">
+              <div className="relative z-10">
+                <h3 className="text-[14px] font-semibold text-content-primary mb-4 flex items-center gap-2">
+                  <Zap className="w-4 h-4 text-brand-purple" /> AI Suggestions
+                </h3>
+                <div className="space-y-3">
+                  {[
+                    { text: `You have ${contactStats?.new || 0} new contacts that haven't been contacted. Consider sending an intro email sequence.`, type: 'action', icon: Mail },
+                    { text: metaInsights ? `Your CTR is ${parseFloat(metaInsights.ctr || 0).toFixed(2)}% — ${parseFloat(metaInsights.ctr || 0) > 2 ? 'above average! Scale your top-performing ads.' : 'below average. Test new creative angles.'}` : 'Connect Meta Ads to see campaign optimization suggestions.', type: 'insight', icon: TrendingUp },
+                    { text: `${dealStats?.lead || 0} deals are stuck in Lead stage. Move qualified ones forward or mark as lost to keep your pipeline clean.`, type: 'action', icon: Target },
+                    { text: `Your pipeline is worth $${(dealStats?.totalValue || 0).toLocaleString()}. Focus on the ${dealStats?.proposal || 0} deals in Proposal stage — they're closest to closing.`, type: 'insight', icon: DollarSign },
+                  ].map((sug, i) => (
+                    <div key={i} className="flex items-start gap-3 p-3 rounded-2xl bg-surface-raised/50 hover:bg-surface-raised transition-colors">
+                      <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${
+                        sug.type === 'action' ? 'bg-brand-purple/10 text-brand-purple' : 'bg-blue-500/10 text-blue-500'
+                      }`}>
+                        <sug.icon className="w-4 h-4" />
+                      </div>
+                      <p className="text-[13px] text-content-secondary leading-relaxed">{sug.text}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Recent Activity */}
+          {activity.length > 0 && (
+            <div className="glossy rounded-3xl p-5">
+              <div className="relative z-10">
+                <h3 className="text-[14px] font-semibold text-content-primary mb-4 flex items-center gap-2">
+                  <Clock className="w-4 h-4 text-brand-purple" /> Recent Activity
+                </h3>
+                <div className="space-y-2">
+                  {activity.slice(0, 5).map((evt) => (
+                    <div key={evt.id} className="flex items-center gap-3 py-2">
+                      <div className="w-2 h-2 rounded-full bg-brand-purple shrink-0" />
+                      <p className="text-[13px] text-content-secondary flex-1">{evt.typeConfig?.label || evt.type}</p>
+                      <span className="text-[11px] text-content-muted">{timeAgo(evt.timestamp)}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ─── CONTACTS TAB ─── */}
       {tab === 'contacts' && (
         <div>
-          <div className="flex items-center gap-3 mb-4">
+          <div className="flex items-center gap-3 mb-5">
             <div className="flex-1 relative">
               <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-content-muted" />
               <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search contacts..." className="!pl-10" />
             </div>
-            <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}
-              className="!w-auto !px-3 !py-3 text-[13px]">
-              <option value="">All statuses</option>
+            <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="!w-auto !px-3 !py-3 text-[13px]">
+              <option value="">All</option>
               {CONTACT_STATUSES.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
             </select>
-            <button onClick={() => setShowAddContact(true)}
-              className="px-4 py-3 rounded-2xl glossy-btn text-white text-[13px] font-semibold flex items-center gap-1.5">
-              <Plus className="w-4 h-4" /> Add Contact
+            <button onClick={() => setShowAddContact(true)} className="px-4 py-3 rounded-2xl glossy-btn text-white text-[13px] font-semibold flex items-center gap-1.5">
+              <Plus className="w-4 h-4" /> Add
             </button>
           </div>
-
           <div className="space-y-2">
             {contacts.length === 0 ? (
-              <div className="glossy rounded-2xl p-8 text-center">
+              <div className="glossy rounded-2xl p-12 text-center">
                 <div className="relative z-10">
-                  <Users className="w-8 h-8 text-content-muted mx-auto mb-3" />
-                  <p className="text-content-muted text-sm">No contacts yet. Add your first contact or they'll appear here from landing page submissions.</p>
+                  <Users className="w-10 h-10 text-content-muted mx-auto mb-3" />
+                  <p className="text-content-secondary text-sm">No contacts yet</p>
+                  <p className="text-content-muted text-xs mt-1">Add contacts manually or they'll flow in from landing pages and ads</p>
                 </div>
               </div>
             ) : contacts.map((contact) => (
-              <motion.div key={contact.id} className="glossy rounded-2xl p-4" whileHover={{ y: -1 }}>
+              <div key={contact.id} className="glossy rounded-2xl p-4">
                 <div className="relative z-10 flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-full bg-brand-purple/10 flex items-center justify-center text-brand-purple font-semibold text-sm">
+                  <div className="w-10 h-10 rounded-full bg-brand-purple/10 flex items-center justify-center text-brand-purple font-semibold text-sm shrink-0">
                     {(contact.firstName?.[0] || '') + (contact.lastName?.[0] || '')}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-[14px] font-medium text-content-primary">
-                      {contact.firstName} {contact.lastName}
-                    </p>
+                    <p className="text-[14px] font-medium text-content-primary">{contact.firstName} {contact.lastName}</p>
                     <div className="flex items-center gap-3 text-[12px] text-content-muted mt-0.5">
                       {contact.email && <span className="flex items-center gap-1"><Mail className="w-3 h-3" />{contact.email}</span>}
                       {contact.phone && <span className="flex items-center gap-1"><Phone className="w-3 h-3" />{contact.phone}</span>}
-                      {contact.company && <span className="flex items-center gap-1"><Building2 className="w-3 h-3" />{contact.company}</span>}
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    {contact.value > 0 && (
-                      <span className="text-[12px] font-mono text-green-500">${contact.value.toLocaleString()}</span>
-                    )}
-                    <select value={contact.status} onChange={(e) => handleUpdateContact(contact.id, { status: e.target.value })}
-                      className="!w-auto !px-2 !py-1 !text-[11px] !rounded-lg !font-semibold">
+                    {contact.value > 0 && <span className="text-[12px] font-mono text-green-500">${contact.value.toLocaleString()}</span>}
+                    <select value={contact.status} onChange={(e) => { updateContact(contact.id, { status: e.target.value }); loadAll(); }}
+                      className="!w-auto !px-2 !py-1 !text-[11px] !rounded-lg">
                       {CONTACT_STATUSES.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
                     </select>
-                    <button onClick={() => handleDeleteContact(contact.id)}
-                      className="p-1.5 rounded-lg text-content-muted hover:text-red-500 hover:bg-red-500/10 transition-colors">
+                    <button onClick={() => { deleteContactApi(contact.id); loadAll(); }} className="p-1.5 rounded-lg text-content-muted hover:text-red-500 transition-colors">
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
                   </div>
                 </div>
-              </motion.div>
+              </div>
             ))}
           </div>
         </div>
       )}
 
-      {/* Deals Tab */}
+      {/* ─── DEALS TAB ─── */}
       {tab === 'deals' && (
         <div>
-          <div className="flex items-center justify-between mb-4">
-            <p className="text-content-secondary text-sm">{deals.length} deal{deals.length !== 1 ? 's' : ''}</p>
-            <button onClick={() => setShowAddDeal(true)}
-              className="px-4 py-2.5 rounded-2xl glossy-btn text-white text-[13px] font-semibold flex items-center gap-1.5">
+          <div className="flex items-center justify-between mb-5">
+            <p className="text-content-secondary text-sm">{deals.length} deal{deals.length !== 1 ? 's' : ''} · ${(dealStats?.totalValue || 0).toLocaleString()} total pipeline</p>
+            <button onClick={() => setShowAddDeal(true)} className="px-4 py-2.5 rounded-2xl glossy-btn text-white text-[13px] font-semibold flex items-center gap-1.5">
               <Plus className="w-4 h-4" /> Add Deal
             </button>
           </div>
-
-          {/* Pipeline columns */}
           <div className="grid grid-cols-6 gap-2">
             {DEAL_STAGES.map((stage) => {
               const stageDeals = deals.filter((d) => d.stage === stage.value);
+              const stageValue = stageDeals.reduce((s, d) => s + (d.value || 0), 0);
               return (
                 <div key={stage.value}>
-                  <div className="flex items-center gap-1.5 mb-2">
-                    <div className={`w-2 h-2 rounded-full ${stage.color}`} />
-                    <span className="text-[11px] font-semibold text-content-muted uppercase">{stage.label}</span>
-                    <span className="text-[10px] text-content-muted">({stageDeals.length})</span>
+                  <div className="mb-2">
+                    <div className="flex items-center gap-1.5">
+                      <div className="w-2 h-2 rounded-full" style={{ background: stage.color }} />
+                      <span className="text-[11px] font-semibold text-content-muted uppercase">{stage.label}</span>
+                    </div>
+                    <p className="text-[10px] text-content-muted ml-3.5">{stageDeals.length} · ${stageValue.toLocaleString()}</p>
                   </div>
-                  <div className="space-y-2 min-h-[100px]">
+                  <div className="space-y-2 min-h-[120px]">
                     {stageDeals.map((deal) => (
                       <div key={deal.id} className="glossy rounded-xl p-3">
                         <div className="relative z-10">
                           <p className="text-[12px] font-medium text-content-primary truncate">{deal.title}</p>
                           <p className="text-[11px] text-green-500 font-mono mt-1">${(deal.value || 0).toLocaleString()}</p>
-                          <div className="flex items-center justify-between mt-2">
-                            <select value={deal.stage} onChange={(e) => { updateDealApi(deal.id, { stage: e.target.value }); loadData(); }}
-                              className="!w-auto !px-1.5 !py-0.5 !text-[10px] !rounded-lg">
-                              {DEAL_STAGES.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
-                            </select>
-                            <button onClick={() => { deleteDealApi(deal.id); loadData(); }}
-                              className="p-1 text-content-muted hover:text-red-500 transition-colors">
-                              <Trash2 className="w-3 h-3" />
-                            </button>
-                          </div>
+                          <select value={deal.stage} onChange={(e) => { updateDealApi(deal.id, { stage: e.target.value }); loadAll(); }}
+                            className="!w-full !px-1.5 !py-0.5 !text-[10px] !rounded-lg mt-2">
+                            {DEAL_STAGES.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
+                          </select>
                         </div>
                       </div>
                     ))}
@@ -243,52 +404,116 @@ export default function CRM() {
         </div>
       )}
 
-      {/* Add Contact Modal */}
-      {showAddContact && <AddContactModal onClose={() => setShowAddContact(false)} onSubmit={handleAddContact} />}
-      {showAddDeal && <AddDealModal onClose={() => setShowAddDeal(false)} onSubmit={handleAddDeal} contacts={contacts} />}
+      {/* ─── CAMPAIGNS TAB ─── */}
+      {tab === 'campaigns' && (
+        <div>
+          {!metaConfigured ? (
+            <div className="glossy rounded-2xl p-12 text-center">
+              <div className="relative z-10">
+                <Megaphone className="w-10 h-10 text-content-muted mx-auto mb-3" />
+                <p className="text-content-secondary text-sm">Connect Meta Ads to see campaign data</p>
+                <Link to={`/dashboard/${id}`} className="text-brand-purple text-sm font-medium mt-2 inline-block">Go to profile settings</Link>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {campaigns.map((c) => (
+                <div key={c.id} className="glossy rounded-2xl p-4">
+                  <div className="relative z-10 flex items-center justify-between">
+                    <div>
+                      <p className="text-[14px] font-medium text-content-primary">{c.name}</p>
+                      <p className="text-[12px] text-content-muted">{c.objective?.replace('OUTCOME_', '')} · ID: {c.id}</p>
+                    </div>
+                    <span className={`text-[10px] font-semibold px-2.5 py-1 rounded-full ${
+                      c.status === 'ACTIVE' ? 'bg-green-500/10 text-green-500' : 'bg-yellow-500/10 text-yellow-600 dark:text-yellow-400'
+                    }`}>{c.status}</span>
+                  </div>
+                </div>
+              ))}
+              {campaigns.length === 0 && (
+                <div className="glossy rounded-2xl p-8 text-center">
+                  <div className="relative z-10 text-content-muted text-sm">No campaigns found in this ad account</div>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Modals */}
+      {showAddContact && <AddContactModal onClose={() => setShowAddContact(false)} onSubmit={async (d) => { await createContact(id, d); setShowAddContact(false); loadAll(); }} />}
+      {showAddDeal && <AddDealModal onClose={() => setShowAddDeal(false)} onSubmit={async (d) => { await createDeal(id, d); setShowAddDeal(false); loadAll(); }} contacts={contacts} />}
     </motion.div>
   );
 }
 
-function StatCard({ icon: Icon, label, value, color }) {
+function KPICard({ icon: Icon, label, value, color, trend, up }) {
   return (
-    <div className="glossy rounded-2xl p-4">
+    <div className="glossy rounded-2xl p-5">
       <div className="relative z-10">
-        <div className="flex items-center gap-1.5 mb-2">
-          <Icon className={`w-3.5 h-3.5 ${color}`} />
-          <span className="text-[10px] font-medium text-content-muted uppercase tracking-wider">{label}</span>
+        <div className="flex items-center justify-between mb-3">
+          <Icon className={`w-5 h-5 ${color}`} />
+          {trend && (
+            <span className={`text-[11px] font-semibold flex items-center gap-0.5 ${up ? 'text-green-500' : 'text-red-500'}`}>
+              {up ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />} {trend}
+            </span>
+          )}
         </div>
-        <p className={`text-xl font-bold ${color}`}>{value}</p>
+        <p className={`text-2xl font-bold ${color}`}>{value}</p>
+        <p className="text-[11px] text-content-muted mt-1">{label}</p>
       </div>
     </div>
   );
 }
 
-function AddContactModal({ onClose, onSubmit }) {
-  const [form, setForm] = useState({ firstName: '', lastName: '', email: '', phone: '', company: '', value: '', notes: '' });
-  const set = (k, v) => setForm((p) => ({ ...p, [k]: v }));
+function MiniKPI({ label, value, icon: Icon, color }) {
+  return (
+    <div className="glossy rounded-xl p-3">
+      <div className="relative z-10 text-center">
+        <Icon className={`w-3.5 h-3.5 ${color} mx-auto mb-1`} />
+        <p className={`text-lg font-bold ${color}`}>{value}</p>
+        <p className="text-[9px] text-content-muted uppercase tracking-wider">{label}</p>
+      </div>
+    </div>
+  );
+}
 
+function formatNum(v) {
+  if (!v) return '0';
+  const n = parseFloat(v);
+  return n >= 1000000 ? `${(n/1000000).toFixed(1)}M` : n >= 1000 ? `${(n/1000).toFixed(1)}k` : n.toLocaleString();
+}
+
+function timeAgo(ts) {
+  const s = Math.floor((Date.now() - ts) / 1000);
+  if (s < 60) return 'just now';
+  if (s < 3600) return `${Math.floor(s/60)}m ago`;
+  if (s < 86400) return `${Math.floor(s/3600)}h ago`;
+  return `${Math.floor(s/86400)}d ago`;
+}
+
+function AddContactModal({ onClose, onSubmit }) {
+  const [f, setF] = useState({ firstName:'', lastName:'', email:'', phone:'', company:'', value:'', notes:'' });
+  const s = (k,v) => setF(p => ({...p,[k]:v}));
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
-      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} onClick={onClose} className="absolute inset-0 bg-black/40 dark:bg-black/60 backdrop-blur-sm" />
-      <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="relative glossy rounded-3xl p-6 max-w-md w-full shadow-elevated-lg">
+      <motion.div initial={{opacity:0}} animate={{opacity:1}} onClick={onClose} className="absolute inset-0 bg-black/40 dark:bg-black/60 backdrop-blur-sm" />
+      <motion.div initial={{scale:0.95,opacity:0}} animate={{scale:1,opacity:1}} className="relative glossy rounded-3xl p-6 max-w-md w-full shadow-elevated-lg">
         <div className="relative z-10">
           <h3 className="text-lg font-semibold text-content-primary mb-4">Add Contact</h3>
           <div className="space-y-3">
             <div className="grid grid-cols-2 gap-3">
-              <input value={form.firstName} onChange={(e) => set('firstName', e.target.value)} placeholder="First name" />
-              <input value={form.lastName} onChange={(e) => set('lastName', e.target.value)} placeholder="Last name" />
+              <input value={f.firstName} onChange={e=>s('firstName',e.target.value)} placeholder="First name" />
+              <input value={f.lastName} onChange={e=>s('lastName',e.target.value)} placeholder="Last name" />
             </div>
-            <input value={form.email} onChange={(e) => set('email', e.target.value)} placeholder="Email" type="email" />
-            <input value={form.phone} onChange={(e) => set('phone', e.target.value)} placeholder="Phone" />
-            <input value={form.company} onChange={(e) => set('company', e.target.value)} placeholder="Company" />
-            <input value={form.value} onChange={(e) => set('value', e.target.value)} placeholder="Deal value ($)" type="number" />
-            <textarea value={form.notes} onChange={(e) => set('notes', e.target.value)} placeholder="Notes" rows={2} />
+            <input value={f.email} onChange={e=>s('email',e.target.value)} placeholder="Email" type="email" />
+            <input value={f.phone} onChange={e=>s('phone',e.target.value)} placeholder="Phone" />
+            <input value={f.company} onChange={e=>s('company',e.target.value)} placeholder="Company" />
+            <input value={f.value} onChange={e=>s('value',e.target.value)} placeholder="Deal value ($)" type="number" />
           </div>
           <div className="flex gap-3 mt-5">
             <button onClick={onClose} className="flex-1 py-3 rounded-2xl bg-surface-raised text-content-secondary text-sm font-medium">Cancel</button>
-            <button onClick={() => onSubmit({ ...form, value: parseFloat(form.value) || 0 })}
-              className="flex-1 py-3 rounded-2xl glossy-btn text-white text-sm font-semibold">Add Contact</button>
+            <button onClick={()=>onSubmit({...f,value:parseFloat(f.value)||0})} className="flex-1 py-3 rounded-2xl glossy-btn text-white text-sm font-semibold">Add</button>
           </div>
         </div>
       </motion.div>
@@ -297,28 +522,25 @@ function AddContactModal({ onClose, onSubmit }) {
 }
 
 function AddDealModal({ onClose, onSubmit, contacts }) {
-  const [form, setForm] = useState({ title: '', value: '', contactId: '', notes: '' });
-  const set = (k, v) => setForm((p) => ({ ...p, [k]: v }));
-
+  const [f, setF] = useState({ title:'', value:'', contactId:'', notes:'' });
+  const s = (k,v) => setF(p => ({...p,[k]:v}));
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
-      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} onClick={onClose} className="absolute inset-0 bg-black/40 dark:bg-black/60 backdrop-blur-sm" />
-      <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="relative glossy rounded-3xl p-6 max-w-md w-full shadow-elevated-lg">
+      <motion.div initial={{opacity:0}} animate={{opacity:1}} onClick={onClose} className="absolute inset-0 bg-black/40 dark:bg-black/60 backdrop-blur-sm" />
+      <motion.div initial={{scale:0.95,opacity:0}} animate={{scale:1,opacity:1}} className="relative glossy rounded-3xl p-6 max-w-md w-full shadow-elevated-lg">
         <div className="relative z-10">
           <h3 className="text-lg font-semibold text-content-primary mb-4">Add Deal</h3>
           <div className="space-y-3">
-            <input value={form.title} onChange={(e) => set('title', e.target.value)} placeholder="Deal title" />
-            <input value={form.value} onChange={(e) => set('value', e.target.value)} placeholder="Value ($)" type="number" />
-            <select value={form.contactId} onChange={(e) => set('contactId', e.target.value)} className="!text-[13px]">
+            <input value={f.title} onChange={e=>s('title',e.target.value)} placeholder="Deal title" />
+            <input value={f.value} onChange={e=>s('value',e.target.value)} placeholder="Value ($)" type="number" />
+            <select value={f.contactId} onChange={e=>s('contactId',e.target.value)} className="!text-[13px]">
               <option value="">Link to contact (optional)</option>
-              {contacts.map((c) => <option key={c.id} value={c.id}>{c.firstName} {c.lastName}</option>)}
+              {contacts.map(c => <option key={c.id} value={c.id}>{c.firstName} {c.lastName}</option>)}
             </select>
-            <textarea value={form.notes} onChange={(e) => set('notes', e.target.value)} placeholder="Notes" rows={2} />
           </div>
           <div className="flex gap-3 mt-5">
             <button onClick={onClose} className="flex-1 py-3 rounded-2xl bg-surface-raised text-content-secondary text-sm font-medium">Cancel</button>
-            <button onClick={() => onSubmit({ ...form, value: parseFloat(form.value) || 0 })}
-              className="flex-1 py-3 rounded-2xl glossy-btn text-white text-sm font-semibold">Add Deal</button>
+            <button onClick={()=>onSubmit({...f,value:parseFloat(f.value)||0})} className="flex-1 py-3 rounded-2xl glossy-btn text-white text-sm font-semibold">Add</button>
           </div>
         </div>
       </motion.div>

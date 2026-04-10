@@ -101,6 +101,14 @@ const PLATFORMS = {
     clientIdEnv: 'KINSTA_API_KEY',
     clientSecretEnv: 'KINSTA_COMPANY_ID',
   },
+  zoominfo: {
+    name: 'ZoomInfo',
+    authUrl: 'https://api.zoominfo.com/authenticate',
+    tokenUrl: 'https://api.zoominfo.com/authenticate',
+    scopes: '',
+    clientIdEnv: 'ZOOMINFO_CLIENT_ID',
+    clientSecretEnv: 'ZOOMINFO_CLIENT_SECRET',
+  },
 };
 
 export function getPlatformConfig(platform) {

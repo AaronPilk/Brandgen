@@ -5,7 +5,7 @@ import {
   ArrowLeft, Globe, Image, Mail, MessageSquare, Palette, ShoppingBag,
   Instagram, Facebook, BarChart3, Megaphone, Link2, AlertTriangle,
   Eye, Zap, Package, ChevronRight, Upload, ExternalLink, Check, Unplug, Edit3, X, DollarSign,
-  Share2, Target, Users, HardDrive, Loader2, Video, Server,
+  Share2, Target, Users, HardDrive, Loader2, Video, Server, Search,
 } from 'lucide-react';
 import { useStore } from '../store/useStore';
 import { getProfile, runAiAction, updateProfile, uploadFiles, getOAuthConnections, startOAuthConnect, disconnectOAuth, prepareMetaCampaign, getMetaAdsStatus } from '../services/api';
@@ -462,6 +462,7 @@ const PROFILE_PLATFORMS = [
   { key: 'wordpress', icon: Globe, color: 'bg-blue-800', name: 'WordPress', desc: 'Publish pages & content' },
   { key: 'arcads', icon: Video, color: 'bg-pink-600', name: 'Arcads', desc: 'AI UGC video generation' },
   { key: 'kinsta', icon: Server, color: 'bg-indigo-600', name: 'Kinsta', desc: 'Deploy & host pages' },
+  { key: 'zoominfo', icon: Search, color: 'bg-blue-700', name: 'ZoomInfo', desc: 'Lead enrichment & data' },
 ];
 
 function ProfileConnections({ profileId, connections, setConnections, connectingPlatform, setConnectingPlatform }) {

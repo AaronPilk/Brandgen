@@ -27,8 +27,8 @@ export default function Layout({ children }) {
 
             {currentProfile && (
               <Link
-                to={`/dashboard/${currentProfile.id}`}
-                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-brand-purple/10 text-brand-purple text-[12px] font-semibold hover:bg-brand-purple/20 transition-colors"
+                to={`/crm/${currentProfile.id}`}
+                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-brand-purple text-white text-[12px] font-semibold hover:bg-brand-purple-dark transition-colors shadow-lg shadow-brand-purple/25"
               >
                 Dashboard <ArrowRight className="w-3 h-3" />
               </Link>

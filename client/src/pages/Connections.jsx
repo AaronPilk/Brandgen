@@ -81,6 +81,12 @@ const PLATFORM_META = {
     description: 'Kinsta Hosting',
     features: ['Deploy landing pages live', 'Manage site environments', 'Custom domains & SSL'],
   },
+  zoominfo: {
+    icon: Share2,
+    color: 'bg-blue-700',
+    description: 'ZoomInfo',
+    features: ['Lead enrichment', 'Company data & intent signals', 'Contact discovery'],
+  },
 };
 
 const container = {
