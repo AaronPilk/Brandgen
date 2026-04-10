@@ -92,6 +92,12 @@ export const getMetaCampaigns = () => request('/meta-ads/campaigns');
 export const getMetaCampaignInsights = (id, datePreset) =>
   request(`/meta-ads/campaigns/${id}/insights?datePreset=${datePreset || 'last_30d'}`);
 
+export const getMetaCampaignAds = (id) =>
+  request(`/meta-ads/campaigns/${id}/ads`);
+
+export const getMetaAdCreatives = (limit) =>
+  request(`/meta-ads/creatives?limit=${limit || 20}`);
+
 export const getMetaAccountInsights = (datePreset) =>
   request(`/meta-ads/account/insights?datePreset=${datePreset || 'last_30d'}`);
 

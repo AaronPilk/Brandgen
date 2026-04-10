@@ -55,6 +55,19 @@ export async function getCampaignInsights(campaignId, datePreset = 'last_30d') {
   return metaFetch(`/${campaignId}/insights?fields=${fields}&date_preset=${datePreset}`);
 }
 
+// Get ads with creative previews for a campaign
+export async function getCampaignAds(campaignId) {
+  const fields = 'id,name,status,creative{id,name,thumbnail_url,object_story_spec,asset_feed_spec},insights.date_preset(last_30d){impressions,clicks,spend,ctr,cpc}';
+  return metaFetch(`/${campaignId}/ads?fields=${fields}&limit=20`);
+}
+
+// Get all ad creatives for the account
+export async function getAdCreatives(limit = 20) {
+  const accountId = getAdAccountId();
+  const fields = 'id,name,thumbnail_url,object_story_spec,status';
+  return metaFetch(`/act_${accountId}/adcreatives?fields=${fields}&limit=${limit}`);
+}
+
 export async function getAccountInsights(datePreset = 'last_30d') {
   const accountId = getAdAccountId();
   const fields = 'impressions,clicks,spend,cpc,cpm,ctr,reach,actions,cost_per_action_type';

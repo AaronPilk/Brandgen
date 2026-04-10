@@ -4,6 +4,8 @@ import {
   isMetaAdsConfigured,
   getCampaigns,
   getCampaignInsights,
+  getCampaignAds,
+  getAdCreatives,
   getAccountInsights,
   prepareCampaign,
   prepareAdSet,
@@ -36,6 +38,28 @@ router.get('/campaigns/:id/insights', async (req, res) => {
   try {
     if (!isMetaAdsConfigured()) return res.status(400).json({ error: 'Meta Ads not configured' });
     const data = await getCampaignInsights(req.params.id, req.query.datePreset || 'last_30d');
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ─── READ: Get campaign ads with creatives ───
+router.get('/campaigns/:id/ads', async (req, res) => {
+  try {
+    if (!isMetaAdsConfigured()) return res.status(400).json({ error: 'Meta Ads not configured' });
+    const data = await getCampaignAds(req.params.id);
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ─── READ: Get all ad creatives ───
+router.get('/creatives', async (req, res) => {
+  try {
+    if (!isMetaAdsConfigured()) return res.status(400).json({ error: 'Meta Ads not configured' });
+    const data = await getAdCreatives(parseInt(req.query.limit) || 20);
     res.json(data);
   } catch (err) {
     res.status(500).json({ error: err.message });

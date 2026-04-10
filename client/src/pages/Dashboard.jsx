@@ -32,6 +32,7 @@ export default function Dashboard() {
   const [connectingPlatform, setConnectingPlatform] = useState(null);
   const [metaAdsConfigured, setMetaAdsConfigured] = useState(false);
   const [metaCampaignModal, setMetaCampaignModal] = useState(false);
+  const [editProfileOpen, setEditProfileOpen] = useState(false);
   const profile = currentProfile;
 
   useEffect(() => {
@@ -159,6 +160,12 @@ export default function Dashboard() {
                   className="text-[12px] font-semibold text-brand-purple bg-brand-purple/10 px-3 py-1 rounded-full hover:bg-brand-purple/20 transition-colors flex items-center gap-1"
                 >
                   <Users className="w-3 h-3" /> CRM
+                </button>
+                <button
+                  onClick={() => setEditProfileOpen(true)}
+                  className="text-[12px] font-semibold text-content-muted bg-surface-raised px-3 py-1 rounded-full hover:text-content-primary transition-colors flex items-center gap-1"
+                >
+                  <Edit3 className="w-3 h-3" /> Edit Profile
                 </button>
               </div>
             </div>
@@ -315,6 +322,18 @@ export default function Dashboard() {
           profile={profile}
           onClose={() => setMetaCampaignModal(false)}
           onSubmitted={() => setMetaCampaignModal(false)}
+        />
+      )}
+
+      {/* Edit Profile Modal */}
+      {editProfileOpen && (
+        <EditProfileModal
+          profile={profile}
+          onClose={() => setEditProfileOpen(false)}
+          onSaved={(updated) => {
+            setCurrentProfile(updated);
+            setEditProfileOpen(false);
+          }}
         />
       )}
 
@@ -696,6 +715,106 @@ function MetaCampaignModal({ profile, onClose, onSubmitted }) {
           </div>
         </div>
       </motion.div>
+    </div>
+  );
+}
+
+function EditProfileModal({ profile, onClose, onSaved }) {
+  const [form, setForm] = useState({
+    brandName: profile.intake?.brandName || profile.intake?.industry || '',
+    industry: profile.intake?.industry || '',
+    whatYouSell: profile.intake?.whatYouSell || '',
+    targetCustomer: profile.intake?.targetCustomer || '',
+    geoTargets: profile.intake?.geoTargets || '',
+    websiteUrl: profile.intake?.websiteUrl || '',
+    competitorUrls: profile.intake?.competitorUrls || '',
+    differentiator: profile.intake?.differentiator || '',
+    adBudget: profile.intake?.adBudget || '',
+    primaryGoal: profile.intake?.primaryGoal || '',
+  });
+  const [saving, setSaving] = useState(false);
+  const [rerunResearch, setRerunResearch] = useState(false);
+  const set = (k, v) => setForm((p) => ({ ...p, [k]: v }));
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      const updatedIntake = { ...profile.intake, ...form };
+      await updateProfile(profile.id, { intake: updatedIntake });
+
+      let updatedProfile = { ...profile, intake: updatedIntake };
+
+      if (rerunResearch) {
+        const research = await runAiAction('market-research', { profile: updatedProfile, sessionId: 'default' });
+        updatedProfile.research = research.research;
+        await updateProfile(profile.id, { research: updatedProfile.research });
+      }
+
+      onSaved(updatedProfile);
+    } catch (err) {
+      alert('Error: ' + err.message);
+    }
+    setSaving(false);
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 overflow-y-auto">
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} onClick={onClose} className="fixed inset-0 bg-black/40 dark:bg-black/60 backdrop-blur-sm" />
+      <div className="min-h-full flex items-start justify-center px-4 py-10">
+        <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="relative glossy rounded-3xl p-6 max-w-lg w-full shadow-elevated-lg">
+          <div className="relative z-10">
+            <h3 className="text-lg font-semibold text-content-primary mb-1">Edit Profile</h3>
+            <p className="text-[13px] text-content-muted mb-5">Update company info for this profile</p>
+
+            <div className="space-y-3 max-h-[60vh] overflow-y-auto pr-1">
+              <div><label className="block text-[12px] font-medium text-content-secondary mb-1">Brand / Company Name</label>
+                <input value={form.brandName} onChange={(e) => set('brandName', e.target.value)} /></div>
+              <div><label className="block text-[12px] font-medium text-content-secondary mb-1">Industry</label>
+                <input value={form.industry} onChange={(e) => set('industry', e.target.value)} placeholder="e.g. Insurance, Real Estate" /></div>
+              <div><label className="block text-[12px] font-medium text-content-secondary mb-1">What Do You Sell?</label>
+                <input value={form.whatYouSell} onChange={(e) => set('whatYouSell', e.target.value)} /></div>
+              <div><label className="block text-[12px] font-medium text-content-secondary mb-1">Target Customer</label>
+                <textarea rows={2} value={form.targetCustomer} onChange={(e) => set('targetCustomer', e.target.value)} /></div>
+              <div><label className="block text-[12px] font-medium text-content-secondary mb-1">Website URL</label>
+                <input value={form.websiteUrl} onChange={(e) => set('websiteUrl', e.target.value)} placeholder="https://..." /></div>
+              <div><label className="block text-[12px] font-medium text-content-secondary mb-1">Geographic Targets</label>
+                <input value={form.geoTargets} onChange={(e) => set('geoTargets', e.target.value)} /></div>
+              <div><label className="block text-[12px] font-medium text-content-secondary mb-1">Competitor URLs</label>
+                <textarea rows={2} value={form.competitorUrls} onChange={(e) => set('competitorUrls', e.target.value)} placeholder="One per line" /></div>
+              <div><label className="block text-[12px] font-medium text-content-secondary mb-1">What Makes You Different</label>
+                <textarea rows={2} value={form.differentiator} onChange={(e) => set('differentiator', e.target.value)} /></div>
+              <div><label className="block text-[12px] font-medium text-content-secondary mb-1">Monthly Ad Budget</label>
+                <input value={form.adBudget} onChange={(e) => set('adBudget', e.target.value)} /></div>
+              <div><label className="block text-[12px] font-medium text-content-secondary mb-1">Primary Goal</label>
+                <input value={form.primaryGoal} onChange={(e) => set('primaryGoal', e.target.value)} /></div>
+            </div>
+
+            <div className="mt-4 p-3 rounded-2xl bg-brand-purple/5 border border-brand-purple/10">
+              <label className="flex items-center gap-3 cursor-pointer">
+                <button onClick={() => setRerunResearch(!rerunResearch)}
+                  className={`w-5 h-5 rounded-lg border-2 flex items-center justify-center transition-all ${
+                    rerunResearch ? 'border-brand-purple bg-brand-purple' : 'border-surface-border'
+                  }`}>
+                  {rerunResearch && <Check className="w-3 h-3 text-white" />}
+                </button>
+                <div>
+                  <p className="text-[13px] font-medium text-content-primary">Re-run Market Research</p>
+                  <p className="text-[11px] text-content-muted">Generate new research based on updated info</p>
+                </div>
+              </label>
+            </div>
+
+            <div className="flex gap-3 mt-5">
+              <button onClick={onClose} className="flex-1 py-3 rounded-2xl bg-surface-raised text-content-secondary text-sm font-medium">Cancel</button>
+              <button onClick={handleSave} disabled={saving}
+                className="flex-1 py-3 rounded-2xl glossy-btn text-white text-sm font-semibold flex items-center justify-center gap-2">
+                {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+                {saving ? (rerunResearch ? 'Saving & Researching...' : 'Saving...') : 'Save Changes'}
+              </button>
+            </div>
+          </div>
+        </motion.div>
+      </div>
     </div>
   );
 }

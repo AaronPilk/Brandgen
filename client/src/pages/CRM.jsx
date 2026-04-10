@@ -5,7 +5,7 @@ import {
   ArrowLeft, Plus, Search, Phone, Mail, Building2, Users, UserPlus,
   DollarSign, Trash2, TrendingUp, TrendingDown, Target, BarChart3,
   Zap, Globe, Eye, MousePointer, ArrowUpRight, ArrowDownRight,
-  Calendar, Filter, Download, Megaphone, Clock, Star, AlertCircle,
+  Calendar, Filter, Download, Megaphone, Clock, Star, AlertCircle, ChevronDown, Settings,
 } from 'lucide-react';
 import {
   AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell,
@@ -15,7 +15,7 @@ import {
   getContacts, getContactStats, createContact, updateContact, deleteContactApi,
   getDeals, getDealStats, createDeal, updateDealApi, deleteDealApi,
   getProfile, getMetaAdsStatus, getMetaAccountInsights, getMetaCampaigns,
-  getActivityFeed,
+  getActivityFeed, getMetaCampaignAds, getMetaAdCreatives,
 } from '../services/api';
 import { useStore } from '../store/useStore';
 
@@ -416,19 +416,9 @@ export default function CRM() {
               </div>
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-4">
               {campaigns.map((c) => (
-                <div key={c.id} className="glossy rounded-2xl p-4">
-                  <div className="relative z-10 flex items-center justify-between">
-                    <div>
-                      <p className="text-[14px] font-medium text-content-primary">{c.name}</p>
-                      <p className="text-[12px] text-content-muted">{c.objective?.replace('OUTCOME_', '')} · ID: {c.id}</p>
-                    </div>
-                    <span className={`text-[10px] font-semibold px-2.5 py-1 rounded-full ${
-                      c.status === 'ACTIVE' ? 'bg-green-500/10 text-green-500' : 'bg-yellow-500/10 text-yellow-600 dark:text-yellow-400'
-                    }`}>{c.status}</span>
-                  </div>
-                </div>
+                <CampaignCard key={c.id} campaign={c} />
               ))}
               {campaigns.length === 0 && (
                 <div className="glossy rounded-2xl p-8 text-center">
@@ -544,6 +534,77 @@ function AddDealModal({ onClose, onSubmit, contacts }) {
           </div>
         </div>
       </motion.div>
+    </div>
+  );
+}
+
+function CampaignCard({ campaign }) {
+  const [expanded, setExpanded] = useState(false);
+  const [ads, setAds] = useState([]);
+  const [loadingAds, setLoadingAds] = useState(false);
+
+  const toggleExpand = async () => {
+    if (!expanded && ads.length === 0) {
+      setLoadingAds(true);
+      try {
+        const data = await getMetaCampaignAds(campaign.id);
+        setAds(data?.data || []);
+      } catch {}
+      setLoadingAds(false);
+    }
+    setExpanded(!expanded);
+  };
+
+  return (
+    <div className="glossy rounded-2xl overflow-hidden">
+      <div className="relative z-10">
+        <button onClick={toggleExpand} className="w-full text-left p-5 flex items-center justify-between hover:bg-surface-raised/30 transition-colors">
+          <div>
+            <p className="text-[14px] font-semibold text-content-primary">{campaign.name}</p>
+            <p className="text-[12px] text-content-muted mt-0.5">
+              {campaign.objective?.replace('OUTCOME_', '')} · {campaign.daily_budget ? `$${(campaign.daily_budget / 100).toFixed(0)}/day` : ''} · ID: {campaign.id}
+            </p>
+          </div>
+          <div className="flex items-center gap-3">
+            <span className={`text-[10px] font-semibold px-2.5 py-1 rounded-full ${
+              campaign.status === 'ACTIVE' ? 'bg-green-500/10 text-green-500' : 'bg-yellow-500/10 text-yellow-600 dark:text-yellow-400'
+            }`}>{campaign.status}</span>
+            <ChevronDown className={`w-4 h-4 text-content-muted transition-transform ${expanded ? 'rotate-180' : ''}`} />
+          </div>
+        </button>
+        {expanded && (
+          <div className="px-5 pb-5 border-t border-surface-border pt-4">
+            {loadingAds ? (
+              <p className="text-content-muted text-sm text-center py-4">Loading ads...</p>
+            ) : ads.length === 0 ? (
+              <p className="text-content-muted text-sm text-center py-4">No ads found in this campaign</p>
+            ) : (
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                {ads.map((ad) => (
+                  <div key={ad.id} className="bg-surface-raised rounded-xl p-3 space-y-2">
+                    {ad.creative?.thumbnail_url ? (
+                      <img src={ad.creative.thumbnail_url} alt={ad.name} className="w-full aspect-square object-cover rounded-lg" />
+                    ) : (
+                      <div className="w-full aspect-square bg-surface-border rounded-lg flex items-center justify-center">
+                        <Eye className="w-6 h-6 text-content-muted" />
+                      </div>
+                    )}
+                    <p className="text-[12px] font-medium text-content-primary truncate">{ad.name}</p>
+                    <p className={`text-[10px] font-semibold ${ad.status === 'ACTIVE' ? 'text-green-500' : 'text-content-muted'}`}>{ad.status}</p>
+                    {ad.insights?.data?.[0] && (
+                      <div className="flex gap-2 text-[10px] text-content-muted">
+                        <span>{formatNum(ad.insights.data[0].impressions)} imp</span>
+                        <span>{formatNum(ad.insights.data[0].clicks)} clicks</span>
+                        <span>${parseFloat(ad.insights.data[0].spend || 0).toFixed(2)}</span>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
