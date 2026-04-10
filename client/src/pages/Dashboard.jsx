@@ -198,48 +198,51 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* AI Agents */}
-      <div className="mb-5">
-        <h2 className="text-lg font-semibold text-content-primary mb-3 flex items-center gap-2">
-          <Zap className="w-5 h-5 text-brand-purple" /> Agents
-        </h2>
-        <div className="grid grid-cols-3 md:grid-cols-6 gap-2.5">
-          {[
-            { name: 'Sales', icon: DollarSign, color: 'text-green-500', bg: 'bg-green-500/10', status: 'coming soon' },
-            { name: 'Campaign Mgmt', icon: Megaphone, color: 'text-blue-500', bg: 'bg-blue-500/10', status: 'coming soon' },
-            { name: 'Creative', icon: Palette, color: 'text-pink-500', bg: 'bg-pink-500/10', status: 'coming soon' },
-            { name: 'Project Mgmt', icon: Target, color: 'text-orange-500', bg: 'bg-orange-500/10', status: 'coming soon' },
-            { name: 'Analytics', icon: BarChart3, color: 'text-brand-purple', bg: 'bg-brand-purple/10', status: 'coming soon' },
-            { name: 'Retention', icon: Users, color: 'text-cyan-500', bg: 'bg-cyan-500/10', status: 'coming soon' },
-          ].map((agent) => {
-            const AgentIcon = agent.icon;
-            return (
-              <div key={agent.name} className="glossy rounded-2xl p-4 opacity-70 cursor-default">
-                <div className="relative z-10 text-center">
-                  <div className={`w-10 h-10 rounded-xl ${agent.bg} flex items-center justify-center mx-auto mb-2`}>
-                    <AgentIcon className={`w-5 h-5 ${agent.color}`} />
+
+      {/* 2-Column Layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+
+        {/* LEFT COLUMN — Actions + Agents */}
+        <div className="lg:col-span-1 space-y-5">
+          {/* Agents */}
+          <div>
+            <h2 className="text-[14px] font-semibold text-content-primary mb-3 flex items-center gap-2">
+              <Zap className="w-4 h-4 text-brand-purple" /> Agents
+            </h2>
+            <div className="grid grid-cols-3 gap-2">
+              {[
+                { name: 'Sales', icon: DollarSign, color: 'text-green-500', bg: 'bg-green-500/10' },
+                { name: 'Campaign', icon: Megaphone, color: 'text-blue-500', bg: 'bg-blue-500/10' },
+                { name: 'Creative', icon: Palette, color: 'text-pink-500', bg: 'bg-pink-500/10' },
+                { name: 'Projects', icon: Target, color: 'text-orange-500', bg: 'bg-orange-500/10' },
+                { name: 'Analytics', icon: BarChart3, color: 'text-brand-purple', bg: 'bg-brand-purple/10' },
+                { name: 'Retention', icon: Users, color: 'text-cyan-500', bg: 'bg-cyan-500/10' },
+              ].map((agent) => {
+                const AgentIcon = agent.icon;
+                return (
+                  <div key={agent.name} className="glossy rounded-xl p-3 opacity-70 cursor-default">
+                    <div className="relative z-10 text-center">
+                      <div className={`w-8 h-8 rounded-lg ${agent.bg} flex items-center justify-center mx-auto mb-1.5`}>
+                        <AgentIcon className={`w-4 h-4 ${agent.color}`} />
+                      </div>
+                      <p className="text-[10px] font-semibold text-content-primary">{agent.name}</p>
+                      <p className="text-[8px] text-content-muted uppercase">Soon</p>
+                    </div>
                   </div>
-                  <p className="text-[11px] font-semibold text-content-primary">{agent.name}</p>
-                  <p className="text-[9px] text-content-muted mt-0.5 uppercase tracking-wider">{agent.status}</p>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
+                );
+              })}
+            </div>
+          </div>
 
-      {/* Performance Dashboard */}
-      <PerformanceDashboard profileId={id} />
+          {error && (
+            <div className="p-3 bg-red-500/5 border border-red-500/10 rounded-2xl text-red-600 dark:text-red-400 text-[12px]">
+              {error}
+            </div>
+          )}
 
-      {error && (
-        <div className="mb-5 p-4 bg-red-500/5 border border-red-500/10 rounded-2xl text-red-600 dark:text-red-400 text-sm">
-          {error}
-        </div>
-      )}
-
-      {/* Actions */}
-      <div className="space-y-2.5">
-        <h2 className="text-lg font-semibold mb-3 text-content-primary">Actions</h2>
+          {/* Actions */}
+          <div className="space-y-2">
+            <h2 className="text-[14px] font-semibold mb-2 text-content-primary">Actions</h2>
 
         {isLeadGen && (
           <>
@@ -311,33 +314,42 @@ export default function Dashboard() {
             onExecute={() => setMetaCampaignModal(true)}
           />
         )}
+          </div>
+
+          {/* Generated Assets */}
+          {Object.keys(assets).length > 0 && (
+            <div>
+              <h2 className="text-[14px] font-semibold mb-2 text-content-primary">Generated Assets</h2>
+              <div className="grid grid-cols-2 gap-2">
+                {Object.entries(assets).map(([key, data]) => (
+                  <motion.button key={key} whileHover={{ y: -1 }}
+                    onClick={() => {
+                      const type = key === 'landing-page' ? 'html' : key === 'logo-concepts' || key === 'product-mockups' ? 'images' : 'json';
+                      const displayData = type === 'html' ? data.html : type === 'images' ? data.concepts || data.mockups : data;
+                      setViewing({ title: key.replace(/-/g, ' '), data: displayData, type });
+                    }}
+                    className="glossy p-3 rounded-xl hover:shadow-elevated-lg transition-all text-left"
+                  >
+                    <div className="relative z-10">
+                      <p className="text-[12px] font-semibold capitalize text-content-primary">{key.replace(/-/g, ' ')}</p>
+                      <p className="text-[10px] text-content-muted">View</p>
+                    </div>
+                  </motion.button>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* RIGHT COLUMN — Performance + Campaigns + Activity */}
+        <div className="lg:col-span-2 space-y-5">
+          <PerformanceDashboard profileId={id} />
+          <ApprovalQueue profileId={id} />
+          <ActivityFeed profileId={id} />
+        </div>
       </div>
 
-      {/* Approval Queue — shows pending Meta actions */}
-      <ApprovalQueue profileId={id} />
-
-      {/* Meta Campaign Prep Modal */}
-      {metaCampaignModal && (
-        <MetaCampaignModal
-          profile={profile}
-          onClose={() => setMetaCampaignModal(false)}
-          onSubmitted={() => setMetaCampaignModal(false)}
-        />
-      )}
-
-      {/* Edit Profile Modal */}
-      {editProfileOpen && (
-        <EditProfileModal
-          profile={profile}
-          onClose={() => setEditProfileOpen(false)}
-          onSaved={(updated) => {
-            setCurrentProfile(updated);
-            setEditProfileOpen(false);
-          }}
-        />
-      )}
-
-      {/* Connected Accounts */}
+      {/* Connected Accounts — full width below */}
       <ProfileConnections
         profileId={id}
         connections={connections}
@@ -346,33 +358,13 @@ export default function Dashboard() {
         setConnectingPlatform={setConnectingPlatform}
       />
 
-      {/* Activity Feed */}
-      <ActivityFeed profileId={id} />
-
-      {/* Generated Assets */}
-      {Object.keys(assets).length > 0 && (
-        <div className="mt-10">
-          <h2 className="text-lg font-semibold mb-4 text-content-primary">Generated Assets</h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-            {Object.entries(assets).map(([key, data]) => (
-              <motion.button
-                key={key}
-                whileHover={{ y: -2 }}
-                onClick={() => {
-                  const type = key === 'landing-page' ? 'html' : key === 'logo-concepts' || key === 'product-mockups' ? 'images' : 'json';
-                  const displayData = type === 'html' ? data.html : type === 'images' ? data.concepts || data.mockups : data;
-                  setViewing({ title: key.replace(/-/g, ' '), data: displayData, type });
-                }}
-                className="glossy p-4 rounded-2xl hover:shadow-elevated-lg transition-all duration-300 text-left"
-              >
-                <div className="relative z-10">
-                  <p className="text-[13px] font-semibold capitalize text-content-primary">{key.replace(/-/g, ' ')}</p>
-                  <p className="text-[11px] text-content-muted mt-1">Click to view</p>
-                </div>
-              </motion.button>
-            ))}
-          </div>
-        </div>
+      {/* Modals */}
+      {metaCampaignModal && (
+        <MetaCampaignModal profile={profile} onClose={() => setMetaCampaignModal(false)} onSubmitted={() => setMetaCampaignModal(false)} />
+      )}
+      {editProfileOpen && (
+        <EditProfileModal profile={profile} onClose={() => setEditProfileOpen(false)}
+          onSaved={(updated) => { setCurrentProfile(updated); setEditProfileOpen(false); }} />
       )}
 
       {viewing && <AssetViewer title={viewing.title} data={viewing.data} type={viewing.type} onClose={() => setViewing(null)} />}

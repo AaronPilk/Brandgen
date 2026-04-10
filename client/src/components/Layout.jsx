@@ -8,6 +8,8 @@ export default function Layout({ children }) {
   const location = useLocation();
   const isHome = location.pathname === '/';
 
+  const isDashboard = location.pathname.startsWith('/dashboard/') || location.pathname.startsWith('/crm/');
+
   return (
     <div className="min-h-screen bg-surface-bg transition-colors duration-500">
       {/* Ambient glow */}
@@ -55,7 +57,7 @@ export default function Layout({ children }) {
 
       {/* Content */}
       <main className="pt-14 min-h-screen">
-        <div className={`mx-auto px-6 ${isHome ? 'max-w-5xl' : 'max-w-3xl'} py-12`}>
+        <div className={`mx-auto px-6 ${isDashboard ? 'max-w-7xl' : isHome ? 'max-w-5xl' : 'max-w-3xl'} py-8`}>
           {children}
         </div>
       </main>
