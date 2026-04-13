@@ -1,7 +1,17 @@
 import { Router } from 'express';
-import { createUser, loginUser, validateToken } from '../services/auth.js';
+import { createUser, loginUser, validateToken, listUsers, updateUserRole, deleteUser } from '../services/auth.js';
 
 const router = Router();
+
+// Admin middleware
+function requireAdmin(req, res, next) {
+  const token = req.headers.authorization?.replace('Bearer ', '');
+  const user = validateToken(token);
+  if (!user) return res.status(401).json({ error: 'Not authenticated' });
+  if (user.role !== 'admin') return res.status(403).json({ error: 'Admin access required' });
+  req.user = user;
+  next();
+}
 
 router.post('/register', (req, res) => {
   try {
@@ -34,7 +44,39 @@ router.get('/me', (req, res) => {
 });
 
 router.post('/logout', (req, res) => {
-  // Session cleanup handled client-side by removing token
+  res.json({ success: true });
+});
+
+// Admin: list all users
+router.get('/users', requireAdmin, (req, res) => {
+  res.json(listUsers());
+});
+
+// Admin: create employee account
+router.post('/users', requireAdmin, (req, res) => {
+  try {
+    const { email, password, name, role } = req.body;
+    if (!email || !password) return res.status(400).json({ error: 'Email and password required' });
+    const user = createUser(email, password, name || '', role || 'employee');
+    res.json(user);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+// Admin: update user role
+router.patch('/users/:id/role', requireAdmin, (req, res) => {
+  try {
+    const user = updateUserRole(req.params.id, req.body.role);
+    res.json(user);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+// Admin: delete user
+router.delete('/users/:id', requireAdmin, (req, res) => {
+  deleteUser(req.params.id);
   res.json({ success: true });
 });
 

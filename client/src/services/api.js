@@ -84,6 +84,12 @@ export const login = (email, password) =>
 
 export const getMe = () => request('/auth/me');
 
+// Admin
+export const getUsers = () => request('/auth/users');
+export const createUserAdmin = (data) => request('/auth/users', { method: 'POST', body: JSON.stringify(data) });
+export const updateUserRole = (id, role) => request(`/auth/users/${id}/role`, { method: 'PATCH', body: JSON.stringify({ role }) });
+export const deleteUserAdmin = (id) => request(`/auth/users/${id}`, { method: 'DELETE' });
+
 // Meta Ads
 export const getMetaAdsStatus = () => request('/meta-ads/status');
 
