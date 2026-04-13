@@ -76,6 +76,29 @@ export function logoutUser(token) {
   dbDelete('sessions', token);
 }
 
+export function updateUser(userId, { name, email, password }) {
+  const user = dbGet('users', userId);
+  if (!user) throw new Error('User not found');
+
+  if (name !== undefined) user.name = name;
+
+  if (email !== undefined && email !== user.email) {
+    // Check email uniqueness
+    const existing = dbList('users', (u) => u.email === email && u.id !== userId);
+    if (existing.length > 0) throw new Error('Email already in use');
+    user.email = email;
+  }
+
+  if (password) {
+    const salt = randomBytes(16).toString('hex');
+    user.salt = salt;
+    user.password = hashPassword(password, salt);
+  }
+
+  dbSet('users', userId, user);
+  return { id: user.id, email: user.email, name: user.name, role: user.role };
+}
+
 export function listUsers() {
   return dbList('users').map((u) => ({
     id: u.id,

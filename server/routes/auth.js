@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { createUser, loginUser, validateToken, listUsers, updateUserRole, deleteUser } from '../services/auth.js';
+import { createUser, loginUser, validateToken, listUsers, updateUserRole, deleteUser, updateUser } from '../services/auth.js';
 
 const router = Router();
 
@@ -41,6 +41,19 @@ router.get('/me', (req, res) => {
   const user = validateToken(token);
   if (!user) return res.status(401).json({ error: 'Not authenticated' });
   res.json(user);
+});
+
+// Update own account (name, email, password)
+router.patch('/me', (req, res) => {
+  const token = req.headers.authorization?.replace('Bearer ', '');
+  const currentUser = validateToken(token);
+  if (!currentUser) return res.status(401).json({ error: 'Not authenticated' });
+  try {
+    const updated = updateUser(currentUser.id, req.body);
+    res.json(updated);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
 });
 
 router.post('/logout', (req, res) => {

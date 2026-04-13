@@ -93,6 +93,9 @@ export const login = (email, password) =>
 
 export const getMe = () => request('/auth/me');
 
+export const updateMe = (data) =>
+  request('/auth/me', { method: 'PATCH', body: JSON.stringify(data) });
+
 // Admin
 export const getUsers = () => request('/auth/users');
 export const createUserAdmin = (data) => request('/auth/users', { method: 'POST', body: JSON.stringify(data) });
