@@ -16,6 +16,7 @@ import Connections from './pages/Connections';
 import CRM from './pages/CRM';
 import Team from './pages/Team';
 import Usage from './pages/Usage';
+import DevChat from './pages/DevChat';
 
 export default function App() {
   const { setApiStatus, budgetSet, theme, user, token, setAuth, logout } = useStore();
@@ -55,6 +56,7 @@ export default function App() {
           <Route path="/profiles" element={<ProfilesList />} />
           <Route path="/team" element={<Team />} />
           <Route path="/usage" element={<Usage />} />
+          <Route path="/internal/dev-chat" element={<DevChat />} />
         </Routes>
       </AnimatePresence>
     </Layout>
