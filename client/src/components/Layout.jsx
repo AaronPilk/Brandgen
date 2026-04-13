@@ -2,6 +2,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { Settings, FolderOpen, Zap, Sun, Moon, ArrowRight, Plug, LogOut, Users } from 'lucide-react';
 import { useStore } from '../store/useStore';
 import CostTracker from './CostTracker';
+import FloatingAssistant from './FloatingAssistant';
 
 export default function Layout({ children }) {
   const { theme, toggleTheme, currentProfile, user, logout } = useStore();
@@ -67,6 +68,9 @@ export default function Layout({ children }) {
           {children}
         </div>
       </main>
+
+      {/* Floating AI Assistant — admin only, self-gates */}
+      <FloatingAssistant />
     </div>
   );
 }

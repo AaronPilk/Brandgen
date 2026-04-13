@@ -39,6 +39,13 @@ export function loginUser(email, password) {
   const hashed = hashPassword(password, user.salt);
   if (hashed !== user.password) throw new Error('Invalid email or password');
 
+  // Backfill role for pre-existing users
+  if (!user.role) {
+    const allUsers = dbList('users');
+    user.role = allUsers.length <= 1 ? 'admin' : 'employee';
+    dbSet('users', user.id, user);
+  }
+
   // Generate session token
   const token = randomBytes(32).toString('hex');
   dbSet('sessions', token, { userId: user.id, createdAt: Date.now() });
@@ -52,6 +59,16 @@ export function validateToken(token) {
   if (!session) return null;
   const user = dbGet('users', session.userId);
   if (!user) return null;
+
+  // Backfill role for users created before role system was added
+  // First user in the system defaults to admin
+  if (!user.role) {
+    const allUsers = dbList('users');
+    const isFirstUser = allUsers.length <= 1 || allUsers[0]?.id === user.id;
+    user.role = isFirstUser ? 'admin' : 'employee';
+    dbSet('users', user.id, user); // persist the fix
+  }
+
   return { id: user.id, email: user.email, name: user.name, role: user.role };
 }
 
