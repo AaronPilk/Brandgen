@@ -438,7 +438,7 @@ function InputModal({ config, onClose, onSubmit }) {
                     <span className="text-[12px] text-content-secondary">
                       {files.length > 0 ? `${files.length} file(s)` : 'Click to upload'}
                     </span>
-                    <input type="file" className="hidden" multiple accept=".pdf,.png,.jpg,.jpeg,.webp" onChange={(e) => setFiles(Array.from(e.target.files).slice(0, 5))} />
+                    <input type="file" className="hidden" multiple accept=".pdf,.png,.jpg,.jpeg,.webp,.gif,.svg,.doc,.docx,.xlsx,.pptx,.csv,.txt" onChange={(e) => setFiles(Array.from(e.target.files).slice(0, 20))} />
                   </label>
                 )}
               </div>

@@ -115,7 +115,7 @@ router.post('/email-sequences', checkBudget('email-sequences'), async (req, res)
 
     const userPrompt = `Create email sequences for: ${intake.industry || intake.brandName}. Sales cycle: ${intake.salesCycle || 'varies'}. Goal: ${intake.primaryGoal || 'nurture to purchase'}. Target: ${intake.geoTargets || intake.targetCustomer}. Differentiator: ${intake.differentiator || intake.brandVibe}.`;
 
-    const result = await generateWithClaude(systemPrompt, userPrompt, 800);
+    const result = await generateWithClaude(systemPrompt, userPrompt, 800, 'fast');
     const cost = trackSpend(req.budgetInfo.sessionId, result.usage, 'email-sequences');
 
     logEvent(profile.id, 'EMAIL_SEQUENCES_GENERATED', { cost });
@@ -135,7 +135,7 @@ router.post('/sms-sequences', checkBudget('sms-sequences'), async (req, res) => 
 
     const userPrompt = `Create SMS follow-up sequence for: ${intake.industry || intake.brandName}. Sales cycle: ${intake.salesCycle || 'varies'}. Goal: ${intake.primaryGoal || 'book appointment'}. Industry: ${intake.industry || 'general'}.`;
 
-    const result = await generateWithClaude(systemPrompt, userPrompt, 800);
+    const result = await generateWithClaude(systemPrompt, userPrompt, 600, 'fast');
     const cost = trackSpend(req.budgetInfo.sessionId, result.usage, 'sms-sequences');
 
     logEvent(profile.id, 'SMS_SEQUENCES_GENERATED', { cost });
@@ -235,7 +235,7 @@ router.post('/social-setup', checkBudget('social-setup'), async (req, res) => {
 
     const userPrompt = `Set up ${platform} for: ${intake.brandName || intake.industry}. Target audience: ${intake.targetCustomer || intake.geoTargets}. Brand vibe: ${intake.brandVibe || 'professional'}. Industry: ${intake.industry || intake.whatYouSell}.`;
 
-    const result = await generateWithClaude(systemPrompt, userPrompt, 800);
+    const result = await generateWithClaude(systemPrompt, userPrompt, 800, 'fast');
     const cost = trackSpend(req.budgetInfo.sessionId, result.usage, 'social-setup');
 
     res.json({ setup: result.text, platform, usage: result.usage, cost });

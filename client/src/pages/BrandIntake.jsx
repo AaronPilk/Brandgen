@@ -113,7 +113,7 @@ export default function BrandIntake() {
 
   const nextStep = () => { const idx = steps.indexOf(step); if (idx < steps.length - 1) setStep(steps[idx + 1]); };
   const prevStep = () => { const idx = steps.indexOf(step); if (idx > 0) setStep(steps[idx - 1]); else navigate('/'); };
-  const handleFileChange = (e) => setFiles(Array.from(e.target.files).slice(0, 5));
+  const handleFileChange = (e) => setFiles(Array.from(e.target.files).slice(0, 20));
 
   const handleSubmit = async () => {
     setLoading(true);
@@ -354,13 +354,13 @@ export default function BrandIntake() {
           <p className="text-content-secondary text-sm">
             {subMode === 'existing'
               ? 'Upload your current logo, brand guidelines, product photos, or any reference material.'
-              : 'PDFs, screenshots, research images — max 5 files. Optional.'}
+              : 'PDFs, screenshots, research images — max 20 files. Optional.'}
           </p>
           <label className="flex flex-col items-center justify-center w-full h-44 border-2 border-dashed border-surface-border rounded-3xl cursor-pointer hover:border-brand-purple/30 hover:bg-brand-purple/[0.02] transition-all duration-300">
             <Upload className="w-8 h-8 text-content-muted mb-3" />
             <span className="text-sm text-content-secondary font-medium">{files.length > 0 ? `${files.length} file(s) selected` : 'Click to upload'}</span>
             <span className="text-[11px] text-content-muted mt-1">PDF, PNG, JPG, WebP</span>
-            <input type="file" className="hidden" multiple accept=".pdf,.png,.jpg,.jpeg,.webp" onChange={handleFileChange} />
+            <input type="file" className="hidden" multiple accept=".pdf,.png,.jpg,.jpeg,.webp,.gif,.svg,.doc,.docx,.xlsx,.pptx,.csv,.txt" onChange={handleFileChange} />
           </label>
           {files.length > 0 && (
             <div className="space-y-2">

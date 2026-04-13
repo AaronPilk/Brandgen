@@ -125,7 +125,7 @@ export default function LeadGenIntake() {
 
   const set = (key, val) => setForm((p) => ({ ...p, [key]: val }));
   const isOperating = form.businessStage === 'operating';
-  const handleFileChange = (e) => setFiles(Array.from(e.target.files).slice(0, 5));
+  const handleFileChange = (e) => setFiles(Array.from(e.target.files).slice(0, 20));
   const toggleChannel = (ch) => set('marketingChannels',
     form.marketingChannels.includes(ch)
       ? form.marketingChannels.filter((c) => c !== ch)
@@ -314,14 +314,14 @@ export default function LeadGenIntake() {
       {step === 'files' && (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-5">
           <h2 className="text-lg font-semibold">Upload Supporting Files</h2>
-          <p className="text-content-secondary text-sm">PDFs, competitor screenshots, images — max 5 files. Optional.</p>
+          <p className="text-content-secondary text-sm">PDFs, competitor screenshots, images — max 20 files. Optional.</p>
           <label className="flex flex-col items-center justify-center w-full h-44 border-2 border-dashed border-surface-border rounded-3xl cursor-pointer hover:border-brand-purple/30 hover:bg-brand-purple/[0.02] transition-all duration-300">
             <Upload className="w-8 h-8 text-content-muted mb-3" />
             <span className="text-sm text-content-secondary font-medium">
               {files.length > 0 ? `${files.length} file(s) selected` : 'Click to upload'}
             </span>
             <span className="text-[11px] text-content-muted mt-1">PDF, PNG, JPG, WebP</span>
-            <input type="file" className="hidden" multiple accept=".pdf,.png,.jpg,.jpeg,.webp" onChange={handleFileChange} />
+            <input type="file" className="hidden" multiple accept=".pdf,.png,.jpg,.jpeg,.webp,.gif,.svg,.doc,.docx,.xlsx,.pptx,.csv,.txt" onChange={handleFileChange} />
           </label>
           {files.length > 0 && (
             <div className="space-y-2">
