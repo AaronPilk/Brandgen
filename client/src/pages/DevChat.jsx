@@ -49,17 +49,49 @@ export default function DevChat() {
     setLoading(true);
 
     try {
-      const res = await fetch(`${BASE}/dev-chat`, {
-        method: 'POST',
-        headers: getAuthHeaders(),
-        body: JSON.stringify({ messages: updated }),
-      });
+      // Check for /plan command
+      if (text.startsWith('/plan ')) {
+        const goal = text.substring(6).trim();
+        const res = await fetch(`${BASE}/planner/plan`, {
+          method: 'POST',
+          headers: getAuthHeaders(),
+          body: JSON.stringify({ goal }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Request failed');
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Request failed');
+        // Format plan as readable text
+        const plan = data.plan || {};
+        let planText = `**Plan:** ${plan.summary || 'No summary'}\n\n`;
+        if (plan.steps?.length) {
+          planText += plan.steps.map((s) =>
+            `**Step ${s.step}: ${s.name}**\nWorkflow: \`${s.workflow}\`\nReason: ${s.reason}${s.missingInputs?.length ? `\nMissing: ${s.missingInputs.join(', ')}` : ''}${s.dependsOn?.length ? `\nDepends on: step ${s.dependsOn.join(', ')}` : ''}`
+          ).join('\n\n');
+        }
+        if (plan.missingInfo?.length) {
+          planText += `\n\n**Questions:**\n${plan.missingInfo.map((q) => `- ${q}`).join('\n')}`;
+        }
+        if (plan.estimatedTotalCost) {
+          planText += `\n\n**Estimated cost:** ${plan.estimatedTotalCost}`;
+        }
+        planText += `\n\n_Mode: ${data.executionMode} (read-only, no actions executed)_`;
 
-      setMessages([...updated, { role: 'assistant', content: data.reply }]);
-      setLastUsage(data.usage);
+        setMessages([...updated, { role: 'assistant', content: planText }]);
+        setLastUsage({ provider: data.provider, model: data.model, inputTokens: data.usage?.inputTokens, outputTokens: data.usage?.outputTokens, latencyMs: data.latencyMs });
+      } else {
+        // Regular chat
+        const res = await fetch(`${BASE}/dev-chat`, {
+          method: 'POST',
+          headers: getAuthHeaders(),
+          body: JSON.stringify({ messages: updated }),
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Request failed');
+
+        setMessages([...updated, { role: 'assistant', content: data.reply }]);
+        setLastUsage(data.usage);
+      }
     } catch (err) {
       setMessages([...updated, { role: 'assistant', content: `Error: ${err.message}` }]);
     }
@@ -94,7 +126,7 @@ export default function DevChat() {
       <div className="flex-1 overflow-y-auto space-y-3 pb-4">
         {messages.length === 0 && (
           <div className="flex items-center justify-center h-full text-content-muted text-sm">
-            Ask anything. No context is loaded by default.
+            Ask anything. Type /plan to generate a task plan.
           </div>
         )}
         {messages.map((msg, i) => (

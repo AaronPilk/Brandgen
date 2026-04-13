@@ -11,6 +11,7 @@ import { metaAdsRoutes } from './routes/metaAds.js';
 import { activityRoutes } from './routes/activity.js';
 import { crmRoutes } from './routes/crm.js';
 import { devChatRoutes } from './routes/devChat.js';
+import { plannerRoutes } from './routes/planner.js';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -29,6 +30,7 @@ app.use('/api/meta-ads', metaAdsRoutes);
 app.use('/api/activity', activityRoutes);
 app.use('/api/crm', crmRoutes);
 app.use('/api/dev-chat', devChatRoutes);
+app.use('/api/planner', plannerRoutes);
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: Date.now() });
