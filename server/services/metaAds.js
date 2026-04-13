@@ -57,8 +57,21 @@ export async function getCampaignInsights(campaignId, datePreset = 'last_30d') {
 
 // Get ads with creative previews for a campaign
 export async function getCampaignAds(campaignId) {
-  const fields = 'id,name,status,creative{id,name,thumbnail_url,object_story_spec,asset_feed_spec},insights.date_preset(last_30d){impressions,clicks,spend,ctr,cpc}';
-  return metaFetch(`/${campaignId}/ads?fields=${fields}&limit=20`);
+  const fields = 'id,name,status,creative{id,name,thumbnail_url,image_url,object_story_spec,effective_object_story_id},insights.date_preset(last_30d){impressions,clicks,spend,ctr,cpc}';
+  const result = await metaFetch(`/${campaignId}/ads?fields=${fields}&limit=20`);
+
+  // For each ad, try to get full-size ad preview
+  if (result.data) {
+    for (const ad of result.data) {
+      if (ad.creative?.id) {
+        try {
+          const preview = await metaFetch(`/${ad.creative.id}?fields=thumbnail_url,image_url,object_story_spec`);
+          if (preview.image_url) ad.creative.image_url = preview.image_url;
+        } catch {}
+      }
+    }
+  }
+  return result;
 }
 
 // Get all ad creatives for the account

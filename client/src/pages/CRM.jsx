@@ -416,15 +416,33 @@ export default function CRM() {
               </div>
             </div>
           ) : (
-            <div className="space-y-4">
-              {campaigns.map((c) => (
-                <CampaignCard key={c.id} campaign={c} />
-              ))}
-              {campaigns.length === 0 && (
-                <div className="glossy rounded-2xl p-8 text-center">
-                  <div className="relative z-10 text-content-muted text-sm">No campaigns found in this ad account</div>
-                </div>
-              )}
+            <div>
+              {/* Campaign summary */}
+              <div className="grid grid-cols-3 gap-3 mb-6">
+                <div className="glossy rounded-xl p-4"><div className="relative z-10">
+                  <p className="text-[10px] text-content-muted uppercase tracking-wider mb-1">Total Campaigns</p>
+                  <p className="text-2xl font-bold text-content-primary">{campaigns.length}</p>
+                </div></div>
+                <div className="glossy rounded-xl p-4"><div className="relative z-10">
+                  <p className="text-[10px] text-content-muted uppercase tracking-wider mb-1">Active</p>
+                  <p className="text-2xl font-bold text-green-500">{campaigns.filter(c => c.status === 'ACTIVE').length}</p>
+                </div></div>
+                <div className="glossy rounded-xl p-4"><div className="relative z-10">
+                  <p className="text-[10px] text-content-muted uppercase tracking-wider mb-1">Paused</p>
+                  <p className="text-2xl font-bold text-yellow-500">{campaigns.filter(c => c.status === 'PAUSED').length}</p>
+                </div></div>
+              </div>
+
+              <div className="space-y-3">
+                {campaigns.map((c) => (
+                  <CampaignCard key={c.id} campaign={c} />
+                ))}
+                {campaigns.length === 0 && (
+                  <div className="glossy rounded-2xl p-8 text-center">
+                    <div className="relative z-10 text-content-muted text-sm">No campaigns found</div>
+                  </div>
+                )}
+              </div>
             </div>
           )}
         </div>
@@ -555,54 +573,93 @@ function CampaignCard({ campaign }) {
     setExpanded(!expanded);
   };
 
+  const statusColor = campaign.status === 'ACTIVE' ? 'bg-green-500' : 'bg-yellow-500';
+  const objective = campaign.objective?.replace('OUTCOME_', '') || '';
+  const budget = campaign.daily_budget ? `$${(campaign.daily_budget / 100).toFixed(0)}/day` : '';
+
   return (
     <div className="glossy rounded-2xl overflow-hidden">
       <div className="relative z-10">
-        <button onClick={toggleExpand} className="w-full text-left p-5 flex items-center justify-between hover:bg-surface-raised/30 transition-colors">
-          <div>
-            <p className="text-[14px] font-semibold text-content-primary">{campaign.name}</p>
-            <p className="text-[12px] text-content-muted mt-0.5">
-              {campaign.objective?.replace('OUTCOME_', '')} · {campaign.daily_budget ? `$${(campaign.daily_budget / 100).toFixed(0)}/day` : ''} · ID: {campaign.id}
-            </p>
+        {/* Campaign Header */}
+        <button onClick={toggleExpand} className="w-full text-left p-4 flex items-center gap-4 hover:bg-surface-raised/30 transition-colors">
+          <div className={`w-2 h-10 rounded-full ${statusColor} shrink-0`} />
+          <div className="flex-1 min-w-0">
+            <p className="text-[14px] font-semibold text-content-primary truncate">{campaign.name}</p>
+            <div className="flex items-center gap-2 mt-0.5">
+              {objective && <span className="text-[11px] px-2 py-0.5 rounded-full bg-surface-raised text-content-muted font-medium">{objective}</span>}
+              {budget && <span className="text-[11px] text-content-muted">{budget}</span>}
+            </div>
           </div>
-          <div className="flex items-center gap-3">
-            <span className={`text-[10px] font-semibold px-2.5 py-1 rounded-full ${
+          <div className="flex items-center gap-2 shrink-0">
+            <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full ${
               campaign.status === 'ACTIVE' ? 'bg-green-500/10 text-green-500' : 'bg-yellow-500/10 text-yellow-600 dark:text-yellow-400'
             }`}>{campaign.status}</span>
-            <ChevronDown className={`w-4 h-4 text-content-muted transition-transform ${expanded ? 'rotate-180' : ''}`} />
+            <ChevronDown className={`w-4 h-4 text-content-muted transition-transform duration-200 ${expanded ? 'rotate-180' : ''}`} />
           </div>
         </button>
+
+        {/* Expanded Ads */}
         {expanded && (
-          <div className="px-5 pb-5 border-t border-surface-border pt-4">
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="border-t border-surface-border">
             {loadingAds ? (
-              <p className="text-content-muted text-sm text-center py-4">Loading ads...</p>
+              <div className="flex items-center justify-center py-8 gap-2 text-content-muted">
+                <div className="w-4 h-4 border-2 border-brand-purple border-t-transparent rounded-full animate-spin" />
+                <span className="text-[13px]">Loading creatives...</span>
+              </div>
             ) : ads.length === 0 ? (
-              <p className="text-content-muted text-sm text-center py-4">No ads found in this campaign</p>
+              <p className="text-content-muted text-[13px] text-center py-8">No ads in this campaign</p>
             ) : (
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                {ads.map((ad) => (
-                  <div key={ad.id} className="bg-surface-raised rounded-xl p-3 space-y-2">
-                    {ad.creative?.thumbnail_url ? (
-                      <img src={ad.creative.thumbnail_url} alt={ad.name} className="w-full aspect-square object-cover rounded-lg" />
-                    ) : (
-                      <div className="w-full aspect-square bg-surface-border rounded-lg flex items-center justify-center">
-                        <Eye className="w-6 h-6 text-content-muted" />
+              <div className="p-4">
+                <p className="text-[11px] text-content-muted mb-3 font-medium">{ads.length} ad{ads.length !== 1 ? 's' : ''}</p>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  {ads.map((ad) => {
+                    const imgSrc = ad.creative?.image_url || ad.creative?.thumbnail_url;
+                    const insights = ad.insights?.data?.[0];
+                    return (
+                      <div key={ad.id} className="group rounded-xl overflow-hidden bg-surface-raised hover:shadow-elevated transition-all">
+                        {/* Image */}
+                        <div className="relative aspect-[4/5] overflow-hidden">
+                          {imgSrc ? (
+                            <img src={imgSrc} alt={ad.name} className="w-full h-full object-cover" />
+                          ) : (
+                            <div className="w-full h-full bg-surface-border flex items-center justify-center">
+                              <Megaphone className="w-8 h-8 text-content-muted/30" />
+                            </div>
+                          )}
+                          {/* Status badge overlay */}
+                          <div className="absolute top-2 right-2">
+                            <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full backdrop-blur-sm ${
+                              ad.status === 'ACTIVE' ? 'bg-green-500/80 text-white' : 'bg-black/50 text-white/80'
+                            }`}>{ad.status}</span>
+                          </div>
+                        </div>
+                        {/* Info */}
+                        <div className="p-3">
+                          <p className="text-[12px] font-medium text-content-primary truncate">{ad.name}</p>
+                          {insights && (
+                            <div className="grid grid-cols-3 gap-1 mt-2">
+                              <div>
+                                <p className="text-[9px] text-content-muted uppercase">Impr</p>
+                                <p className="text-[11px] font-semibold text-content-primary">{formatNum(insights.impressions)}</p>
+                              </div>
+                              <div>
+                                <p className="text-[9px] text-content-muted uppercase">Clicks</p>
+                                <p className="text-[11px] font-semibold text-content-primary">{formatNum(insights.clicks)}</p>
+                              </div>
+                              <div>
+                                <p className="text-[9px] text-content-muted uppercase">Spend</p>
+                                <p className="text-[11px] font-semibold text-content-primary">${parseFloat(insights.spend || 0).toFixed(0)}</p>
+                              </div>
+                            </div>
+                          )}
+                        </div>
                       </div>
-                    )}
-                    <p className="text-[12px] font-medium text-content-primary truncate">{ad.name}</p>
-                    <p className={`text-[10px] font-semibold ${ad.status === 'ACTIVE' ? 'text-green-500' : 'text-content-muted'}`}>{ad.status}</p>
-                    {ad.insights?.data?.[0] && (
-                      <div className="flex gap-2 text-[10px] text-content-muted">
-                        <span>{formatNum(ad.insights.data[0].impressions)} imp</span>
-                        <span>{formatNum(ad.insights.data[0].clicks)} clicks</span>
-                        <span>${parseFloat(ad.insights.data[0].spend || 0).toFixed(2)}</span>
-                      </div>
-                    )}
-                  </div>
-                ))}
+                    );
+                  })}
+                </div>
               </div>
             )}
-          </div>
+          </motion.div>
         )}
       </div>
     </div>
