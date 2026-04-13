@@ -102,22 +102,47 @@ async function callOpenAI(systemPrompt, userPrompt, maxTokens, quality) {
 }
 
 // Main function — tries Anthropic first, falls back to OpenAI
+// Returns enriched metadata for normalized logging
 export async function generateWithClaude(systemPrompt, userPrompt, maxTokens = 800, quality = 'standard') {
+  const startTime = Date.now();
+  let retryCount = 0;
+  let lastError = null;
+
   // Try Anthropic first
   try {
     const result = await callAnthropic(systemPrompt, userPrompt, maxTokens, quality);
-    if (result) return result;
+    if (result) {
+      return {
+        ...result,
+        latencyMs: Date.now() - startTime,
+        retryCount,
+        success: true,
+        quality,
+      };
+    }
   } catch (err) {
+    lastError = err;
+    retryCount++;
     console.log(`[AI] Anthropic failed: ${err.message}. Falling back to OpenAI...`);
   }
 
   // Fallback to OpenAI
   try {
     const result = await callOpenAI(systemPrompt, userPrompt, maxTokens, quality);
-    if (result) return result;
+    if (result) {
+      return {
+        ...result,
+        latencyMs: Date.now() - startTime,
+        retryCount,
+        success: true,
+        quality,
+        fallback: true,
+      };
+    }
   } catch (err) {
+    lastError = err;
     console.log(`[AI] OpenAI also failed: ${err.message}`);
   }
 
-  throw new Error('All AI providers unavailable. Please try again in a moment.');
+  throw new Error(`All AI providers unavailable: ${lastError?.message || 'unknown error'}`);
 }

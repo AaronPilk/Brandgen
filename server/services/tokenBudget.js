@@ -64,18 +64,27 @@ export function recordSpend(userId, amount, action, details = {}) {
   budget.monthSpent += amount;
   dbSet('budgets', userId, budget);
 
-  // Log individual transaction
+  // Log individual transaction with normalized schema
   const txId = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
   dbSet('token-transactions', txId, {
     id: txId,
     userId,
+    profileId: details.profileId || null,
     action,
+    taskType: details.taskType || action,
     amount: Math.round(amount * 100000) / 100000,
     provider: details.provider || 'unknown',
     model: details.model || '',
+    quality: details.quality || 'standard',
     inputTokens: details.inputTokens || 0,
     outputTokens: details.outputTokens || 0,
+    totalTokens: (details.inputTokens || 0) + (details.outputTokens || 0),
     images: details.images || 0,
+    latencyMs: details.latencyMs || 0,
+    success: details.success !== undefined ? details.success : true,
+    retryCount: details.retryCount || 0,
+    fallback: details.fallback || false,
+    errorType: details.errorType || null,
     timestamp: Date.now(),
   });
 
@@ -138,16 +147,32 @@ export function canAfford(userId, estimatedCost) {
   };
 }
 
-// Helper for AI routes
-export function trackAiSpend(userId, usage, action) {
-  const inputCost = (usage.inputTokens / 1000) * 0.003;
-  const outputCost = (usage.outputTokens / 1000) * 0.015;
+// Helper for AI routes — uses actual provider rates and passes full metadata
+export function trackAiSpend(userId, usage, action, extra = {}) {
+  const provider = usage.provider || 'anthropic';
+  const model = usage.model || '';
+
+  // Select rate based on actual provider and model
+  let rateKey = provider;
+  if (provider === 'anthropic' && model.includes('haiku')) rateKey = 'anthropic-fast';
+  if (provider === 'openai' && model.includes('mini')) rateKey = 'openai-fast';
+
+  const rate = RATES[rateKey] || RATES.anthropic;
+  const inputCost = (usage.inputTokens / 1000) * rate.input;
+  const outputCost = (usage.outputTokens / 1000) * rate.output;
   const totalCost = inputCost + outputCost;
+
   recordSpend(userId, totalCost, action, {
-    provider: usage.provider || 'anthropic',
-    model: usage.model || '',
+    provider,
+    model,
+    quality: usage.quality || 'standard',
     inputTokens: usage.inputTokens,
     outputTokens: usage.outputTokens,
+    latencyMs: usage.latencyMs || 0,
+    success: usage.success !== undefined ? usage.success : true,
+    retryCount: usage.retryCount || 0,
+    fallback: usage.fallback || false,
+    ...extra,
   });
   return totalCost;
 }
