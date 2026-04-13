@@ -15,6 +15,7 @@ import ProfilesList from './pages/ProfilesList';
 import Connections from './pages/Connections';
 import CRM from './pages/CRM';
 import Team from './pages/Team';
+import Usage from './pages/Usage';
 
 export default function App() {
   const { setApiStatus, budgetSet, theme, user, token, setAuth, logout } = useStore();
@@ -53,6 +54,7 @@ export default function App() {
           <Route path="/connections" element={<Connections />} />
           <Route path="/profiles" element={<ProfilesList />} />
           <Route path="/team" element={<Team />} />
+          <Route path="/usage" element={<Usage />} />
         </Routes>
       </AnimatePresence>
     </Layout>

@@ -36,20 +36,29 @@ export const deleteProfile = (id) =>
 // Config
 export const getApiStatus = () => request('/config/status');
 
-export const setBudget = (sessionId, dailyLimit) =>
+export const setBudget = (sessionId, dailyLimit, monthlyLimit) =>
   request('/config/budget', {
     method: 'POST',
-    body: JSON.stringify({ sessionId, dailyLimit }),
+    body: JSON.stringify({ sessionId, dailyLimit, monthlyLimit }),
   });
 
-export const getBudget = (sessionId) =>
-  request(`/config/budget/${sessionId}`);
+export const updateBudget = (userId, data) =>
+  request(`/config/budget/${userId}`, { method: 'PATCH', body: JSON.stringify(data) });
+
+export const getBudget = (userId) =>
+  request(`/config/budget/${userId}`);
 
 export const getEstimate = (action) =>
   request(`/config/estimate/${action}`);
 
 export const checkAffordability = (sessionId, action) =>
   request(`/config/can-afford/${sessionId}/${action}`);
+
+export const getTransactions = (userId, limit) =>
+  request(`/config/transactions/${userId}?limit=${limit || 50}`);
+
+export const getAllTransactions = (limit) =>
+  request(`/config/transactions?limit=${limit || 100}`);
 
 // AI Actions
 export const runAiAction = (action, body) =>

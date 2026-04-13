@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { useStore } from '../store/useStore';
 
 export default function CostTracker() {
@@ -9,7 +10,7 @@ export default function CostTracker() {
   const isWarning = pct > 80;
 
   return (
-    <div className="flex items-center gap-2.5 px-3 py-1.5 rounded-xl glass border border-surface-border mr-1">
+    <Link to="/usage" className="flex items-center gap-2.5 px-3 py-1.5 rounded-xl glass border border-surface-border mr-1 hover:border-brand-purple/30 transition-colors cursor-pointer">
       <div className="flex flex-col items-end">
         <span className={`text-xs font-mono font-semibold tracking-tight ${isWarning ? 'text-orange-500' : 'text-brand-purple'}`}>
           ${totalSpent.toFixed(3)}
@@ -22,6 +23,6 @@ export default function CostTracker() {
           style={{ width: `${Math.min(pct, 100)}%` }}
         />
       </div>
-    </div>
+    </Link>
   );
 }
