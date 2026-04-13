@@ -4,6 +4,10 @@ import { generateImage, isMockMode } from '../services/imageGen.js';
 import { recordSpend, estimateCost, canAfford, trackAiSpend } from '../services/tokenBudget.js';
 import { logEvent } from '../services/activityFeed.js';
 import { validateToken } from '../services/auth.js';
+import {
+  buildResearchContext, buildLandingPageContext, buildAdCreativeContext,
+  buildNurtureContext, buildVisualContext, buildSocialContext,
+} from '../services/contextBuilder.js';
 
 const router = Router();
 
@@ -44,19 +48,7 @@ router.post('/market-research', checkBudget('market-research'), async (req, res)
 
     const systemPrompt = `You are a senior market research analyst. Provide concise, actionable market research. Be specific with data points and recommendations. Output in JSON format with keys: targetAudience, competitors, marketSize, opportunities, positioning, messagingAngles.`;
 
-    // Build compact user prompt — essential fields only to reduce input tokens
-    const parts = [`Industry: ${intake.industry || intake.brandName || 'general'}`];
-    if (intake.businessType) parts.push(`Type: ${intake.businessType}`);
-    if (intake.geoTargets || intake.geoMarket) parts.push(`Geo: ${intake.geoTargets || intake.geoMarket}`);
-    if (intake.primaryGoal) parts.push(`Goal: ${intake.primaryGoal}`);
-    if (intake.adBudget) parts.push(`Budget: ${intake.adBudget}/mo`);
-    if (intake.differentiator) parts.push(`Differentiator: ${(intake.differentiator || '').substring(0, 150)}`);
-    if (intake.targetCustomer) parts.push(`Customer: ${(intake.targetCustomer || '').substring(0, 100)}`);
-    if (intake.whatYouSell) parts.push(`Sells: ${intake.whatYouSell}`);
-    if (intake.brandVibe) parts.push(`Vibe: ${intake.brandVibe}`);
-    if (intake.websiteUrl) parts.push(`Website: ${intake.websiteUrl}`);
-    if (intake.competitorUrls) parts.push(`Competitors: ${(intake.competitorUrls || '').substring(0, 200)}`);
-    const userPrompt = parts.join('. ') + '.';
+    const userPrompt = buildResearchContext(profile);
 
     const result = await generateWithClaude(systemPrompt, userPrompt, 800);
     const cost = trackSpend(req.budgetInfo.sessionId, result.usage, 'market-research');
@@ -77,18 +69,8 @@ router.post('/landing-page', checkBudget('landing-page'), async (req, res) => {
 
     const systemPrompt = `You are an expert conversion-focused landing page copywriter. Generate complete landing page HTML with inline Tailwind CSS classes. The page must be mobile-responsive, have a clear hero section, benefits, social proof section, and a strong CTA. Include form with name, email, phone fields. Output valid HTML only.`;
 
-    // Extract compact research context instead of dumping raw JSON
-    let researchContext = '';
-    if (research) {
-      try {
-        const r = typeof research === 'string' ? JSON.parse(research.replace(/```json?\s*/gi, '').replace(/```/g, '').trim()) : research;
-        if (r?.positioning) researchContext += ` Positioning: ${typeof r.positioning === 'string' ? r.positioning.substring(0, 100) : JSON.stringify(r.positioning).substring(0, 100)}.`;
-        if (r?.messagingAngles) researchContext += ` Messaging: ${typeof r.messagingAngles === 'string' ? r.messagingAngles.substring(0, 100) : JSON.stringify(r.messagingAngles).substring(0, 100)}.`;
-      } catch {
-        researchContext = typeof research === 'string' ? ` Context: ${research.substring(0, 150)}` : '';
-      }
-    }
-    const userPrompt = `Create a high-converting landing page for: ${intake.industry || intake.brandName || 'this brand'}. Goal: ${intake.primaryGoal || 'conversions'}. Target: ${intake.geoTargets || intake.targetCustomer || 'general audience'}. Differentiator: ${(intake.differentiator || intake.brandVibe || 'quality service').substring(0, 100)}.${researchContext} Include UTM parameter capture in the form. Include placeholder comments for tracking pixels.`;
+    const context = buildLandingPageContext(profile);
+    const userPrompt = `${context} Include UTM parameter capture in the form. Include placeholder comments for tracking pixels.`;
 
     const result = await generateWithClaude(systemPrompt, userPrompt, 800);
     const cost = trackSpend(req.budgetInfo.sessionId, result.usage, 'landing-page');
@@ -115,7 +97,7 @@ router.post('/ad-creatives', checkBudget('ad-creatives'), async (req, res) => {
 
     const systemPrompt = `You are a performance marketing creative strategist specializing in Meta and TikTok ads. Generate 10 ad creative concepts. For each, provide: headline, primaryText, description, callToAction, platform (Meta or TikTok), format (image/video/carousel), visualDirection (what the image/video should show). Output as JSON array.`;
 
-    const userPrompt = `Create 10 ad creatives for: ${intake.industry || intake.brandName}. Target audience: ${intake.geoTargets || intake.targetCustomer}. Goal: ${intake.primaryGoal || 'brand awareness and sales'}. Budget: ${intake.adBudget || 'moderate'}. Differentiator: ${intake.differentiator || intake.brandVibe || 'unique value'}.`;
+    const userPrompt = `Create 10 ad creatives for: ${buildAdCreativeContext(profile)}`;
 
     const result = await generateWithClaude(systemPrompt, userPrompt, 800);
     const cost = trackSpend(req.budgetInfo.sessionId, result.usage, 'ad-creatives');
@@ -135,7 +117,7 @@ router.post('/email-sequences', checkBudget('email-sequences'), async (req, res)
 
     const systemPrompt = `You are an email marketing expert. Create a 5-email nurture sequence. For each email provide: subject, preheader, body (with HTML formatting), sendDelay (days after signup), purpose. Output as JSON array. Emails should be industry-specific and conversion-focused.`;
 
-    const userPrompt = `Create email sequences for: ${intake.industry || intake.brandName}. Sales cycle: ${intake.salesCycle || 'varies'}. Goal: ${intake.primaryGoal || 'nurture to purchase'}. Target: ${intake.geoTargets || intake.targetCustomer}. Differentiator: ${intake.differentiator || intake.brandVibe}.`;
+    const userPrompt = `Create email sequences for: ${buildNurtureContext(profile)}`;
 
     const result = await generateWithClaude(systemPrompt, userPrompt, 800, 'fast');
     const cost = trackSpend(req.budgetInfo.sessionId, result.usage, 'email-sequences');
@@ -155,7 +137,7 @@ router.post('/sms-sequences', checkBudget('sms-sequences'), async (req, res) => 
 
     const systemPrompt = `You are an SMS marketing specialist. Create a 5-message SMS follow-up sequence. Each message must be under 160 characters. For each provide: message, sendDelay (hours/days after signup), purpose. Output as JSON array. Messages should feel personal, not spammy.`;
 
-    const userPrompt = `Create SMS follow-up sequence for: ${intake.industry || intake.brandName}. Sales cycle: ${intake.salesCycle || 'varies'}. Goal: ${intake.primaryGoal || 'book appointment'}. Industry: ${intake.industry || 'general'}.`;
+    const userPrompt = `Create SMS follow-up sequence for: ${buildNurtureContext(profile)}`;
 
     const result = await generateWithClaude(systemPrompt, userPrompt, 600, 'fast');
     const cost = trackSpend(req.budgetInfo.sessionId, result.usage, 'sms-sequences');
@@ -176,7 +158,7 @@ router.post('/logo-concepts', checkBudget('logo-concepts'), async (req, res) => 
     // First generate logo descriptions with Claude
     const systemPrompt = `You are a brand identity designer. Generate 3 distinct logo concept descriptions for DALL-E image generation. Each should be different in style (minimalist, bold, artistic). Output as JSON array with keys: name, dallePrompt, style, colorPalette.`;
 
-    const userPrompt = `Create 3 logo concepts for: ${intake.brandName || intake.industry}. Vibe: ${intake.brandVibe || 'modern'}. Industry: ${intake.industry || intake.whatYouSell || 'general'}.`;
+    const userPrompt = `Create 3 logo concepts for: ${buildVisualContext(profile)}`;
 
     const result = await generateWithClaude(systemPrompt, userPrompt, 500);
     const cost = trackSpend(req.budgetInfo.sessionId, result.usage, 'logo-concepts');
@@ -216,7 +198,7 @@ router.post('/product-mockups', checkBudget('product-mockups'), async (req, res)
 
     const systemPrompt = `You are a product visualization specialist. Generate 3 product mockup descriptions for DALL-E image generation. Include t-shirt mockups, packaging, and lifestyle shots. Output as JSON array with keys: name, dallePrompt, type.`;
 
-    const userPrompt = `Create 3 product mockup descriptions for: ${intake.brandName || intake.industry}. Product: ${intake.whatYouSell || 'apparel/merch'}. Vibe: ${intake.brandVibe || 'modern'}.`;
+    const userPrompt = `Create 3 product mockup descriptions for: ${buildVisualContext(profile)}`;
 
     const result = await generateWithClaude(systemPrompt, userPrompt, 500);
     const cost = trackSpend(req.budgetInfo.sessionId, result.usage, 'product-mockups');
@@ -255,7 +237,7 @@ router.post('/social-setup', checkBudget('social-setup'), async (req, res) => {
 
     const systemPrompt = `You are a social media strategist. Generate a complete ${platform} profile setup guide with: bio, profileDescription, contentPillars (3-5 topics), firstWeekPosts (5 post ideas with captions), hashtagStrategy, visualStyle. Output as JSON.`;
 
-    const userPrompt = `Set up ${platform} for: ${intake.brandName || intake.industry}. Target audience: ${intake.targetCustomer || intake.geoTargets}. Brand vibe: ${intake.brandVibe || 'professional'}. Industry: ${intake.industry || intake.whatYouSell}.`;
+    const userPrompt = `Set up ${platform} for: ${buildSocialContext(profile)}`;
 
     const result = await generateWithClaude(systemPrompt, userPrompt, 800, 'fast');
     const cost = trackSpend(req.budgetInfo.sessionId, result.usage, 'social-setup');
