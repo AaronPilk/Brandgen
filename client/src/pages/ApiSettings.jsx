@@ -368,20 +368,42 @@ function IntegrationsTab({ apiStatus }) {
   );
 }
 
+const LOGO_COLORS = {
+  meta: '#1877F2', tiktok: '#000', pinterest: '#E60023', twitter: '#000', youtube: '#FF0000', linkedinAds: '#0A66C2',
+  gohighlevel: '#28A745', hubspot: '#FF7A59', klaviyo: '#000', mailchimp: '#FFE01B', activecampaign: '#356AE6', twilio: '#F22F46',
+  shopify: '#96BF48', wordpress: '#21759B', webflow: '#4353FF', woocommerce: '#96588A', stripe: '#635BFF', printful: '#28323C',
+  google: '#4285F4', canva: '#00C4CC', notion: '#000', airtable: '#18BFFF', zoominfo: '#6B3FA0',
+  arcads: '#FF2D55', heygen: '#7C3AED', synthesia: '#0070F3', creatify: '#FF6B2B', captions: '#000', kinsta: '#5333ED',
+  anthropic: '#D4A574', openai: '#10A37F', dalle: '#10A37F', gemini: '#4285F4', grok: '#000', perplexity: '#20808D',
+  elevenlabs: '#000', vapi: '#6366F1', bland: '#000', retell: '#FF4F00',
+  n8n: '#EA4B71', make: '#6D00CC', zapier: '#FF4F00', pipedream: '#059669',
+  metaAds: '#1877F2', googleAds: '#4285F4', googleAnalytics: '#E37400', gtm: '#4285F4',
+  midjourney: '#000', runway: '#000', pika: '#FF6B35',
+};
+
+const LOGO_LETTERS = {
+  meta: 'f', tiktok: '♪', pinterest: 'P', twitter: '𝕏', youtube: '▶', linkedinAds: 'in',
+  gohighlevel: 'G', hubspot: 'H', klaviyo: 'K', mailchimp: 'M', activecampaign: 'A', twilio: 'T',
+  shopify: 'S', wordpress: 'W', webflow: 'W', woocommerce: 'W', stripe: 'S', printful: 'P',
+  google: 'G', canva: 'C', notion: 'N', airtable: 'A', zoominfo: 'Z',
+  arcads: 'A', heygen: 'H', synthesia: 'S', creatify: 'C', captions: 'C', kinsta: 'K',
+  anthropic: 'A', openai: 'O', dalle: 'D', gemini: 'G', grok: 'X', perplexity: 'P',
+  elevenlabs: '11', vapi: 'V', bland: 'B', retell: 'R',
+  n8n: 'n8n', make: 'M', zapier: '⚡', pipedream: 'P',
+  metaAds: 'M', googleAds: 'G', googleAnalytics: 'GA', gtm: 'GT',
+  midjourney: 'MJ', runway: 'R', pika: 'P',
+};
+
 function IntegrationCard({ api, apiStatus }) {
   const isConnected = apiStatus?.[api.key];
+  const color = LOGO_COLORS[api.key] || '#8B5CF6';
+  const letter = LOGO_LETTERS[api.key] || api.name[0];
 
   return (
     <div className={`glossy rounded-2xl p-3 transition-all ${isConnected ? '!border-green-500/20' : ''}`}>
       <div className="relative z-10 flex items-center gap-3">
-        {/* Real logo */}
-        <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 overflow-hidden ${isConnected ? 'bg-white dark:bg-white/10' : 'bg-surface-raised'}`}>
-          {api.logo ? (
-            <img src={api.logo} alt={api.name} className="w-6 h-6 object-contain" onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }} />
-          ) : null}
-          <div className="w-6 h-6 items-center justify-center text-content-muted text-[10px] font-bold" style={{ display: api.logo ? 'none' : 'flex' }}>
-            {api.name[0]}
-          </div>
+        <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ backgroundColor: `${color}18` }}>
+          <span className="font-bold text-[11px] leading-none" style={{ color }}>{letter}</span>
         </div>
         <div className="min-w-0 flex-1">
           <p className="text-[12px] font-semibold text-content-primary truncate">{api.name}</p>
