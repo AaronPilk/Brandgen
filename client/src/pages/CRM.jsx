@@ -171,13 +171,25 @@ export default function CRM() {
       {/* ─── OVERVIEW TAB ─── */}
       {tab === 'overview' && (
         <div className="space-y-6">
-          {/* KPI Row */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <KPICard icon={Users} label="Total Contacts" value={contactStats?.total || 0} color="text-blue-500" trend="+12%" up />
-            <KPICard icon={Target} label="Active Deals" value={dealStats?.total || 0} color="text-brand-purple" trend="+5%" up />
-            <KPICard icon={DollarSign} label="Pipeline Value" value={`$${(dealStats?.totalValue || 0).toLocaleString()}`} color="text-green-500" trend="+18%" up />
-            <KPICard icon={TrendingUp} label="Won Revenue" value={`$${(dealStats?.wonValue || 0).toLocaleString()}`} color="text-emerald-500" />
-          </div>
+          {/* KPI Row — only show if there's actual data */}
+          {(contactStats?.total > 0 || dealStats?.total > 0 || metaConfigured) ? (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <KPICard icon={Users} label="Total Contacts" value={contactStats?.total || 0} color="text-blue-500" />
+              <KPICard icon={Target} label="Active Deals" value={dealStats?.total || 0} color="text-brand-purple" />
+              <KPICard icon={DollarSign} label="Pipeline Value" value={`$${(dealStats?.totalValue || 0).toLocaleString()}`} color="text-green-500" />
+              <KPICard icon={TrendingUp} label="Won Revenue" value={`$${(dealStats?.wonValue || 0).toLocaleString()}`} color="text-emerald-500" />
+            </div>
+          ) : (
+            <div className="glossy rounded-2xl p-8 text-center">
+              <div className="relative z-10">
+                <BarChart3 className="w-10 h-10 text-content-muted/30 mx-auto mb-3" />
+                <h3 className="text-[15px] font-semibold text-content-primary mb-1">Connect your accounts to see data</h3>
+                <p className="text-[13px] text-content-secondary max-w-md mx-auto">
+                  Go back to the brand dashboard and connect Facebook, Instagram, or other platforms. Data will populate here automatically.
+                </p>
+              </div>
+            </div>
+          )}
 
           {/* Ad Performance Row */}
           {metaConfigured && metaInsights && (
