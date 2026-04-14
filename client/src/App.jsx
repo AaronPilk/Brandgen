@@ -12,7 +12,7 @@ import BrandIntake from './pages/BrandIntake';
 import Dashboard from './pages/Dashboard';
 import ApiSettings from './pages/ApiSettings';
 import ProfilesList from './pages/ProfilesList';
-import Connections from './pages/Connections';
+
 import CRM from './pages/CRM';
 import Team from './pages/Team';
 import Usage from './pages/Usage';
@@ -52,7 +52,7 @@ export default function App() {
           <Route path="/dashboard/:id" element={<Dashboard />} />
           <Route path="/crm/:id" element={<CRM />} />
           <Route path="/settings" element={<ApiSettings />} />
-          <Route path="/connections" element={<Connections />} />
+
           <Route path="/profiles" element={<ProfilesList />} />
           <Route path="/team" element={<Team />} />
           <Route path="/usage" element={<Usage />} />
