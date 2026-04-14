@@ -46,11 +46,12 @@ async function getMetaData(profileId, datePreset) {
   const conns = getProfileConnections(profileId);
   const adAccountId = conns?.meta_ads?.adAccountId || null;
 
-  // Only show data if this profile has its own ad account configured, OR if there's a global fallback
-  if (!isMetaAdsConfigured(adAccountId)) return null;
+  // Only show data if THIS profile has its own ad account — no global fallback
+  if (!adAccountId) return null;
+  if (!process.env.META_SYSTEM_USER_TOKEN) return null;
 
   // Cache per profile + date
-  const cacheKey = `meta:${profileId}:${adAccountId || 'global'}:${datePreset}`;
+  const cacheKey = `meta:${profileId}:${adAccountId}:${datePreset}`;
   const cached = getCached(cacheKey);
   if (cached) return cached;
 
@@ -123,6 +124,10 @@ async function getInstagramData(profileId) {
 
   const conns = getProfileConnections(profileId);
   const savedIgId = conns?.instagram?.accountId;
+
+  // Only show if this profile has a Meta or Instagram connection — no global fallback
+  const hasMetaConnection = conns?.meta?.connected || conns?.meta_ads?.adAccountId;
+  if (!savedIgId && !hasMetaConnection) return null;
 
   // Cache per profile
   const cacheKey = `ig:${profileId}:${savedIgId || 'auto'}`;
