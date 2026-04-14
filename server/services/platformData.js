@@ -73,16 +73,29 @@ function getCrmData(profileId) {
   } catch { return null; }
 }
 
+// ─── Instagram (via Meta API — same token) ───
+async function getInstagramData(profileId) {
+  if (!isMetaAdsConfigured()) return null;
+  try {
+    // Instagram data comes through Meta Graph API when Meta is connected
+    // For now, surface it as a connected platform with placeholder KPIs
+    // Real Instagram Insights API requires an Instagram Business Account ID
+    return {
+      platform: 'instagram',
+      name: 'Instagram',
+      connected: true, // Connected via Meta
+      kpis: [
+        kpi('Status', 'Connected via Meta', 'text', null, 'Instagram'),
+      ],
+      details: { note: 'Instagram data available through Meta Business Suite. Full Instagram Insights API integration coming soon.' },
+      viaParent: 'meta',
+    };
+  } catch { return null; }
+}
+
 // ─── Connected Platforms (placeholder KPIs for future real data) ───
 function getPlaceholderPlatformData(profileId) {
-  // Check which platforms are connected for this profile
-  const connections = [];
-  const allConns = dbList('workspace-agents') || []; // reuse workspace data if available
-
-  // For now, return empty platforms that are "ready" when connected
-  // These will show as connected but with "Connect to see data" until real APIs are wired
   const platforms = [
-    { key: 'instagram', name: 'Instagram', kpiLabels: ['Followers', 'Engagement Rate', 'Posts', 'Reach'] },
     { key: 'tiktok', name: 'TikTok', kpiLabels: ['Followers', 'Views', 'Engagement', 'Videos'] },
     { key: 'shopify', name: 'Shopify', kpiLabels: ['Revenue', 'Orders', 'AOV', 'Customers'] },
     { key: 'google_analytics', name: 'Google Analytics', kpiLabels: ['Sessions', 'Users', 'Bounce Rate', 'Pageviews'] },
@@ -105,6 +118,10 @@ export async function getBrandOverview(profileId, datePreset = 'last_30d') {
   // Get real data from connected platforms
   const meta = await getMetaData(profileId, datePreset);
   if (meta) results.push(meta);
+
+  // Instagram comes through Meta when Meta is connected
+  const ig = await getInstagramData(profileId);
+  if (ig) results.push(ig);
 
   const crm = getCrmData(profileId);
   if (crm) results.push(crm);
