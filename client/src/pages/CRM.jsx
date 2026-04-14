@@ -729,9 +729,38 @@ function PlatformDataTab({ profileId }) {
               {platform.details && (
                 <details className="text-[11px]">
                   <summary className="cursor-pointer text-content-muted hover:text-brand-purple">View details</summary>
-                  <pre className="mt-2 bg-surface-raised rounded-xl p-3 text-[10px] text-content-secondary overflow-x-auto font-mono max-h-60">
-                    {JSON.stringify(platform.details, null, 2)}
-                  </pre>
+                  <div className="mt-2 space-y-2">
+                    {platform.details.profilePicture && (
+                      <div className="flex items-center gap-3">
+                        <img src={platform.details.profilePicture} alt="" className="w-10 h-10 rounded-full" />
+                        <div>
+                          {platform.details.name && <p className="text-[13px] font-semibold text-content-primary">{platform.details.name}</p>}
+                          {platform.details.username && <p className="text-[11px] text-content-muted">@{platform.details.username}</p>}
+                        </div>
+                      </div>
+                    )}
+                    {platform.details.campaigns?.length > 0 && (
+                      <div className="space-y-1">
+                        {platform.details.campaigns.slice(0, 5).map(c => (
+                          <div key={c.id} className="flex items-center justify-between bg-surface-raised rounded-lg px-2.5 py-2">
+                            <div>
+                              <p className="text-[11px] font-medium text-content-primary">{c.name}</p>
+                              <p className="text-[9px] text-content-muted">{c.objective?.replace('OUTCOME_', '')}</p>
+                            </div>
+                            <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${c.status === 'ACTIVE' ? 'bg-green-500/10 text-green-500' : 'bg-yellow-500/10 text-yellow-500'}`}>{c.status}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    {platform.details.contactsByStatus && (
+                      <div className="flex gap-1.5 flex-wrap">
+                        {Object.entries(platform.details.contactsByStatus).filter(([,v]) => v > 0).map(([k, v]) => (
+                          <span key={k} className="text-[10px] px-2 py-1 rounded-lg bg-surface-raised text-content-secondary capitalize">{k}: {v}</span>
+                        ))}
+                      </div>
+                    )}
+                    {platform.details.note && <p className="text-[11px] text-content-muted italic">{platform.details.note}</p>}
+                  </div>
                 </details>
               )}
             </div>

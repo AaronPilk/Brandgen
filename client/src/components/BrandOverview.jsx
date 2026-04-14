@@ -158,13 +158,103 @@ function PlatformRow({ platform, expanded, onToggle }) {
 
         {expanded && platform.details && (
           <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }}
-            className="px-3 pb-3 border-t border-surface-border pt-2">
-            <pre className="text-[10px] text-content-secondary font-mono bg-surface-raised rounded-lg p-2 overflow-x-auto">
-              {JSON.stringify(platform.details, null, 2)}
-            </pre>
+            className="px-3 pb-3 border-t border-surface-border pt-3">
+            <PlatformDetails details={platform.details} name={platform.name} />
           </motion.div>
         )}
       </div>
+    </div>
+  );
+}
+
+function PlatformDetails({ details, name }) {
+  if (!details) return null;
+
+  // Render known fields cleanly
+  return (
+    <div className="space-y-3">
+      {/* Profile info row */}
+      {(details.profilePicture || details.username || details.name) && (
+        <div className="flex items-center gap-3">
+          {details.profilePicture && (
+            <img src={details.profilePicture} alt="" className="w-10 h-10 rounded-full object-cover" />
+          )}
+          <div>
+            {details.name && <p className="text-[13px] font-semibold text-content-primary">{details.name}</p>}
+            {details.username && <p className="text-[11px] text-content-muted">@{details.username}</p>}
+          </div>
+        </div>
+      )}
+
+      {/* Campaign stats */}
+      {(details.totalCampaigns !== undefined || details.activeCampaigns !== undefined) && (
+        <div className="grid grid-cols-3 gap-2">
+          {details.totalCampaigns !== undefined && (
+            <div className="bg-surface-raised rounded-lg p-2">
+              <p className="text-[9px] text-content-muted uppercase">Total</p>
+              <p className="text-[14px] font-bold text-content-primary">{details.totalCampaigns}</p>
+            </div>
+          )}
+          {details.activeCampaigns !== undefined && (
+            <div className="bg-surface-raised rounded-lg p-2">
+              <p className="text-[9px] text-content-muted uppercase">Active</p>
+              <p className="text-[14px] font-bold text-green-500">{details.activeCampaigns}</p>
+            </div>
+          )}
+          {details.pausedCampaigns !== undefined && (
+            <div className="bg-surface-raised rounded-lg p-2">
+              <p className="text-[9px] text-content-muted uppercase">Paused</p>
+              <p className="text-[14px] font-bold text-yellow-500">{details.pausedCampaigns}</p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Campaign list */}
+      {details.campaigns?.length > 0 && (
+        <div className="space-y-1">
+          <p className="text-[10px] font-semibold text-content-muted uppercase tracking-wider">Campaigns</p>
+          {details.campaigns.slice(0, 5).map((c) => (
+            <div key={c.id} className="flex items-center justify-between bg-surface-raised rounded-lg px-2.5 py-2">
+              <div>
+                <p className="text-[11px] font-medium text-content-primary">{c.name}</p>
+                <p className="text-[9px] text-content-muted">{c.objective?.replace('OUTCOME_', '')}</p>
+              </div>
+              <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${
+                c.status === 'ACTIVE' ? 'bg-green-500/10 text-green-500' : 'bg-yellow-500/10 text-yellow-500'
+              }`}>{c.status}</span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Contact/deal stats */}
+      {details.contactsByStatus && (
+        <div>
+          <p className="text-[10px] font-semibold text-content-muted uppercase tracking-wider mb-1.5">Contacts</p>
+          <div className="flex gap-1.5 flex-wrap">
+            {Object.entries(details.contactsByStatus).filter(([,v]) => v > 0).map(([k, v]) => (
+              <span key={k} className="text-[10px] px-2 py-1 rounded-lg bg-surface-raised text-content-secondary capitalize">{k}: {v}</span>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {details.dealsByStage && (
+        <div>
+          <p className="text-[10px] font-semibold text-content-muted uppercase tracking-wider mb-1.5">Deals</p>
+          <div className="flex gap-1.5 flex-wrap">
+            {Object.entries(details.dealsByStage).filter(([,v]) => v > 0).map(([k, v]) => (
+              <span key={k} className="text-[10px] px-2 py-1 rounded-lg bg-surface-raised text-content-secondary capitalize">{k}: {v}</span>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Generic note */}
+      {details.note && (
+        <p className="text-[11px] text-content-muted italic">{details.note}</p>
+      )}
     </div>
   );
 }
