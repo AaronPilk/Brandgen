@@ -104,7 +104,7 @@ export default function CRM() {
 
   useEffect(() => { loadAll(); }, [search, statusFilter]);
 
-  // Chart data
+  // Chart data — only from real data, no fake/random values
   const pipelineData = DEAL_STAGES.slice(0, 4).map((s) => ({
     name: s.label,
     value: deals.filter((d) => d.stage === s.value).length,
@@ -117,13 +117,17 @@ export default function CRM() {
     color: s.color,
   })).filter((d) => d.value > 0);
 
-  // Mock trend data for visualization (replace with real time-series later)
-  const trendData = Array.from({ length: 14 }, (_, i) => ({
-    day: `${i + 1}`,
-    leads: Math.floor(Math.random() * 8 + (contactStats?.total || 2)),
-    spend: parseFloat(((Math.random() * 30 + 10) * (metaInsights ? 1 : 0.1)).toFixed(2)),
-    clicks: Math.floor(Math.random() * 200 + 50),
-  }));
+  // Real trend data from contacts created over time
+  const trendData = (() => {
+    if (contacts.length === 0) return [];
+    const days = {};
+    contacts.forEach((c) => {
+      const day = new Date(c.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      if (!days[day]) days[day] = { day, leads: 0 };
+      days[day].leads++;
+    });
+    return Object.values(days).slice(-14);
+  })();
 
   const TABS = [
     { key: 'overview', label: 'Overview' },
@@ -228,6 +232,9 @@ export default function CRM() {
             </div>
           )}
 
+          {/* Charts + Suggestions — only when there's real data */}
+          {(contactStats?.total > 0 || dealStats?.total > 0 || metaConfigured) && (
+          <>
           {/* Charts Row */}
           <div className="grid md:grid-cols-2 gap-5">
             {/* Lead Trend */}
@@ -329,6 +336,8 @@ export default function CRM() {
               </div>
             </div>
           </div>
+          </>
+          )}
 
           {/* Recent Activity */}
           {activity.length > 0 && (
