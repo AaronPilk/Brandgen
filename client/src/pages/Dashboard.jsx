@@ -325,6 +325,20 @@ export default function Dashboard() {
             actionKey="meta-campaign" onExecute={() => setMetaCampaignModal(true)}
           />
         )}
+        <ActionButton
+          skipConfirm icon={Share2} label="Create Social Posts" description="Posts for IG, FB, TikTok, X"
+          actionKey="social-posts" completed={!!assets['social-posts']}
+          onExecute={() => handleActionWithInput('social-posts', {
+            title: 'Create Social Media Posts',
+            subtitle: 'AI generates platform-optimized posts with captions, hashtags, and visual direction.',
+            fields: [
+              { key: 'topic', label: 'Topic or theme (optional)', type: 'textarea', placeholder: 'New product launch, seasonal sale, behind the scenes, industry tips...' },
+              { key: 'platforms', label: 'Platforms (comma separated)', type: 'textarea', placeholder: 'Instagram, Facebook, TikTok, X' },
+              { key: 'tone', label: 'Tone (optional)', type: 'textarea', placeholder: 'Professional, fun, edgy, inspirational...' },
+              { key: 'notes', label: 'Additional notes', type: 'textarea', placeholder: 'Include call-to-action, mention specific products, use brand voice...' },
+            ],
+          })}
+        />
           </div>
         </div>
 

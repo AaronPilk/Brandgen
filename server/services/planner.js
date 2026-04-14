@@ -101,6 +101,15 @@ const WORKFLOWS = {
     category: 'ads',
     requiresApproval: true,
   },
+  'social-posts': {
+    name: 'Create Social Media Posts',
+    description: 'Generate platform-optimized posts for Instagram, Facebook, TikTok, X',
+    requiredInputs: ['brandName or industry'],
+    optionalInputs: ['topic', 'platforms', 'tone', 'notes'],
+    estimatedCost: '$0.005',
+    tier: 'fast',
+    category: 'content',
+  },
 };
 
 export function getWorkflowRegistry() {

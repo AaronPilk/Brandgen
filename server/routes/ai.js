@@ -248,6 +248,27 @@ router.post('/social-setup', checkBudget('social-setup'), async (req, res) => {
   }
 });
 
+// Social Media Posts
+router.post('/social-posts', checkBudget('social-setup'), async (req, res) => {
+  try {
+    const { profile, platforms, topic, tone, postCount, notes } = req.body;
+    const intake = profile.intake;
+    const platformList = (platforms || ['Instagram', 'Facebook', 'TikTok', 'X']).join(', ');
+
+    const systemPrompt = `You are a social media content strategist. Create ${postCount || 5} social media posts optimized for ${platformList}. For each post provide: platform, caption, hashtags (array), visualDirection (what image/video to use), bestTimeToPost, format (image/carousel/reel/story/text). Adapt tone, length, and style for each platform. Output as JSON array.`;
+
+    const userPrompt = `Create ${postCount || 5} social media posts for: ${buildSocialContext(profile)}. Platforms: ${platformList}. ${topic ? `Topic: ${topic}.` : ''} ${tone ? `Tone: ${tone}.` : ''} ${notes ? `Notes: ${notes}` : ''}`;
+
+    const result = await generateWithClaude(systemPrompt, userPrompt, 800, 'fast');
+    const cost = trackSpend(req.budgetInfo.sessionId, result.usage, 'social-posts');
+
+    logEvent(profile.id, 'SOCIAL_SETUP', { platforms: platformList, cost });
+    res.json({ posts: result.text, platforms: platformList, usage: result.usage, cost });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Tracking Pixels Setup
 router.post('/tracking-pixels', checkBudget('tracking-pixels'), async (req, res) => {
   try {

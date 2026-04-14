@@ -117,6 +117,7 @@ export function estimateCost(action) {
     'brand-strategy': { inputTokens: 500, outputTokens: 800, images: 0, tier: 'standard' },
     'social-setup': { inputTokens: 400, outputTokens: 800, images: 0, tier: 'fast' },
     'meta-campaign': { inputTokens: 500, outputTokens: 800, images: 0, tier: 'standard' },
+    'social-posts': { inputTokens: 400, outputTokens: 800, images: 0, tier: 'fast' },
   };
 
   const est = estimates[action] || { inputTokens: 400, outputTokens: 800, images: 0, tier: 'standard' };
