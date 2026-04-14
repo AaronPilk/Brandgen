@@ -72,7 +72,7 @@ export default function FloatingAssistant() {
 
   return (
     <>
-      {/* Floating Button */}
+      {/* Floating AI Orb */}
       <AnimatePresence>
         {!open && (
           <motion.button
@@ -80,14 +80,22 @@ export default function FloatingAssistant() {
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0, opacity: 0 }}
             onClick={() => setOpen(true)}
-            className="fixed bottom-6 right-6 z-50 w-12 h-12 rounded-full glossy-btn text-white flex items-center justify-center shadow-xl hover:scale-110 transition-transform"
+            className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full flex items-center justify-center cursor-pointer group"
+            style={{ background: 'radial-gradient(circle at 30% 30%, #A78BFA, #7C3AED 50%, #5B21B6)' }}
           >
-            <Zap className="w-5 h-5" />
+            {/* Animated glow ring */}
+            <div className="absolute inset-0 rounded-full animate-ping opacity-20" style={{ background: 'radial-gradient(circle, #8B5CF6, transparent 70%)' }} />
+            <div className="absolute inset-[-3px] rounded-full animate-spin" style={{ background: 'conic-gradient(from 0deg, transparent, #8B5CF6, transparent, #A78BFA, transparent)', opacity: 0.4, animationDuration: '3s' }} />
+            {/* Inner orb */}
+            <div className="relative w-14 h-14 rounded-full flex items-center justify-center shadow-lg shadow-brand-purple/40 group-hover:shadow-brand-purple/60 transition-shadow"
+              style={{ background: 'radial-gradient(circle at 35% 35%, #C4B5FD, #8B5CF6 40%, #6D28D9 80%)' }}>
+              <Zap className="w-5 h-5 text-white drop-shadow-lg" />
+            </div>
           </motion.button>
         )}
       </AnimatePresence>
 
-      {/* Panel */}
+      {/* Panel — bottom right */}
       <AnimatePresence>
         {open && (
           <motion.div
