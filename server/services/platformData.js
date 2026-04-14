@@ -73,38 +73,89 @@ function getCrmData(profileId) {
   } catch { return null; }
 }
 
-// ─── Instagram (via Meta Graph API) ───
+// ─── Instagram (full data via Meta Graph API) ───
 async function getInstagramData(profileId) {
   if (!isMetaAdsConfigured()) return null;
+  const token = process.env.META_SYSTEM_USER_TOKEN;
+  if (!token) return null;
+
   try {
-    // Use Meta token to get Instagram Business Account data
-    const token = process.env.META_SYSTEM_USER_TOKEN;
-    if (!token) return null;
-
-    // Get pages connected to the ad account, then find Instagram account
-    const pagesRes = await fetch(`https://graph.facebook.com/v19.0/me/accounts?fields=instagram_business_account{id,name,username,followers_count,media_count,profile_picture_url}&access_token=${token}`);
+    // 1. Find Instagram Business Account via connected Pages
+    const pagesRes = await fetch(`https://graph.facebook.com/v19.0/me/accounts?fields=instagram_business_account{id,name,username,followers_count,media_count,profile_picture_url,biography}&access_token=${token}`);
     const pagesData = await pagesRes.json();
-
     if (pagesData.error || !pagesData.data) return null;
 
-    // Find first page with an Instagram business account
     const pageWithIG = pagesData.data?.find(p => p.instagram_business_account);
     if (!pageWithIG) return null;
-
     const ig = pageWithIG.instagram_business_account;
+    const igId = ig.id;
 
-    // Get Instagram insights
-    let reachVal = 0, impressionsVal = 0;
+    // 2. Get account-level insights (28 days)
+    const since = Math.floor(Date.now() / 1000) - 86400 * 28;
+    const until = Math.floor(Date.now() / 1000);
+    let reach = 0, impressions = 0, profileViews = 0, websiteClicks = 0;
+    const timeline = [];
+
     try {
-      const insightsRes = await fetch(`https://graph.facebook.com/v19.0/${ig.id}/insights?metric=reach,impressions&period=day&since=${Math.floor(Date.now()/1000) - 86400*28}&until=${Math.floor(Date.now()/1000)}&access_token=${token}`);
-      const insightsData = await insightsRes.json();
-      if (insightsData.data) {
-        const reachMetric = insightsData.data.find(m => m.name === 'reach');
-        const impMetric = insightsData.data.find(m => m.name === 'impressions');
-        reachVal = reachMetric?.values?.reduce((s, v) => s + (v.value || 0), 0) || 0;
-        impressionsVal = impMetric?.values?.reduce((s, v) => s + (v.value || 0), 0) || 0;
+      const metricsRes = await fetch(`https://graph.facebook.com/v19.0/${igId}/insights?metric=reach,impressions,profile_views,website_clicks&period=day&since=${since}&until=${until}&access_token=${token}`);
+      const metricsData = await metricsRes.json();
+      if (metricsData.data) {
+        for (const metric of metricsData.data) {
+          const total = metric.values?.reduce((s, v) => s + (v.value || 0), 0) || 0;
+          if (metric.name === 'reach') reach = total;
+          if (metric.name === 'impressions') impressions = total;
+          if (metric.name === 'profile_views') profileViews = total;
+          if (metric.name === 'website_clicks') websiteClicks = total;
+
+          // Build timeline from reach data
+          if (metric.name === 'reach' && metric.values) {
+            metric.values.forEach(v => {
+              timeline.push({ date: v.end_time?.split('T')[0], reach: v.value || 0 });
+            });
+          }
+        }
+        // Merge impressions into timeline
+        const impMetric = metricsData.data.find(m => m.name === 'impressions');
+        if (impMetric?.values) {
+          impMetric.values.forEach((v, i) => {
+            if (timeline[i]) timeline[i].impressions = v.value || 0;
+          });
+        }
       }
     } catch {}
+
+    // 3. Get top-performing recent media
+    const topPosts = [];
+    try {
+      const mediaRes = await fetch(`https://graph.facebook.com/v19.0/${igId}/media?fields=id,caption,media_type,media_url,thumbnail_url,timestamp,like_count,comments_count,permalink&limit=25&access_token=${token}`);
+      const mediaData = await mediaRes.json();
+      if (mediaData.data) {
+        // Sort by engagement (likes + comments)
+        const sorted = mediaData.data
+          .map(m => ({ ...m, engagement: (m.like_count || 0) + (m.comments_count || 0) }))
+          .sort((a, b) => b.engagement - a.engagement);
+
+        for (const post of sorted.slice(0, 6)) {
+          topPosts.push({
+            id: post.id,
+            type: post.media_type,
+            caption: post.caption?.substring(0, 100) || '',
+            image: post.media_url || post.thumbnail_url,
+            likes: post.like_count || 0,
+            comments: post.comments_count || 0,
+            engagement: post.engagement,
+            date: post.timestamp,
+            permalink: post.permalink,
+          });
+        }
+      }
+    } catch {}
+
+    // 4. Calculate engagement rate
+    const totalEngagement = topPosts.reduce((s, p) => s + p.engagement, 0);
+    const engagementRate = ig.followers_count > 0 && topPosts.length > 0
+      ? ((totalEngagement / topPosts.length) / ig.followers_count) * 100
+      : 0;
 
     return {
       platform: 'instagram',
@@ -113,14 +164,20 @@ async function getInstagramData(profileId) {
       kpis: [
         kpi('Followers', ig.followers_count || 0, 'number', null, 'Instagram'),
         kpi('Posts', ig.media_count || 0, 'number', null, 'Instagram'),
-        kpi('Reach (28d)', reachVal, 'number', null, 'Instagram'),
-        kpi('Impressions (28d)', impressionsVal, 'number', null, 'Instagram'),
+        kpi('Reach (28d)', reach, 'number', null, 'Instagram'),
+        kpi('Impressions (28d)', impressions, 'number', null, 'Instagram'),
+        kpi('Profile Views', profileViews, 'number', null, 'Instagram'),
+        kpi('Engagement Rate', engagementRate, 'percent', null, 'Instagram'),
       ],
       details: {
         username: ig.username,
         name: ig.name,
+        bio: ig.biography,
         profilePicture: ig.profile_picture_url,
-        accountId: ig.id,
+        accountId: igId,
+        websiteClicks,
+        topPosts,
+        timeline,
       },
     };
   } catch { return null; }

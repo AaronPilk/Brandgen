@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import {
   DollarSign, Eye, MousePointer, TrendingUp, Users, Target,
   ShoppingBag, BarChart3, Mail, Globe, Instagram, ChevronDown,
@@ -248,6 +249,79 @@ function PlatformDetails({ details, name }) {
               <span key={k} className="text-[10px] px-2 py-1 rounded-lg bg-surface-raised text-content-secondary capitalize">{k}: {v}</span>
             ))}
           </div>
+        </div>
+      )}
+
+      {/* Bio */}
+      {details.bio && (
+        <p className="text-[11px] text-content-secondary leading-relaxed">{details.bio}</p>
+      )}
+
+      {/* Timeline chart */}
+      {details.timeline?.length > 0 && (
+        <div>
+          <p className="text-[10px] font-semibold text-content-muted uppercase tracking-wider mb-2">28-Day Trend</p>
+          <div className="bg-surface-raised rounded-xl p-3">
+            <ResponsiveContainer width="100%" height={140}>
+              <AreaChart data={details.timeline}>
+                <defs>
+                  <linearGradient id="reachGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#8B5CF6" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="#8B5CF6" stopOpacity={0} />
+                  </linearGradient>
+                  <linearGradient id="impGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.2} />
+                    <stop offset="95%" stopColor="#3B82F6" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                <XAxis dataKey="date" tick={{ fontSize: 9, fill: 'var(--text-muted)' }} axisLine={false}
+                  tickFormatter={(d) => d ? new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : ''} />
+                <YAxis tick={{ fontSize: 9, fill: 'var(--text-muted)' }} axisLine={false} width={40} />
+                <Tooltip contentStyle={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 10, fontSize: 11 }} />
+                <Area type="monotone" dataKey="reach" stroke="#8B5CF6" fill="url(#reachGrad)" strokeWidth={2} name="Reach" />
+                <Area type="monotone" dataKey="impressions" stroke="#3B82F6" fill="url(#impGrad)" strokeWidth={1.5} name="Impressions" />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      )}
+
+      {/* Top performing posts */}
+      {details.topPosts?.length > 0 && (
+        <div>
+          <p className="text-[10px] font-semibold text-content-muted uppercase tracking-wider mb-2">Top Performing Posts</p>
+          <div className="grid grid-cols-3 gap-2">
+            {details.topPosts.slice(0, 6).map((post) => (
+              <a key={post.id} href={post.permalink} target="_blank" rel="noopener noreferrer"
+                className="group bg-surface-raised rounded-xl overflow-hidden hover:shadow-elevated transition-all">
+                {post.image ? (
+                  <div className="aspect-square overflow-hidden">
+                    <img src={post.image} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                  </div>
+                ) : (
+                  <div className="aspect-square bg-surface-border flex items-center justify-center">
+                    <span className="text-[10px] text-content-muted">{post.type}</span>
+                  </div>
+                )}
+                <div className="p-2">
+                  <div className="flex items-center gap-2 text-[9px] text-content-secondary">
+                    <span>❤️ {post.likes}</span>
+                    <span>💬 {post.comments}</span>
+                  </div>
+                  {post.caption && <p className="text-[9px] text-content-muted mt-1 line-clamp-2">{post.caption}</p>}
+                </div>
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Website clicks */}
+      {details.websiteClicks > 0 && (
+        <div className="flex items-center gap-2 text-[11px]">
+          <span className="text-content-muted">Website clicks (28d):</span>
+          <span className="font-semibold text-content-primary">{details.websiteClicks.toLocaleString()}</span>
         </div>
       )}
 
