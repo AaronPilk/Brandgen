@@ -5,11 +5,11 @@ import {
   ArrowLeft, Globe, Image, Mail, MessageSquare, Palette, ShoppingBag,
   Instagram, Facebook, BarChart3, Megaphone, Link2, AlertTriangle,
   Eye, Zap, Package, ChevronRight, Upload, ExternalLink, Check, Unplug, Edit3, X, DollarSign,
-  Share2, Target, Users, HardDrive, Loader2, Video, Server, Search,
+  Share2, Target, Users, HardDrive, Loader2, Video, Server, Search, UserPlus,
 } from 'lucide-react';
 import { useStore } from '../store/useStore';
 import { BRAND_INTEGRATIONS, BRAND_GROUPS, TOP_BRAND_INTEGRATIONS } from '../data/integrations';
-import { getProfile, runAiAction, updateProfile, uploadFiles, getOAuthConnections, startOAuthConnect, disconnectOAuth, prepareMetaCampaign, getMetaAdsStatus } from '../services/api';
+import { getProfile, runAiAction, updateProfile, uploadFiles, getOAuthConnections, startOAuthConnect, disconnectOAuth, prepareMetaCampaign, getMetaAdsStatus, createClientInvite } from '../services/api';
 import ActionButton from '../components/ActionButton';
 import AssetViewer from '../components/AssetViewer';
 import LoadingOverlay from '../components/LoadingOverlay';
@@ -35,6 +35,7 @@ export default function Dashboard() {
   const [metaAdsConfigured, setMetaAdsConfigured] = useState(false);
   const [metaCampaignModal, setMetaCampaignModal] = useState(false);
   const [editProfileOpen, setEditProfileOpen] = useState(false);
+  const [inviteClientOpen, setInviteClientOpen] = useState(false);
   const profile = currentProfile;
 
   useEffect(() => {
@@ -174,6 +175,12 @@ export default function Dashboard() {
                   className="text-[12px] font-semibold text-content-muted bg-surface-raised px-3 py-1 rounded-full hover:text-content-primary transition-colors flex items-center gap-1"
                 >
                   <Edit3 className="w-3 h-3" /> Edit Profile
+                </button>
+                <button
+                  onClick={() => setInviteClientOpen(true)}
+                  className="text-[12px] font-semibold text-content-muted bg-surface-raised px-3 py-1 rounded-full hover:text-content-primary transition-colors flex items-center gap-1"
+                >
+                  <UserPlus className="w-3 h-3" /> Invite Client
                 </button>
               </div>
             </div>
@@ -387,6 +394,9 @@ export default function Dashboard() {
       {editProfileOpen && (
         <EditProfileModal profile={profile} onClose={() => setEditProfileOpen(false)}
           onSaved={(updated) => { setCurrentProfile(updated); setEditProfileOpen(false); }} />
+      )}
+      {inviteClientOpen && (
+        <InviteClientModal profileId={id} profileName={profileLabel} onClose={() => setInviteClientOpen(false)} />
       )}
 
       {viewing && <AssetViewer title={viewing.title} data={viewing.data} type={viewing.type} onClose={() => setViewing(null)} />}
@@ -888,6 +898,88 @@ function EditProfileModal({ profile, onClose, onSaved }) {
           </div>
         </motion.div>
       </div>
+    </div>
+  );
+}
+
+function InviteClientModal({ profileId, profileName, onClose }) {
+  const [email, setEmail] = useState('');
+  const [name, setName] = useState('');
+  const [days, setDays] = useState('30');
+  const [result, setResult] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleInvite = async () => {
+    if (!email) return;
+    setLoading(true);
+    setError('');
+    try {
+      const data = await createClientInvite({
+        email,
+        name,
+        profileIds: [profileId],
+        expiresInDays: parseInt(days) || 30,
+      });
+      setResult(data);
+    } catch (err) { setError(err.message); }
+    setLoading(false);
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} onClick={onClose} className="absolute inset-0 bg-black/40 dark:bg-black/60 backdrop-blur-sm" />
+      <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="relative glossy rounded-3xl p-6 max-w-md w-full shadow-elevated-lg">
+        <div className="relative z-10">
+          <h3 className="text-lg font-semibold text-content-primary mb-1">Invite Client</h3>
+          <p className="text-[13px] text-content-muted mb-4">
+            Send access to <span className="text-content-primary font-medium">{profileName}</span> so they can connect their accounts.
+          </p>
+
+          {result ? (
+            <div className="space-y-3">
+              <div className="bg-green-500/10 border border-green-500/20 rounded-xl p-4">
+                <p className="text-[13px] font-semibold text-green-500 mb-2">Client account created!</p>
+                <div className="space-y-1.5 text-[12px]">
+                  <p className="text-content-secondary">Email: <span className="text-content-primary font-mono">{result.user?.email}</span></p>
+                  <p className="text-content-secondary">Temp Password: <span className="text-content-primary font-mono">{result.tempPassword}</span></p>
+                </div>
+                <p className="text-[11px] text-content-muted mt-3">Send these credentials to the client. They'll only see this profile and can connect their accounts.</p>
+              </div>
+              <button onClick={() => {
+                navigator.clipboard.writeText(`Login: ${result.user?.email}\nPassword: ${result.tempPassword}\nURL: ${window.location.origin}`);
+              }} className="w-full py-2.5 rounded-xl bg-surface-raised text-content-secondary text-[13px] font-medium hover:text-content-primary transition-colors">
+                Copy Credentials
+              </button>
+              <button onClick={onClose} className="w-full py-2.5 rounded-xl glossy-btn text-white text-[13px] font-semibold">Done</button>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Client name" />
+              <input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Client email" type="email" />
+              <div>
+                <label className="block text-[12px] font-medium text-content-secondary mb-1">Access expires in</label>
+                <select value={days} onChange={(e) => setDays(e.target.value)} className="!text-[13px]">
+                  <option value="7">7 days</option>
+                  <option value="14">14 days</option>
+                  <option value="30">30 days</option>
+                  <option value="90">90 days</option>
+                  <option value="365">1 year</option>
+                  <option value="">Never expires</option>
+                </select>
+              </div>
+              {error && <p className="text-[12px] text-red-500">{error}</p>}
+              <div className="flex gap-3">
+                <button onClick={onClose} className="flex-1 py-3 rounded-2xl bg-surface-raised text-content-secondary text-sm font-medium">Cancel</button>
+                <button onClick={handleInvite} disabled={loading || !email} className="flex-1 py-3 rounded-2xl glossy-btn text-white text-sm font-semibold flex items-center justify-center gap-2">
+                  {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <UserPlus className="w-4 h-4" />}
+                  {loading ? 'Creating...' : 'Send Invite'}
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      </motion.div>
     </div>
   );
 }
