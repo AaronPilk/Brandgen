@@ -8,12 +8,12 @@ function getToken() {
   return process.env.META_SYSTEM_USER_TOKEN || null;
 }
 
-function getAdAccountId() {
-  return process.env.META_AD_ACCOUNT_ID || null;
+function getAdAccountId(override) {
+  return override || process.env.META_AD_ACCOUNT_ID || null;
 }
 
-export function isMetaAdsConfigured() {
-  return !!(getToken() && getAdAccountId());
+export function isMetaAdsConfigured(adAccountId) {
+  return !!(getToken() && getAdAccountId(adAccountId));
 }
 
 async function metaFetch(endpoint, options = {}) {
@@ -37,8 +37,8 @@ async function metaFetch(endpoint, options = {}) {
 
 // ─── READ Operations ───
 
-export async function getCampaigns(fields = 'id,name,status,objective,daily_budget,lifetime_budget,start_time,stop_time') {
-  const accountId = getAdAccountId();
+export async function getCampaigns(fields = 'id,name,status,objective,daily_budget,lifetime_budget,start_time,stop_time', adAccountId = null) {
+  const accountId = getAdAccountId(adAccountId);
   return metaFetch(`/act_${accountId}/campaigns?fields=${fields}&limit=50`);
 }
 
@@ -81,8 +81,8 @@ export async function getAdCreatives(limit = 20) {
   return metaFetch(`/act_${accountId}/adcreatives?fields=${fields}&limit=${limit}`);
 }
 
-export async function getAccountInsights(datePreset = 'last_30d') {
-  const accountId = getAdAccountId();
+export async function getAccountInsights(datePreset = 'last_30d', adAccountId = null) {
+  const accountId = getAdAccountId(adAccountId);
   const fields = 'impressions,clicks,spend,cpc,cpm,ctr,reach,actions,cost_per_action_type';
   return metaFetch(`/act_${accountId}/insights?fields=${fields}&date_preset=${datePreset}`);
 }

@@ -721,6 +721,8 @@ function EditProfileModal({ profile, onClose, onSaved }) {
     differentiator: profile.intake?.differentiator || '',
     adBudget: profile.intake?.adBudget || '',
     primaryGoal: profile.intake?.primaryGoal || '',
+    metaAdAccountId: profile.connections?.meta_ads?.adAccountId || '',
+    instagramAccountId: profile.connections?.instagram?.accountId || '',
   });
   const [saving, setSaving] = useState(false);
   const [rerunResearch, setRerunResearch] = useState(false);
@@ -729,10 +731,17 @@ function EditProfileModal({ profile, onClose, onSaved }) {
   const handleSave = async () => {
     setSaving(true);
     try {
-      const updatedIntake = { ...profile.intake, ...form };
-      await updateProfile(profile.id, { intake: updatedIntake });
+      const { metaAdAccountId, instagramAccountId, ...intakeFields } = form;
+      const updatedIntake = { ...profile.intake, ...intakeFields };
 
-      let updatedProfile = { ...profile, intake: updatedIntake };
+      // Save per-profile connection settings
+      const connections = { ...profile.connections };
+      if (metaAdAccountId) connections.meta_ads = { ...connections.meta_ads, adAccountId: metaAdAccountId };
+      if (instagramAccountId) connections.instagram = { ...connections.instagram, accountId: instagramAccountId };
+
+      await updateProfile(profile.id, { intake: updatedIntake, connections });
+
+      let updatedProfile = { ...profile, intake: updatedIntake, connections };
 
       if (rerunResearch) {
         const research = await runAiAction('market-research', { profile: updatedProfile, sessionId: 'default' });
@@ -777,6 +786,13 @@ function EditProfileModal({ profile, onClose, onSaved }) {
                 <input value={form.adBudget} onChange={(e) => set('adBudget', e.target.value)} /></div>
               <div><label className="block text-[12px] font-medium text-content-secondary mb-1">Primary Goal</label>
                 <input value={form.primaryGoal} onChange={(e) => set('primaryGoal', e.target.value)} /></div>
+              <div className="pt-2 border-t border-surface-border">
+                <p className="text-[12px] font-semibold text-content-primary mb-2">Platform Accounts (per brand)</p>
+              </div>
+              <div><label className="block text-[12px] font-medium text-content-secondary mb-1">Meta Ad Account ID</label>
+                <input value={form.metaAdAccountId} onChange={(e) => set('metaAdAccountId', e.target.value)} placeholder="e.g. 1036979485088762" /></div>
+              <div><label className="block text-[12px] font-medium text-content-secondary mb-1">Instagram Account ID</label>
+                <input value={form.instagramAccountId} onChange={(e) => set('instagramAccountId', e.target.value)} placeholder="Auto-detected or enter manually" /></div>
             </div>
 
             <div className="mt-4 p-3 rounded-2xl bg-brand-purple/5 border border-brand-purple/10">

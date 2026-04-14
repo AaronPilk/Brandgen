@@ -4,7 +4,37 @@
 
 import { isMetaAdsConfigured, getCampaigns, getAccountInsights } from './metaAds.js';
 import { getContactStats, getDealStats } from './crm.js';
-import { dbGet, dbList } from './db.js';
+import { dbGet, dbList, dbSet } from './db.js';
+
+// ─── Simple cache to reduce API calls ───
+const cache = new Map();
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
+function getCached(key) {
+  const entry = cache.get(key);
+  if (entry && Date.now() - entry.ts < CACHE_TTL) return entry.data;
+  return null;
+}
+
+function setCache(key, data) {
+  cache.set(key, { data, ts: Date.now() });
+}
+
+// ─── Per-profile connection settings ───
+// Each profile stores its own account IDs for each platform
+export function getProfileConnections(profileId) {
+  const profile = dbGet('profiles', profileId);
+  return profile?.connections || {};
+}
+
+export function setProfileConnection(profileId, platform, settings) {
+  const profile = dbGet('profiles', profileId);
+  if (!profile) return null;
+  if (!profile.connections) profile.connections = {};
+  profile.connections[platform] = { ...profile.connections[platform], ...settings, updatedAt: Date.now() };
+  dbSet('profiles', profileId, profile);
+  return profile.connections[platform];
+}
 
 // Standardized KPI shape
 function kpi(label, value, format = 'number', trend = null, platform = '') {
@@ -13,11 +43,21 @@ function kpi(label, value, format = 'number', trend = null, platform = '') {
 
 // ─── Meta Ads ───
 async function getMetaData(profileId, datePreset) {
-  if (!isMetaAdsConfigured()) return null;
+  const conns = getProfileConnections(profileId);
+  const adAccountId = conns?.meta_ads?.adAccountId || null;
+
+  // Only show data if this profile has its own ad account configured, OR if there's a global fallback
+  if (!isMetaAdsConfigured(adAccountId)) return null;
+
+  // Cache per profile + date
+  const cacheKey = `meta:${profileId}:${adAccountId || 'global'}:${datePreset}`;
+  const cached = getCached(cacheKey);
+  if (cached) return cached;
+
   try {
     const [insights, campaigns] = await Promise.all([
-      getAccountInsights(datePreset).catch(() => null),
-      getCampaigns().catch(() => null),
+      getAccountInsights(datePreset, adAccountId).catch(() => null),
+      getCampaigns(undefined, adAccountId).catch(() => null),
     ]);
     const data = insights?.data?.[0];
     const campaignList = campaigns?.data || [];
@@ -41,8 +81,11 @@ async function getMetaData(profileId, datePreset) {
         activeCampaigns: active,
         pausedCampaigns: paused,
         campaigns: campaignList.slice(0, 10),
+        adAccountId: adAccountId || process.env.META_AD_ACCOUNT_ID,
       },
     };
+    setCache(cacheKey, result);
+    return result;
   } catch { return null; }
 }
 
@@ -75,20 +118,44 @@ function getCrmData(profileId) {
 
 // ─── Instagram (full data via Meta Graph API) ───
 async function getInstagramData(profileId) {
-  if (!isMetaAdsConfigured()) return null;
   const token = process.env.META_SYSTEM_USER_TOKEN;
   if (!token) return null;
 
-  try {
-    // 1. Find Instagram Business Account via connected Pages
-    const pagesRes = await fetch(`https://graph.facebook.com/v19.0/me/accounts?fields=instagram_business_account{id,name,username,followers_count,media_count,profile_picture_url,biography}&access_token=${token}`);
-    const pagesData = await pagesRes.json();
-    if (pagesData.error || !pagesData.data) return null;
+  const conns = getProfileConnections(profileId);
+  const savedIgId = conns?.instagram?.accountId;
 
-    const pageWithIG = pagesData.data?.find(p => p.instagram_business_account);
-    if (!pageWithIG) return null;
-    const ig = pageWithIG.instagram_business_account;
-    const igId = ig.id;
+  // Cache per profile
+  const cacheKey = `ig:${profileId}:${savedIgId || 'auto'}`;
+  const cached = getCached(cacheKey);
+  if (cached) return cached;
+
+  try {
+    let igId = savedIgId;
+    let ig = null;
+
+    if (igId) {
+      // Use saved Instagram account ID directly — skip page discovery (saves API call)
+      const igRes = await fetch(`https://graph.facebook.com/v19.0/${igId}?fields=id,name,username,followers_count,media_count,profile_picture_url,biography&access_token=${token}`);
+      ig = await igRes.json();
+      if (ig.error) ig = null;
+    }
+
+    if (!ig) {
+      // Discover from pages (first time only)
+      const pagesRes = await fetch(`https://graph.facebook.com/v19.0/me/accounts?fields=instagram_business_account{id,name,username,followers_count,media_count,profile_picture_url,biography}&access_token=${token}`);
+      const pagesData = await pagesRes.json();
+      if (pagesData.error || !pagesData.data) return null;
+
+      const pageWithIG = pagesData.data?.find(p => p.instagram_business_account);
+      if (!pageWithIG) return null;
+      ig = pageWithIG.instagram_business_account;
+      igId = ig.id;
+
+      // Save for next time — avoids re-discovery API call
+      setProfileConnection(profileId, 'instagram', { accountId: igId, username: ig.username });
+    }
+
+    if (!ig || !igId) return null;
 
     // 2. Get account-level insights (28 days)
     const since = Math.floor(Date.now() / 1000) - 86400 * 28;
@@ -180,6 +247,8 @@ async function getInstagramData(profileId) {
         timeline,
       },
     };
+    setCache(cacheKey, result);
+    return result;
   } catch { return null; }
 }
 

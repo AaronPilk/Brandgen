@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { getBrandOverview, DATE_PRESETS } from '../services/platformData.js';
+import { getBrandOverview, DATE_PRESETS, getProfileConnections, setProfileConnection } from '../services/platformData.js';
 
 const router = Router();
 
@@ -17,6 +17,18 @@ router.get('/overview/:profileId', async (req, res) => {
 // Get available date presets
 router.get('/date-presets', (req, res) => {
   res.json(DATE_PRESETS);
+});
+
+// Get per-profile connection settings
+router.get('/connections/:profileId', (req, res) => {
+  res.json(getProfileConnections(req.params.profileId));
+});
+
+// Set per-profile connection settings (e.g. ad account ID, IG account ID)
+router.patch('/connections/:profileId/:platform', (req, res) => {
+  const result = setProfileConnection(req.params.profileId, req.params.platform, req.body);
+  if (!result) return res.status(404).json({ error: 'Profile not found' });
+  res.json(result);
 });
 
 export { router as platformDataRoutes };
