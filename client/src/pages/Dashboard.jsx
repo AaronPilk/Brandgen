@@ -555,13 +555,8 @@ function ProfileConnections({ profileId, connections, setConnections, connecting
         {expanded ? 'Show less' : `See all ${BRAND_INTEGRATIONS.length} integrations (+${hiddenCount} more)`}
       </button>
 
-      {/* Tracking Pixels — compact row */}
-      <div className="mt-4 flex items-center gap-2 flex-wrap">
-        <span className="text-[10px] font-semibold text-content-muted uppercase tracking-wider">Pixels:</span>
-        {['Meta Pixel', 'TikTok Pixel', 'Google Analytics', 'Pinterest Tag'].map((p) => (
-          <span key={p} className="text-[10px] px-2 py-0.5 rounded-full bg-surface-raised text-content-muted">{p}</span>
-        ))}
-      </div>
+      {/* Tracking Pixels — clickable to set per-profile */}
+      <PixelManager profileId={profileId} connections={connections} setConnections={setConnections} />
     </div>
   );
 }
@@ -593,6 +588,71 @@ function ConnectionCard({ platform, connections, connectingPlatform, onConnect, 
           </button>
         )}
       </div>
+    </div>
+  );
+}
+
+const PIXELS = [
+  { key: 'metaPixelId', label: 'Meta Pixel', placeholder: 'e.g. 123456789012345' },
+  { key: 'tiktokPixelId', label: 'TikTok Pixel', placeholder: 'e.g. CXXXXXXXXXXXXXXXXX' },
+  { key: 'googleAnalyticsId', label: 'Google Analytics', placeholder: 'e.g. G-XXXXXXXXXX' },
+  { key: 'pinterestTagId', label: 'Pinterest Tag', placeholder: 'e.g. 2612345678901' },
+];
+
+function PixelManager({ profileId, connections }) {
+  const [editing, setEditing] = useState(null);
+  const [value, setValue] = useState('');
+  const pixelConns = connections?.pixels || {};
+
+  const handleSave = async (pixelKey) => {
+    if (!value.trim()) { setEditing(null); return; }
+    try {
+      await updateProfile(profileId, {
+        connections: { ...connections, pixels: { ...pixelConns, [pixelKey]: value.trim() } }
+      });
+      setEditing(null);
+      setValue('');
+    } catch {}
+  };
+
+  return (
+    <div className="mt-3 flex items-center gap-2 flex-wrap">
+      <span className="text-[10px] font-semibold text-content-muted uppercase tracking-wider">Pixels:</span>
+      {PIXELS.map((pixel) => {
+        const isSet = !!pixelConns[pixel.key];
+        const isEditing = editing === pixel.key;
+
+        if (isEditing) {
+          return (
+            <div key={pixel.key} className="flex items-center gap-1">
+              <input
+                value={value}
+                onChange={(e) => setValue(e.target.value)}
+                placeholder={pixel.placeholder}
+                className="!w-48 !py-1 !px-2 !text-[10px] !rounded-lg"
+                autoFocus
+                onKeyDown={(e) => { if (e.key === 'Enter') handleSave(pixel.key); if (e.key === 'Escape') setEditing(null); }}
+              />
+              <button onClick={() => handleSave(pixel.key)} className="text-[9px] text-green-500 font-bold">Save</button>
+              <button onClick={() => setEditing(null)} className="text-[9px] text-content-muted">Cancel</button>
+            </div>
+          );
+        }
+
+        return (
+          <button
+            key={pixel.key}
+            onClick={() => { setEditing(pixel.key); setValue(pixelConns[pixel.key] || ''); }}
+            className={`text-[10px] px-2 py-1 rounded-full transition-all ${
+              isSet
+                ? 'bg-green-500/10 text-green-500 font-semibold'
+                : 'bg-surface-raised text-content-muted hover:text-brand-purple hover:bg-brand-purple/5'
+            }`}
+          >
+            {isSet ? `✓ ${pixel.label}` : `+ ${pixel.label}`}
+          </button>
+        );
+      })}
     </div>
   );
 }
