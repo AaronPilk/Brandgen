@@ -8,6 +8,7 @@ import {
   Share2, Target, Users, HardDrive, Loader2, Video, Server, Search,
 } from 'lucide-react';
 import { useStore } from '../store/useStore';
+import { BRAND_INTEGRATIONS, BRAND_GROUPS, TOP_BRAND_INTEGRATIONS } from '../data/integrations';
 import { getProfile, runAiAction, updateProfile, uploadFiles, getOAuthConnections, startOAuthConnect, disconnectOAuth, prepareMetaCampaign, getMetaAdsStatus } from '../services/api';
 import ActionButton from '../components/ActionButton';
 import AssetViewer from '../components/AssetViewer';
@@ -459,24 +460,8 @@ function InputModal({ config, onClose, onSubmit }) {
   );
 }
 
-const PROFILE_PLATFORMS = [
-  { key: 'meta', icon: Facebook, color: 'bg-blue-500', name: 'Facebook & Instagram', desc: 'Pages, Instagram, Meta Ads' },
-  { key: 'tiktok', icon: Share2, color: 'bg-gray-900 dark:bg-white dark:text-black', name: 'TikTok', desc: 'TikTok for Business' },
-  { key: 'pinterest', icon: Share2, color: 'bg-red-600', name: 'Pinterest', desc: 'Pinterest Business' },
-  { key: 'twitter', icon: Share2, color: 'bg-black dark:bg-white dark:text-black', name: 'X (Twitter)', desc: 'Social account' },
-  { key: 'google', icon: HardDrive, color: 'bg-blue-600', name: 'Google Drive', desc: 'Pull docs, sheets & files' },
-  { key: 'gohighlevel', icon: Target, color: 'bg-green-600', name: 'GoHighLevel', desc: 'CRM for lead routing' },
-  { key: 'hubspot', icon: Users, color: 'bg-orange-500', name: 'HubSpot', desc: 'CRM for contacts & deals' },
-  { key: 'canva', icon: Palette, color: 'bg-cyan-500', name: 'Canva', desc: 'Design assets & templates' },
-  { key: 'printful', icon: Package, color: 'bg-violet-600', name: 'Printful', desc: 'T-shirt & merch fulfillment' },
-  { key: 'shopify', icon: ShoppingBag, color: 'bg-green-500', name: 'Shopify', desc: 'Products, store & themes' },
-  { key: 'wordpress', icon: Globe, color: 'bg-blue-800', name: 'WordPress', desc: 'Publish pages & content' },
-  { key: 'arcads', icon: Video, color: 'bg-pink-600', name: 'Arcads', desc: 'AI UGC video generation' },
-  { key: 'kinsta', icon: Server, color: 'bg-indigo-600', name: 'Kinsta', desc: 'Deploy & host pages' },
-  { key: 'zoominfo', icon: Search, color: 'bg-blue-700', name: 'ZoomInfo', desc: 'Lead enrichment & data' },
-];
-
 function ProfileConnections({ profileId, connections, setConnections, connectingPlatform, setConnectingPlatform }) {
+  const [expanded, setExpanded] = useState(false);
   const connectedCount = Object.keys(connections).length;
 
   const handleConnect = async (platformKey) => {
@@ -493,100 +478,99 @@ function ProfileConnections({ profileId, connections, setConnections, connecting
   const handleDisconnect = async (platformKey) => {
     try {
       await disconnectOAuth(platformKey, profileId);
-      setConnections((c) => {
-        const next = { ...c };
-        delete next[platformKey];
-        return next;
-      });
-    } catch (err) {
-      alert(err.message);
-    }
+      setConnections((c) => { const next = { ...c }; delete next[platformKey]; return next; });
+    } catch (err) { alert(err.message); }
   };
 
+  // Show top-priority items by default, full list when expanded
+  const visibleItems = expanded ? BRAND_INTEGRATIONS : TOP_BRAND_INTEGRATIONS;
+  const hiddenCount = BRAND_INTEGRATIONS.length - TOP_BRAND_INTEGRATIONS.length;
+
   return (
-    <div className="mt-10 mb-2">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-semibold text-content-primary">Connected Accounts</h2>
-        {connectedCount > 0 && (
-          <span className="text-[11px] font-semibold text-green-500 bg-green-500/10 px-2.5 py-1 rounded-full">
-            {connectedCount} connected
-          </span>
-        )}
+    <div className="mt-8 mb-2">
+      <div className="flex items-center justify-between mb-3">
+        <h2 className="text-[14px] font-semibold text-content-primary">Connected Accounts</h2>
+        <div className="flex items-center gap-2">
+          {connectedCount > 0 && (
+            <span className="text-[10px] font-semibold text-green-500 bg-green-500/10 px-2 py-0.5 rounded-full">
+              {connectedCount} connected
+            </span>
+          )}
+        </div>
       </div>
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5">
-        {PROFILE_PLATFORMS.map((platform) => {
-          const Icon = platform.icon;
-          const isConnected = !!connections[platform.key];
-          const isConnecting = connectingPlatform === platform.key;
 
-          return (
-            <div
-              key={platform.key}
-              className={`glossy rounded-2xl p-4 transition-all duration-300 ${
-                isConnected ? '!border-green-500/20' : ''
-              }`}
-            >
-              <div className="relative z-10">
-                <div className="flex items-center gap-2.5 mb-3">
-                  <div className={`w-8 h-8 rounded-lg ${platform.color} flex items-center justify-center text-white shrink-0`}>
-                    <Icon className="w-4 h-4" />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-[13px] font-semibold text-content-primary truncate">{platform.name}</p>
-                    <p className="text-[10px] text-content-muted">{platform.desc}</p>
-                  </div>
+      {/* Grouped grid when expanded, flat grid when collapsed */}
+      {expanded ? (
+        <div className="space-y-4">
+          {BRAND_GROUPS.map((group) => {
+            const items = BRAND_INTEGRATIONS.filter((i) => i.group === group);
+            return (
+              <div key={group}>
+                <p className="text-[10px] font-semibold text-content-muted uppercase tracking-wider mb-1.5">{group}</p>
+                <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-1.5">
+                  {items.map((platform) => (
+                    <ConnectionCard key={platform.key} platform={platform} connections={connections}
+                      connectingPlatform={connectingPlatform} onConnect={handleConnect} onDisconnect={handleDisconnect} />
+                  ))}
                 </div>
-
-                {isConnected ? (
-                  <div className="flex items-center justify-between">
-                    <span className="flex items-center gap-1 text-[10px] font-semibold text-green-500">
-                      <Check className="w-3 h-3" /> Connected
-                    </span>
-                    <button
-                      onClick={() => handleDisconnect(platform.key)}
-                      className="text-[10px] text-red-400 hover:text-red-500 transition-colors"
-                    >
-                      Disconnect
-                    </button>
-                  </div>
-                ) : (
-                  <button
-                    onClick={() => handleConnect(platform.key)}
-                    disabled={isConnecting}
-                    className="w-full py-2 rounded-xl text-[12px] font-semibold flex items-center justify-center gap-1.5 bg-surface-raised hover:bg-brand-purple/10 hover:text-brand-purple text-content-secondary transition-all"
-                  >
-                    <ExternalLink className="w-3 h-3" />
-                    {isConnecting ? 'Connecting...' : 'Connect'}
-                  </button>
-                )}
               </div>
-            </div>
-          );
-        })}
-      </div>
-
-      {/* Tracking Pixels */}
-      <div className="mt-6">
-        <h3 className="text-[14px] font-semibold text-content-primary mb-3 flex items-center gap-2">
-          <BarChart3 className="w-4 h-4 text-brand-purple" />
-          Tracking Pixels
-          <span className="text-[11px] text-content-muted font-normal">Auto-injected into generated pages</span>
-        </h3>
-        <div className="grid grid-cols-2 gap-2.5">
-          {[
-            { label: 'Meta Pixel', env: 'META_PIXEL_ID' },
-            { label: 'TikTok Pixel', env: 'TIKTOK_PIXEL_ID' },
-            { label: 'Google Analytics', env: 'GOOGLE_ANALYTICS_ID' },
-            { label: 'Pinterest Tag', env: 'PINTEREST_TAG_ID' },
-          ].map((pixel) => (
-            <div key={pixel.env} className="glossy rounded-xl p-3">
-              <div className="relative z-10">
-                <p className="text-[12px] font-medium text-content-primary">{pixel.label}</p>
-                <p className="text-[10px] text-content-muted">Set {pixel.env} in .env</p>
-              </div>
-            </div>
+            );
+          })}
+        </div>
+      ) : (
+        <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-1.5">
+          {visibleItems.map((platform) => (
+            <ConnectionCard key={platform.key} platform={platform} connections={connections}
+              connectingPlatform={connectingPlatform} onConnect={handleConnect} onDisconnect={handleDisconnect} />
           ))}
         </div>
+      )}
+
+      {/* Show more / less */}
+      <button
+        onClick={() => setExpanded(!expanded)}
+        className="mt-3 w-full py-2 rounded-xl text-[11px] font-medium text-content-muted hover:text-brand-purple hover:bg-brand-purple/5 transition-all flex items-center justify-center gap-1"
+      >
+        {expanded ? 'Show less' : `See all ${BRAND_INTEGRATIONS.length} integrations (+${hiddenCount} more)`}
+      </button>
+
+      {/* Tracking Pixels — compact row */}
+      <div className="mt-4 flex items-center gap-2 flex-wrap">
+        <span className="text-[10px] font-semibold text-content-muted uppercase tracking-wider">Pixels:</span>
+        {['Meta Pixel', 'TikTok Pixel', 'Google Analytics', 'Pinterest Tag'].map((p) => (
+          <span key={p} className="text-[10px] px-2 py-0.5 rounded-full bg-surface-raised text-content-muted">{p}</span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function ConnectionCard({ platform, connections, connectingPlatform, onConnect, onDisconnect }) {
+  const isConnected = !!connections[platform.key];
+  const isConnecting = connectingPlatform === platform.key;
+
+  return (
+    <div className={`glossy rounded-xl p-2.5 transition-all duration-200 ${isConnected ? '!border-green-500/20' : ''}`}>
+      <div className="relative z-10">
+        <div className="flex items-center gap-2 mb-2">
+          <div className={`w-6 h-6 rounded-md flex items-center justify-center shrink-0 ${
+            isConnected ? 'bg-green-500/10 text-green-500' : 'bg-surface-raised text-content-muted'
+          }`}>
+            {isConnected ? <Check className="w-3 h-3" /> : <ExternalLink className="w-3 h-3" />}
+          </div>
+          <p className="text-[11px] font-semibold text-content-primary truncate">{platform.name}</p>
+        </div>
+        {isConnected ? (
+          <div className="flex items-center justify-between">
+            <span className="text-[9px] text-green-500 font-semibold">Connected</span>
+            <button onClick={() => onDisconnect(platform.key)} className="text-[9px] text-red-400 hover:text-red-500">Disconnect</button>
+          </div>
+        ) : (
+          <button onClick={() => onConnect(platform.key)} disabled={isConnecting}
+            className="w-full py-1.5 rounded-lg text-[10px] font-semibold bg-surface-raised hover:bg-brand-purple/10 hover:text-brand-purple text-content-muted transition-all">
+            {isConnecting ? '...' : 'Connect'}
+          </button>
+        )}
       </div>
     </div>
   );

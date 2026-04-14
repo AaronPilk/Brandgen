@@ -7,53 +7,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { useStore } from '../store/useStore';
 import { getApiStatus, getUsers, createUserAdmin, updateUserRole, deleteUserAdmin, updateMe } from '../services/api';
-
-const API_LIST = [
-  // Core AI
-  { key: 'anthropic', name: 'Anthropic', description: 'AI reasoning & generation', envVar: 'ANTHROPIC_API_KEY', required: true, group: 'Core AI' },
-  { key: 'openai', name: 'OpenAI', description: 'GPT-4o fallback + DALL-E', envVar: 'OPENAI_API_KEY', group: 'Core AI' },
-  { key: 'gemini', name: 'Google Gemini', description: 'AI reasoning', envVar: 'GEMINI_API_KEY', group: 'Core AI' },
-  { key: 'grok', name: 'xAI / Grok', description: 'AI reasoning', envVar: 'XAI_API_KEY', group: 'Core AI' },
-  { key: 'perplexity', name: 'Perplexity', description: 'AI search & research', envVar: 'PERPLEXITY_API_KEY', group: 'Core AI' },
-  // Voice & Conversational
-  { key: 'elevenlabs', name: 'ElevenLabs', description: 'Voice generation', envVar: 'ELEVENLABS_API_KEY', group: 'Voice' },
-  { key: 'vapi', name: 'Vapi', description: 'Voice AI agents', envVar: 'VAPI_API_KEY', group: 'Voice' },
-  { key: 'bland', name: 'Bland', description: 'AI phone calls', envVar: 'BLAND_API_KEY', group: 'Voice' },
-  { key: 'retell', name: 'Retell AI', description: 'Conversational AI', envVar: 'RETELL_API_KEY', group: 'Voice' },
-  // Automation
-  { key: 'n8n', name: 'n8n', description: 'Workflow automation', envVar: 'N8N_API_KEY', group: 'Automation' },
-  { key: 'make', name: 'Make', description: 'Visual automation', envVar: 'MAKE_API_KEY', group: 'Automation' },
-  { key: 'zapier', name: 'Zapier', description: 'App integrations', envVar: 'ZAPIER_API_KEY', group: 'Automation' },
-  { key: 'pipedream', name: 'Pipedream', description: 'Developer automation', envVar: 'PIPEDREAM_API_KEY', group: 'Automation' },
-  // Creative AI
-  { key: 'midjourney', name: 'Midjourney', description: 'Image generation', envVar: 'MIDJOURNEY_API_KEY', group: 'Creative AI' },
-  { key: 'runway', name: 'Runway', description: 'Video generation', envVar: 'RUNWAY_API_KEY', group: 'Creative AI' },
-  { key: 'pika', name: 'Pika', description: 'Video generation', envVar: 'PIKA_API_KEY', group: 'Creative AI' },
-  { key: 'heygen', name: 'HeyGen', description: 'Avatar videos', envVar: 'HEYGEN_API_KEY', group: 'Creative AI' },
-  { key: 'synthesia', name: 'Synthesia', description: 'AI video creation', envVar: 'SYNTHESIA_API_KEY', group: 'Creative AI' },
-  { key: 'creatify', name: 'Creatify', description: 'Ad video creation', envVar: 'CREATIFY_API_KEY', group: 'Creative AI' },
-  { key: 'captions', name: 'Captions', description: 'Video captions & editing', envVar: 'CAPTIONS_API_KEY', group: 'Creative AI' },
-  // Ads & Marketing
-  { key: 'metaAds', name: 'Meta Ads', description: 'Campaign management', envVar: 'META_SYSTEM_USER_TOKEN', group: 'Ads & Marketing' },
-  { key: 'googleAds', name: 'Google Ads', description: 'Search & display ads', envVar: 'GOOGLE_ADS_API_KEY', group: 'Ads & Marketing' },
-  { key: 'linkedinAds', name: 'LinkedIn Ads', description: 'B2B advertising', envVar: 'LINKEDIN_CLIENT_ID', group: 'Ads & Marketing' },
-  { key: 'youtube', name: 'YouTube', description: 'Video marketing', envVar: 'YOUTUBE_API_KEY', group: 'Ads & Marketing' },
-  // CRM & Comms
-  { key: 'klaviyo', name: 'Klaviyo', description: 'Email & SMS marketing', envVar: 'KLAVIYO_API_KEY', group: 'CRM & Comms' },
-  { key: 'mailchimp', name: 'Mailchimp', description: 'Email marketing', envVar: 'MAILCHIMP_API_KEY', group: 'CRM & Comms' },
-  { key: 'activecampaign', name: 'ActiveCampaign', description: 'Marketing automation', envVar: 'ACTIVECAMPAIGN_API_KEY', group: 'CRM & Comms' },
-  { key: 'twilio', name: 'Twilio', description: 'SMS & voice', envVar: 'TWILIO_API_KEY', group: 'CRM & Comms' },
-  // Commerce & Sites
-  { key: 'kinsta', name: 'Kinsta', description: 'Hosting & deployment', envVar: 'KINSTA_API_KEY', group: 'Commerce & Sites' },
-  { key: 'webflow', name: 'Webflow', description: 'Website builder', envVar: 'WEBFLOW_API_KEY', group: 'Commerce & Sites' },
-  { key: 'stripe', name: 'Stripe', description: 'Payments', envVar: 'STRIPE_API_KEY', group: 'Commerce & Sites' },
-  { key: 'printful', name: 'Printful', description: 'Fulfillment', envVar: 'PRINTFUL_API_KEY', group: 'Commerce & Sites' },
-  { key: 'woocommerce', name: 'WooCommerce', description: 'E-commerce', envVar: 'WOOCOMMERCE_API_KEY', group: 'Commerce & Sites' },
-  { key: 'notion', name: 'Notion', description: 'Docs & databases', envVar: 'NOTION_API_KEY', group: 'Commerce & Sites' },
-  { key: 'airtable', name: 'Airtable', description: 'Data management', envVar: 'AIRTABLE_API_KEY', group: 'Commerce & Sites' },
-];
-
-const API_GROUPS = [...new Set(API_LIST.map((a) => a.group))];
+import { GLOBAL_INTEGRATIONS, GLOBAL_GROUPS } from '../data/integrations';
 
 const ROLES = [
   { value: 'admin', label: 'Admin', desc: 'Full access — manage team, billing, all profiles', icon: Crown, color: 'text-brand-purple' },
@@ -247,7 +201,7 @@ export default function ApiSettings() {
         <div>
           <div className="glossy rounded-xl p-4 mb-5">
             <div className="relative z-10 flex items-center justify-between">
-              <span className="text-[13px] text-content-secondary">{API_LIST.filter(a => apiStatus?.[a.key]).length} of {API_LIST.length} configured</span>
+              <span className="text-[13px] text-content-secondary">{GLOBAL_INTEGRATIONS.filter(a => apiStatus?.[a.key]).length} of {GLOBAL_INTEGRATIONS.length} configured</span>
               <div className="flex items-center gap-3 text-[10px] text-content-muted">
                 <span className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-green-500" />Connected</span>
                 <span className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-surface-border" />Not configured</span>
@@ -255,8 +209,8 @@ export default function ApiSettings() {
             </div>
           </div>
 
-          {API_GROUPS.map((group) => {
-            const items = API_LIST.filter((a) => a.group === group);
+          {GLOBAL_GROUPS.map((group) => {
+            const items = GLOBAL_INTEGRATIONS.filter((a) => a.group === group);
             return (
               <div key={group} className="mb-5">
                 <h3 className="text-[11px] font-semibold text-content-muted uppercase tracking-wider mb-2">{group}</h3>
