@@ -134,6 +134,12 @@ export const rejectQueueItem = (id, reason) =>
 export const clearApprovalQueue = (profileId) =>
   request(`/meta-ads/queue/clear/${profileId}`, { method: 'DELETE' });
 
+// Platform data
+export const getBrandOverview = (profileId, datePreset) =>
+  request(`/platform-data/overview/${profileId}?datePreset=${datePreset || 'last_30d'}`);
+
+export const getDatePresets = () => request('/platform-data/date-presets');
+
 // Activity Feed
 export const getActivityFeed = (profileId, limit) =>
   request(`/activity/${profileId}?limit=${limit || 50}`);

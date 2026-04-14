@@ -15,7 +15,7 @@ import {
   getContacts, getContactStats, createContact, updateContact, deleteContactApi,
   getDeals, getDealStats, createDeal, updateDealApi, deleteDealApi,
   getProfile, getMetaAdsStatus, getMetaAccountInsights, getMetaCampaigns,
-  getActivityFeed, getMetaCampaignAds, getMetaAdCreatives,
+  getActivityFeed, getMetaCampaignAds, getMetaAdCreatives, getBrandOverview,
 } from '../services/api';
 import { useStore } from '../store/useStore';
 
@@ -119,6 +119,7 @@ export default function CRM() {
 
   const TABS = [
     { key: 'overview', label: 'Overview' },
+    { key: 'platforms', label: 'Platform Data' },
     { key: 'contacts', label: `Contacts (${contactStats?.total || 0})` },
     { key: 'deals', label: `Deals (${dealStats?.total || 0})` },
     { key: 'campaigns', label: `Campaigns (${campaigns.length})` },
@@ -404,6 +405,9 @@ export default function CRM() {
         </div>
       )}
 
+      {/* ─── PLATFORM DATA TAB (deep dive) ─── */}
+      {tab === 'platforms' && <PlatformDataTab profileId={id} />}
+
       {/* ─── CAMPAIGNS TAB ─── */}
       {tab === 'campaigns' && (
         <div>
@@ -660,6 +664,90 @@ function CampaignCard({ campaign }) {
               </div>
             )}
           </motion.div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function PlatformDataTab({ profileId }) {
+  const [data, setData] = useState(null);
+  const [datePreset, setDatePreset] = useState('last_30d');
+  const [loading, setLoading] = useState(true);
+
+  const DATE_OPTIONS = [
+    { value: 'today', label: 'Today' }, { value: 'yesterday', label: 'Yesterday' },
+    { value: 'last_7d', label: '7d' }, { value: 'last_14d', label: '14d' },
+    { value: 'last_30d', label: '30d' }, { value: 'last_90d', label: '90d' },
+    { value: 'this_month', label: 'Month' }, { value: 'last_month', label: 'Last mo' },
+    { value: 'this_quarter', label: 'Quarter' }, { value: 'this_year', label: 'Year' },
+    { value: 'lifetime', label: 'All time' },
+  ];
+
+  useEffect(() => {
+    setLoading(true);
+    getBrandOverview(profileId, datePreset).then(setData).catch(() => {}).finally(() => setLoading(false));
+  }, [profileId, datePreset]);
+
+  if (loading) return <div className="text-center py-12 text-content-muted text-sm">Loading...</div>;
+  if (!data) return null;
+
+  const fmtVal = (v, f) => {
+    if (!v && v !== 0) return '—';
+    if (f === 'currency') return `$${Number(v).toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
+    if (f === 'percent') return `${Number(v).toFixed(2)}%`;
+    const n = Number(v);
+    return n >= 1e6 ? `${(n/1e6).toFixed(1)}M` : n >= 1e3 ? `${(n/1e3).toFixed(1)}k` : n.toLocaleString();
+  };
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-4">
+        <p className="text-content-secondary text-sm">{data.summary.connectedPlatforms} connected</p>
+        <div className="flex gap-0.5 p-0.5 bg-surface-raised rounded-lg flex-wrap">
+          {DATE_OPTIONS.map(opt => (
+            <button key={opt.value} onClick={() => setDatePreset(opt.value)}
+              className={`px-2 py-1 rounded-md text-[9px] font-semibold transition-all ${
+                datePreset === opt.value ? 'bg-brand-purple text-white' : 'text-content-muted hover:text-content-secondary'
+              }`}>{opt.label}</button>
+          ))}
+        </div>
+      </div>
+      <div className="space-y-3">
+        {data.platforms.filter(p => p.connected).map(platform => (
+          <div key={platform.platform} className="glossy rounded-2xl p-4">
+            <div className="relative z-10">
+              <h3 className="text-[14px] font-semibold text-content-primary mb-3">{platform.name}</h3>
+              <div className="grid grid-cols-3 md:grid-cols-6 gap-3 mb-3">
+                {platform.kpis.map((kpi, i) => (
+                  <div key={i}>
+                    <p className="text-[9px] text-content-muted uppercase tracking-wider">{kpi.label}</p>
+                    <p className="text-lg font-bold text-content-primary">{fmtVal(kpi.value, kpi.format)}</p>
+                  </div>
+                ))}
+              </div>
+              {platform.details && (
+                <details className="text-[11px]">
+                  <summary className="cursor-pointer text-content-muted hover:text-brand-purple">View details</summary>
+                  <pre className="mt-2 bg-surface-raised rounded-xl p-3 text-[10px] text-content-secondary overflow-x-auto font-mono max-h-60">
+                    {JSON.stringify(platform.details, null, 2)}
+                  </pre>
+                </details>
+              )}
+            </div>
+          </div>
+        ))}
+        {data.platforms.filter(p => !p.connected).length > 0 && (
+          <div className="glossy rounded-xl p-4">
+            <div className="relative z-10">
+              <p className="text-[12px] font-semibold text-content-primary mb-2">Connect to see data:</p>
+              <div className="flex flex-wrap gap-2">
+                {data.platforms.filter(p => !p.connected).map(p => (
+                  <span key={p.platform} className="text-[11px] px-3 py-1 rounded-lg bg-surface-raised text-content-muted">{p.name}</span>
+                ))}
+              </div>
+            </div>
+          </div>
         )}
       </div>
     </div>

@@ -15,7 +15,7 @@ import AssetViewer from '../components/AssetViewer';
 import LoadingOverlay from '../components/LoadingOverlay';
 import ApprovalQueue from '../components/ApprovalQueue';
 import ActivityFeed from '../components/ActivityFeed';
-import PerformanceDashboard from '../components/PerformanceDashboard';
+import BrandOverview from '../components/BrandOverview';
 
 export default function Dashboard() {
   const { id } = useParams();
@@ -203,7 +203,7 @@ export default function Dashboard() {
       {/* ─── Row 1: Performance + Agents side by side ─── */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-5">
         <div className="lg:col-span-3">
-          <PerformanceDashboard profileId={id} />
+          <BrandOverview profileId={id} />
         </div>
         <div>
           <h2 className="text-[13px] font-semibold text-content-primary mb-2 flex items-center gap-1.5">
