@@ -17,9 +17,16 @@ function tryParseJson(input) {
   // Strategy 1: direct parse
   try { return JSON.parse(str); } catch {}
 
-  // Strategy 2: strip code fences globally
-  const stripped = str.replace(/```json\b/gi, '').replace(/```/g, '').trim();
+  // Strategy 2: strip ALL code fences aggressively
+  const stripped = str.replace(/```[a-z]*\s*/gi, '').replace(/```/g, '').trim();
   try { return JSON.parse(stripped); } catch {}
+
+  // Strategy 2b: try stripping everything before the first { and after last }
+  const firstBrace = str.indexOf('{');
+  const lastBrace = str.lastIndexOf('}');
+  if (firstBrace >= 0 && lastBrace > firstBrace) {
+    try { return JSON.parse(str.substring(firstBrace, lastBrace + 1)); } catch {}
+  }
 
   // Strategy 3: find the outermost { ... } in the string
   let depth = 0;
