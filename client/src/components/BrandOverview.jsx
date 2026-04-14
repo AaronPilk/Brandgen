@@ -65,6 +65,28 @@ export default function BrandOverview({ profileId }) {
   const connectedPlatforms = data.platforms.filter(p => p.connected);
   const placeholderPlatforms = data.platforms.filter(p => !p.connected);
 
+  // Empty state — nothing connected yet
+  if (connectedPlatforms.length === 0) {
+    return (
+      <div className="mb-5">
+        <div className="glossy rounded-2xl p-8 text-center">
+          <div className="relative z-10">
+            <BarChart3 className="w-10 h-10 text-brand-purple/30 mx-auto mb-3" />
+            <h3 className="text-[15px] font-semibold text-content-primary mb-1">No platforms connected yet</h3>
+            <p className="text-[13px] text-content-secondary mb-4 max-w-md mx-auto">
+              Connect your accounts below to see performance data. Click "Connect" on Facebook, Instagram, TikTok, or any platform to get started.
+            </p>
+            <div className="flex items-center justify-center gap-2 flex-wrap">
+              {['Facebook & Instagram', 'TikTok', 'Google Analytics', 'Shopify', 'HubSpot'].map(p => (
+                <span key={p} className="text-[11px] px-3 py-1.5 rounded-xl bg-surface-raised text-content-muted">{p}</span>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="mb-5">
       {/* Header with date selector */}
