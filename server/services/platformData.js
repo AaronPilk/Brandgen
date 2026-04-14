@@ -125,9 +125,12 @@ async function getInstagramData(profileId) {
   const conns = getProfileConnections(profileId);
   const savedIgId = conns?.instagram?.accountId;
 
-  // Only show if this profile has a Meta or Instagram connection — no global fallback
-  const hasMetaConnection = conns?.meta?.connected || conns?.meta_ads?.adAccountId;
-  if (!savedIgId && !hasMetaConnection) return null;
+  // Only show if this profile explicitly connected Meta (via OAuth) — not auto-discovered globals
+  const hasMetaOAuth = conns?.meta?.connected === true;
+  const hasExplicitIG = conns?.instagram?.connected === true;
+  if (!savedIgId && !hasMetaOAuth && !hasExplicitIG) return null;
+  // If the IG was auto-saved from global discovery (no meta OAuth), skip it
+  if (savedIgId && !hasMetaOAuth && !hasExplicitIG) return null;
 
   // Cache per profile
   const cacheKey = `ig:${profileId}:${savedIgId || 'auto'}`;
@@ -156,8 +159,11 @@ async function getInstagramData(profileId) {
       ig = pageWithIG.instagram_business_account;
       igId = ig.id;
 
-      // Save for next time — avoids re-discovery API call
-      setProfileConnection(profileId, 'instagram', { accountId: igId, username: ig.username });
+      // Only auto-save if this profile explicitly connected Meta via OAuth
+      const metaConn = getProfileConnections(profileId)?.meta;
+      if (metaConn?.connected) {
+        setProfileConnection(profileId, 'instagram', { accountId: igId, username: ig.username, connected: true });
+      }
     }
 
     if (!ig || !igId) return null;
