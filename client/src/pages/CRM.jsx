@@ -171,25 +171,50 @@ export default function CRM() {
       {/* ─── OVERVIEW TAB ─── */}
       {tab === 'overview' && (
         <div className="space-y-6">
-          {/* KPI Row — only show if there's actual data */}
-          {(contactStats?.total > 0 || dealStats?.total > 0 || metaConfigured) ? (
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              <KPICard icon={Users} label="Total Contacts" value={contactStats?.total || 0} color="text-blue-500" />
-              <KPICard icon={Target} label="Active Deals" value={dealStats?.total || 0} color="text-brand-purple" />
-              <KPICard icon={DollarSign} label="Pipeline Value" value={`$${(dealStats?.totalValue || 0).toLocaleString()}`} color="text-green-500" />
-              <KPICard icon={TrendingUp} label="Won Revenue" value={`$${(dealStats?.wonValue || 0).toLocaleString()}`} color="text-emerald-500" />
-            </div>
-          ) : (
-            <div className="glossy rounded-2xl p-8 text-center">
-              <div className="relative z-10">
-                <BarChart3 className="w-10 h-10 text-content-muted/30 mx-auto mb-3" />
-                <h3 className="text-[15px] font-semibold text-content-primary mb-1">Connect your accounts to see data</h3>
-                <p className="text-[13px] text-content-secondary max-w-md mx-auto">
-                  Go back to the brand dashboard and connect Facebook, Instagram, or other platforms. Data will populate here automatically.
-                </p>
+          {/* KPI Row — dynamic based on what's connected and brand type */}
+          {(() => {
+            const kpis = [];
+            const hasCrm = contactStats?.total > 0 || dealStats?.total > 0;
+            const hasAds = metaConfigured && metaInsights;
+            const isLeadGen = currentProfile?.mode === 'lead-gen';
+
+            // CRM KPIs (primary for lead gen, secondary for ecom)
+            if (hasCrm) {
+              kpis.push({ icon: Users, label: 'Contacts', value: contactStats?.total || 0, color: 'text-blue-500' });
+              if (isLeadGen) kpis.push({ icon: Target, label: 'Active Deals', value: dealStats?.total || 0, color: 'text-brand-purple' });
+              kpis.push({ icon: DollarSign, label: 'Pipeline', value: `$${(dealStats?.totalValue || 0).toLocaleString()}`, color: 'text-green-500' });
+              kpis.push({ icon: TrendingUp, label: 'Won Revenue', value: `$${(dealStats?.wonValue || 0).toLocaleString()}`, color: 'text-emerald-500' });
+            }
+
+            // Ad KPIs (supplementary — only if connected)
+            if (hasAds) {
+              kpis.push({ icon: DollarSign, label: 'Ad Spend', value: `$${parseFloat(metaInsights.spend || 0).toFixed(2)}`, color: 'text-brand-purple' });
+              kpis.push({ icon: Eye, label: 'Reach', value: formatNum(metaInsights.reach), color: 'text-pink-500' });
+              if (!hasCrm) {
+                // If no CRM, show more ad detail
+                kpis.push({ icon: MousePointer, label: 'Clicks', value: formatNum(metaInsights.clicks), color: 'text-green-500' });
+                kpis.push({ icon: TrendingUp, label: 'CTR', value: `${parseFloat(metaInsights.ctr || 0).toFixed(2)}%`, color: 'text-orange-500' });
+              }
+            }
+
+            if (kpis.length === 0) {
+              return (
+                <div className="glossy rounded-2xl p-6 text-center">
+                  <div className="relative z-10">
+                    <BarChart3 className="w-8 h-8 text-content-muted/30 mx-auto mb-2" />
+                    <h3 className="text-[14px] font-semibold text-content-primary mb-1">Connect accounts to see data</h3>
+                    <p className="text-[12px] text-content-secondary">Connect your CRM, ad accounts, or other platforms from the brand dashboard.</p>
+                  </div>
+                </div>
+              );
+            }
+
+            return (
+              <div className={`grid gap-3 ${kpis.length <= 4 ? 'grid-cols-2 md:grid-cols-4' : 'grid-cols-3 md:grid-cols-6'}`}>
+                {kpis.map((k, i) => <KPICard key={i} icon={k.icon} label={k.label} value={k.value} color={k.color} />)}
               </div>
-            </div>
-          )}
+            );
+          })()}
 
           {/* Ad Performance Row */}
           {metaConfigured && metaInsights && (
