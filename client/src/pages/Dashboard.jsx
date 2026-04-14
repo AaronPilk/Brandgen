@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
   ArrowLeft, Globe, Image, Mail, MessageSquare, Palette, ShoppingBag,
@@ -20,6 +20,7 @@ import BrandOverview from '../components/BrandOverview';
 export default function Dashboard() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const {
     currentProfile, setCurrentProfile, updateProfileAsset,
     addSpend, sessionId, apiStatus, autonomousMode, setAutonomousMode,
@@ -42,12 +43,18 @@ export default function Dashboard() {
     }
   }, [id]);
 
-  // Load connections for this profile
+  // Load connections for this profile + handle OAuth callback
   useEffect(() => {
     if (id) {
       getOAuthConnections(id).then(setConnections).catch(() => {});
+      // Reload profile after OAuth callback to get fresh connection data
+      const connected = searchParams.get('connected');
+      if (connected) {
+        getProfile(id).then(setCurrentProfile).catch(() => {});
+        getOAuthConnections(id).then(setConnections).catch(() => {});
+      }
     }
-  }, [id]);
+  }, [id, searchParams.get('connected')]);
 
   // Check if Meta Ads is configured
   useEffect(() => {
