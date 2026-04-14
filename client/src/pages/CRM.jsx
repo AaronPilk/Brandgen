@@ -14,8 +14,7 @@ import {
 import {
   getContacts, getContactStats, createContact, updateContact, deleteContactApi,
   getDeals, getDealStats, createDeal, updateDealApi, deleteDealApi,
-  getProfile, getMetaAdsStatus, getMetaAccountInsights, getMetaCampaigns,
-  getActivityFeed, getMetaCampaignAds, getMetaAdCreatives, getBrandOverview,
+  getProfile, getActivityFeed, getMetaCampaignAds, getBrandOverview,
 } from '../services/api';
 import { useStore } from '../store/useStore';
 
@@ -81,16 +80,25 @@ export default function CRM() {
     ]);
     setContacts(c); setCStats(cs); setDeals(d); setDStats(ds); setActivity(act);
 
-    // Meta data
-    const metaStatus = await getMetaAdsStatus().catch(() => ({ configured: false }));
-    setMetaConfigured(metaStatus.configured);
-    if (metaStatus.configured) {
-      const [ins, camp] = await Promise.all([
-        getMetaAccountInsights('last_30d').catch(() => null),
-        getMetaCampaigns().catch(() => null),
-      ]);
-      if (ins?.data?.[0]) setMetaInsights(ins.data[0]);
-      if (camp?.data) setCampaigns(camp.data);
+    // Platform data — per-profile, not global
+    const overview = await getBrandOverview(id, 'last_30d').catch(() => null);
+    if (overview) {
+      const metaPlatform = overview.platforms?.find(p => p.platform === 'meta_ads' && p.connected);
+      setMetaConfigured(!!metaPlatform);
+      if (metaPlatform) {
+        // Extract insights from KPIs
+        const kpiMap = {};
+        metaPlatform.kpis.forEach(k => { kpiMap[k.label.toLowerCase().replace(/\s/g, '_')] = k.value; });
+        setMetaInsights({
+          spend: kpiMap.ad_spend || 0,
+          impressions: kpiMap.impressions || 0,
+          clicks: kpiMap.clicks || 0,
+          ctr: kpiMap.ctr || 0,
+          cpc: kpiMap.cpc || 0,
+          reach: kpiMap.reach || 0,
+        });
+        setCampaigns(metaPlatform.details?.campaigns || []);
+      }
     }
   };
 
