@@ -7,6 +7,22 @@ import {
 } from 'lucide-react';
 import { useStore } from '../store/useStore';
 import { getOAuthPlatforms, getOAuthConnections, startOAuthConnect, disconnectOAuth, getApiStatus } from '../services/api';
+import { BRAND_INTEGRATIONS, BRAND_GROUPS } from '../data/integrations';
+
+const LOGO_C = {
+  meta: '1877F2', tiktok: '000', pinterest: 'E60023', twitter: '000', youtube: 'FF0000', linkedinAds: '0A66C2',
+  gohighlevel: '28A745', hubspot: 'FF7A59', klaviyo: '000', mailchimp: 'FFE01B', activecampaign: '356AE6', twilio: 'F22F46',
+  shopify: '96BF48', wordpress: '21759B', webflow: '4353FF', woocommerce: '96588A', stripe: '635BFF', printful: '28323C',
+  google: '4285F4', canva: '00C4CC', notion: '000', airtable: '18BFFF', zoominfo: '6B3FA0',
+  arcads: 'FF2D55', heygen: '7C3AED', synthesia: '0070F3', creatify: 'FF6B2B', captions: '000', kinsta: '5333ED',
+};
+const LOGO_L = {
+  meta: 'f', tiktok: '♪', pinterest: 'P', twitter: '𝕏', youtube: '▶', linkedinAds: 'in',
+  gohighlevel: 'G', hubspot: 'H', klaviyo: 'K', mailchimp: 'M', activecampaign: 'A', twilio: 'T',
+  shopify: 'S', wordpress: 'W', webflow: 'W', woocommerce: 'W', stripe: 'S', printful: 'P',
+  google: 'G', canva: 'C', notion: 'N', airtable: 'A', zoominfo: 'Z',
+  arcads: 'A', heygen: 'H', synthesia: 'S', creatify: 'C', captions: 'C', kinsta: 'K',
+};
 
 const PLATFORM_META = {
   meta: {
@@ -203,88 +219,56 @@ export default function Connections() {
           <Loader2 className="w-6 h-6 text-brand-purple animate-spin" />
         </div>
       ) : (
-        <motion.div variants={container} initial="hidden" animate="show" className="space-y-3">
-          {platforms.map((platform) => {
-            const meta = PLATFORM_META[platform.key] || {};
-            const Icon = meta.icon || Share2;
-            const isConnected = !!connections[platform.key];
-            const isConnecting = connecting === platform.key;
-
+        <div>
+          {BRAND_GROUPS.map((group) => {
+            const items = BRAND_INTEGRATIONS.filter((i) => i.group === group);
             return (
-              <motion.div
-                key={platform.key}
-                variants={item}
-                className={`glossy rounded-2xl p-5 transition-all duration-300 ${
-                  isConnected ? '!border-green-500/20' : ''
-                }`}
-              >
-                <div className="relative z-10">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                      <div className={`w-11 h-11 rounded-xl ${meta.color || 'bg-gray-600'} flex items-center justify-center text-white`}>
-                        <Icon className="w-5 h-5" />
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <h3 className="text-[15px] font-semibold text-content-primary">{platform.name}</h3>
-                          {isConnected && (
-                            <span className="flex items-center gap-1 text-[10px] font-semibold text-green-500 bg-green-500/10 px-2 py-0.5 rounded-full">
-                              <Check className="w-3 h-3" /> Connected
-                            </span>
+              <div key={group} className="mb-5">
+                <h3 className="text-[11px] font-semibold text-content-muted uppercase tracking-wider mb-2">{group}</h3>
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+                  {items.map((int) => {
+                    const isConnected = !!connections[int.key];
+                    const isConnecting = connecting === int.key;
+                    const platformData = platforms.find((p) => p.key === int.key);
+                    const isConfigured = platformData?.configured;
+
+                    return (
+                      <div key={int.key} className={`glossy rounded-2xl p-3.5 transition-all ${isConnected ? '!border-green-500/20' : ''}`}>
+                        <div className="relative z-10">
+                          <div className="flex items-center gap-3 mb-3">
+                            <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
+                              style={{ backgroundColor: `${int.logo ? '#' : ''}${(LOGO_C[int.key] || '8B5CF6')}18` }}>
+                              <span className="font-bold text-[11px]" style={{ color: `#${LOGO_C[int.key] || '8B5CF6'}` }}>{LOGO_L[int.key] || int.name[0]}</span>
+                            </div>
+                            <div className="min-w-0">
+                              <p className="text-[13px] font-semibold text-content-primary truncate">{int.name}</p>
+                              <p className="text-[10px] text-content-muted">{int.authType === 'oauth' ? 'OAuth' : 'API Key'}</p>
+                            </div>
+                          </div>
+                          {isConnected ? (
+                            <div className="flex items-center justify-between">
+                              <span className="text-[10px] font-bold text-green-500 flex items-center gap-1"><Check className="w-3 h-3" />Connected</span>
+                              <button onClick={() => handleDisconnect(int.key)} className="text-[10px] text-red-400 hover:text-red-500 transition-colors">Disconnect</button>
+                            </div>
+                          ) : (
+                            <button
+                              onClick={() => handleConnect(int.key)}
+                              disabled={isConnecting}
+                              className="w-full py-2 rounded-xl text-[11px] font-semibold bg-surface-raised hover:bg-brand-purple/10 hover:text-brand-purple text-content-secondary transition-all flex items-center justify-center gap-1.5"
+                            >
+                              <ExternalLink className="w-3 h-3" />
+                              {isConnecting ? 'Connecting...' : 'Connect'}
+                            </button>
                           )}
                         </div>
-                        <p className="text-[12px] text-content-muted mt-0.5">{meta.description}</p>
                       </div>
-                    </div>
-
-                    {isConnected ? (
-                      <button
-                        onClick={() => handleDisconnect(platform.key)}
-                        className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-[13px] font-medium text-red-500 hover:bg-red-500/10 transition-colors"
-                      >
-                        <Unplug className="w-3.5 h-3.5" /> Disconnect
-                      </button>
-                    ) : (
-                      <button
-                        onClick={() => handleConnect(platform.key)}
-                        disabled={isConnecting || !platform.configured}
-                        className={`flex items-center gap-1.5 px-5 py-2.5 rounded-xl text-[13px] font-semibold transition-all ${
-                          platform.configured
-                            ? 'glossy-btn text-white'
-                            : 'bg-surface-raised text-content-muted cursor-not-allowed'
-                        }`}
-                      >
-                        {isConnecting ? (
-                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                        ) : (
-                          <ExternalLink className="w-3.5 h-3.5" />
-                        )}
-                        {platform.configured ? 'Connect' : 'Not configured'}
-                      </button>
-                    )}
-                  </div>
-
-                  {/* Features list */}
-                  {meta.features && (
-                    <div className="flex flex-wrap gap-2 mt-4 ml-15">
-                      {meta.features.map((f) => (
-                        <span key={f} className="text-[11px] px-2.5 py-1 rounded-full bg-surface-raised text-content-muted font-medium">
-                          {f}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-
-                  {!platform.configured && (
-                    <p className="text-[11px] text-content-muted mt-3 ml-15">
-                      Add {platform.key.toUpperCase()}_CLIENT_ID and {platform.key.toUpperCase()}_CLIENT_SECRET to your .env file to enable.
-                    </p>
-                  )}
+                    );
+                  })}
                 </div>
-              </motion.div>
+              </div>
             );
           })}
-        </motion.div>
+        </div>
       )}
 
       {/* Tracking Pixels Section */}
