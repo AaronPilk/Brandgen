@@ -370,22 +370,29 @@ function IntegrationsTab({ apiStatus }) {
 
 function IntegrationCard({ api, apiStatus }) {
   const isConnected = apiStatus?.[api.key];
-  const scopeLabel = api.scope === 'global' ? 'S' : 'B';
-  const scopeColor = api.scope === 'global' ? 'text-brand-purple' : 'text-blue-500';
 
   return (
-    <div className={`glossy rounded-lg p-2 ${isConnected ? '!border-green-500/15' : ''}`}>
-      <div className="relative z-10 flex items-center gap-2">
-        <div className={`w-5 h-5 rounded flex items-center justify-center shrink-0 ${isConnected ? 'bg-green-500/10 text-green-500' : 'bg-surface-raised text-content-muted'}`}>
-          {isConnected ? <Check className="w-3 h-3" /> : <X className="w-3 h-3" />}
+    <div className={`glossy rounded-xl p-2.5 transition-all ${isConnected ? '!border-green-500/20' : ''}`}>
+      <div className="relative z-10 flex items-center gap-2.5">
+        {/* Brand-colored icon circle */}
+        <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: `${api.color || '#8B5CF6'}15` }}>
+          {isConnected ? (
+            <Check className="w-3.5 h-3.5" style={{ color: api.color || '#8B5CF6' }} />
+          ) : (
+            <div className="w-3 h-3 rounded-full" style={{ backgroundColor: `${api.color || '#888'}30` }} />
+          )}
         </div>
         <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-1">
-            <p className="text-[11px] font-medium text-content-primary truncate">{api.name}</p>
-            {api.required && <span className="text-[7px] px-0.5 bg-brand-purple/10 text-brand-purple rounded font-bold leading-tight">REQ</span>}
+          <p className="text-[11px] font-semibold text-content-primary truncate leading-tight">{api.name}</p>
+          <div className="flex items-center gap-1 mt-0.5">
+            {isConnected && <span className="text-[8px] font-bold text-green-500">Connected</span>}
+            {!isConnected && <span className="text-[8px] text-content-muted">Not configured</span>}
+            {api.required && <span className="text-[7px] px-1 bg-brand-purple/10 text-brand-purple rounded-sm font-bold">REQ</span>}
           </div>
         </div>
-        <span className={`text-[8px] font-bold ${scopeColor} shrink-0`}>{scopeLabel}</span>
+        <span className={`text-[7px] font-bold px-1 py-0.5 rounded ${api.scope === 'global' ? 'bg-brand-purple/10 text-brand-purple' : 'bg-blue-500/10 text-blue-500'}`}>
+          {api.scope === 'global' ? 'SYS' : 'BRAND'}
+        </span>
       </div>
     </div>
   );
