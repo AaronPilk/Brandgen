@@ -73,22 +73,55 @@ function getCrmData(profileId) {
   } catch { return null; }
 }
 
-// ─── Instagram (via Meta API — same token) ───
+// ─── Instagram (via Meta Graph API) ───
 async function getInstagramData(profileId) {
   if (!isMetaAdsConfigured()) return null;
   try {
-    // Instagram data comes through Meta Graph API when Meta is connected
-    // For now, surface it as a connected platform with placeholder KPIs
-    // Real Instagram Insights API requires an Instagram Business Account ID
+    // Use Meta token to get Instagram Business Account data
+    const token = process.env.META_SYSTEM_USER_TOKEN;
+    if (!token) return null;
+
+    // Get pages connected to the ad account, then find Instagram account
+    const pagesRes = await fetch(`https://graph.facebook.com/v19.0/me/accounts?fields=instagram_business_account{id,name,username,followers_count,media_count,profile_picture_url}&access_token=${token}`);
+    const pagesData = await pagesRes.json();
+
+    if (pagesData.error || !pagesData.data) return null;
+
+    // Find first page with an Instagram business account
+    const pageWithIG = pagesData.data?.find(p => p.instagram_business_account);
+    if (!pageWithIG) return null;
+
+    const ig = pageWithIG.instagram_business_account;
+
+    // Get Instagram insights
+    let reachVal = 0, impressionsVal = 0;
+    try {
+      const insightsRes = await fetch(`https://graph.facebook.com/v19.0/${ig.id}/insights?metric=reach,impressions&period=day&since=${Math.floor(Date.now()/1000) - 86400*28}&until=${Math.floor(Date.now()/1000)}&access_token=${token}`);
+      const insightsData = await insightsRes.json();
+      if (insightsData.data) {
+        const reachMetric = insightsData.data.find(m => m.name === 'reach');
+        const impMetric = insightsData.data.find(m => m.name === 'impressions');
+        reachVal = reachMetric?.values?.reduce((s, v) => s + (v.value || 0), 0) || 0;
+        impressionsVal = impMetric?.values?.reduce((s, v) => s + (v.value || 0), 0) || 0;
+      }
+    } catch {}
+
     return {
       platform: 'instagram',
       name: 'Instagram',
-      connected: true, // Connected via Meta
+      connected: true,
       kpis: [
-        kpi('Status', 'Connected via Meta', 'text', null, 'Instagram'),
+        kpi('Followers', ig.followers_count || 0, 'number', null, 'Instagram'),
+        kpi('Posts', ig.media_count || 0, 'number', null, 'Instagram'),
+        kpi('Reach (28d)', reachVal, 'number', null, 'Instagram'),
+        kpi('Impressions (28d)', impressionsVal, 'number', null, 'Instagram'),
       ],
-      details: { note: 'Instagram data available through Meta Business Suite. Full Instagram Insights API integration coming soon.' },
-      viaParent: 'meta',
+      details: {
+        username: ig.username,
+        name: ig.name,
+        profilePicture: ig.profile_picture_url,
+        accountId: ig.id,
+      },
     };
   } catch { return null; }
 }
