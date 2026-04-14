@@ -101,6 +101,9 @@ export const getUsers = () => request('/auth/users');
 export const createUserAdmin = (data) => request('/auth/users', { method: 'POST', body: JSON.stringify(data) });
 export const updateUserRole = (id, role) => request(`/auth/users/${id}/role`, { method: 'PATCH', body: JSON.stringify({ role }) });
 export const deleteUserAdmin = (id) => request(`/auth/users/${id}`, { method: 'DELETE' });
+export const createClientInvite = (data) => request('/auth/invite', { method: 'POST', body: JSON.stringify(data) });
+export const assignUserToProfile = (profileId, userIds) => request(`/profiles/${profileId}/assign`, { method: 'POST', body: JSON.stringify({ userIds }) });
+export const unassignUserFromProfile = (profileId, userId) => request(`/profiles/${profileId}/unassign`, { method: 'POST', body: JSON.stringify({ userId }) });
 
 // Meta Ads
 export const getMetaAdsStatus = () => request('/meta-ads/status');

@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { createUser, loginUser, validateToken, listUsers, updateUserRole, deleteUser, updateUser } from '../services/auth.js';
+import { dbGet, dbSet } from '../services/db.js';
 
 const router = Router();
 
@@ -91,6 +92,47 @@ router.patch('/users/:id/role', requireAdmin, (req, res) => {
 router.delete('/users/:id', requireAdmin, (req, res) => {
   deleteUser(req.params.id);
   res.json({ success: true });
+});
+
+// Admin: Create client invite with expiration
+router.post('/invite', requireAdmin, (req, res) => {
+  try {
+    const { email, name, profileIds, expiresInDays } = req.body;
+    if (!email) return res.status(400).json({ error: 'Email required' });
+
+    // Create user with client role and temp password
+    const tempPassword = Math.random().toString(36).slice(2, 10);
+    const user = createUser(email, tempPassword, name || '', 'client');
+
+    // Assign to profiles
+    if (profileIds?.length) {
+      for (const profileId of profileIds) {
+        const profile = dbGet('profiles', profileId);
+        if (profile) {
+          profile.allowedUsers = [...new Set([...(profile.allowedUsers || []), user.id])];
+          dbSet('profiles', profileId, profile);
+        }
+      }
+    }
+
+    // Store invite metadata
+    dbSet('invites', user.id, {
+      userId: user.id,
+      email,
+      role: 'client',
+      profileIds: profileIds || [],
+      expiresAt: expiresInDays ? Date.now() + (expiresInDays * 86400000) : null,
+      createdAt: Date.now(),
+    });
+
+    res.json({
+      user,
+      tempPassword,
+      message: `Client account created. Send them: email=${email}, password=${tempPassword}`,
+    });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
 });
 
 export { router as authRoutes };

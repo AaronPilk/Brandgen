@@ -7,6 +7,7 @@ import FloatingAssistant from './FloatingAssistant';
 export default function Layout({ children }) {
   const { theme, toggleTheme, currentProfile, user, logout } = useStore();
   const isAdmin = user?.role === 'admin';
+  const isClient = user?.role === 'client';
   const location = useLocation();
   const isHome = location.pathname === '/';
 
@@ -28,7 +29,7 @@ export default function Layout({ children }) {
           </Link>
 
           <div className="flex items-center gap-2">
-            <CostTracker />
+            {!isClient && <CostTracker />}
 
             {currentProfile && (
               <Link
@@ -39,20 +40,26 @@ export default function Layout({ children }) {
               </Link>
             )}
 
-            <NavButton onClick={toggleTheme} title={theme === 'dark' ? 'Light mode' : 'Dark mode'}>
-              {theme === 'dark' ? <Sun className="w-[18px] h-[18px]" /> : <Moon className="w-[18px] h-[18px]" />}
-            </NavButton>
-            <NavLink to="/profiles" title="Profiles">
-              <FolderOpen className="w-[18px] h-[18px]" />
-            </NavLink>
+            {!isClient && (
+              <NavButton onClick={toggleTheme} title={theme === 'dark' ? 'Light mode' : 'Dark mode'}>
+                {theme === 'dark' ? <Sun className="w-[18px] h-[18px]" /> : <Moon className="w-[18px] h-[18px]" />}
+              </NavButton>
+            )}
+            {!isClient && (
+              <NavLink to="/profiles" title="Profiles">
+                <FolderOpen className="w-[18px] h-[18px]" />
+              </NavLink>
+            )}
             {isAdmin && (
               <NavLink to="/team" title="Team">
                 <Users className="w-[18px] h-[18px]" />
               </NavLink>
             )}
-            <NavLink to="/settings" title="Settings">
-              <Settings className="w-[18px] h-[18px]" />
-            </NavLink>
+            {!isClient && (
+              <NavLink to="/settings" title="Settings">
+                <Settings className="w-[18px] h-[18px]" />
+              </NavLink>
+            )}
             <NavButton onClick={logout} title="Sign out">
               <LogOut className="w-[18px] h-[18px]" />
             </NavButton>
