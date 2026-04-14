@@ -7,7 +7,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { useStore } from '../store/useStore';
 import { getApiStatus, getUsers, createUserAdmin, updateUserRole, deleteUserAdmin, updateMe } from '../services/api';
-import { GLOBAL_INTEGRATIONS, GLOBAL_GROUPS } from '../data/integrations';
+import { INTEGRATION_CATALOG } from '../data/integrations';
 
 const ROLES = [
   { value: 'admin', label: 'Admin', desc: 'Full access — manage team, billing, all profiles', icon: Crown, color: 'text-brand-purple' },
@@ -64,7 +64,7 @@ export default function ApiSettings() {
   const TABS = [
     { key: 'account', label: 'Account', icon: User },
     { key: 'team', label: 'Team & Roles', icon: Users },
-    { key: 'api', label: 'Integrations', icon: Key },
+    ...(isAdmin ? [{ key: 'api', label: 'Integrations', icon: Key }] : []),
   ];
 
   return (
@@ -196,56 +196,8 @@ export default function ApiSettings() {
         </div>
       )}
 
-      {/* ─── INTEGRATIONS TAB ─── */}
-      {tab === 'api' && (
-        <div>
-          <div className="glossy rounded-xl p-3 mb-4">
-            <div className="relative z-10 flex items-center justify-between">
-              <span className="text-[13px] text-content-secondary">{GLOBAL_INTEGRATIONS.filter(a => apiStatus?.[a.key]).length} of {GLOBAL_INTEGRATIONS.length} configured</span>
-              <div className="flex items-center gap-3 text-[10px] text-content-muted">
-                <span className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-green-500" />Connected</span>
-                <span className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-surface-border" />Not configured</span>
-              </div>
-            </div>
-          </div>
-
-          {GLOBAL_GROUPS.map((group) => {
-            const items = GLOBAL_INTEGRATIONS.filter((a) => a.group === group);
-            return (
-              <div key={group} className="mb-4">
-                <h3 className="text-[11px] font-semibold text-content-muted uppercase tracking-wider mb-2">{group}</h3>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                  {items.map((api) => {
-                    const isConnected = apiStatus?.[api.key];
-                    return (
-                      <div key={api.key} className={`glossy rounded-xl p-3 ${isConnected ? '!border-green-500/15' : ''}`}>
-                        <div className="relative z-10 flex items-center gap-2.5">
-                          <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${isConnected ? 'bg-green-500/10 text-green-500' : 'bg-surface-raised text-content-muted'}`}>
-                            {isConnected ? <Check className="w-3.5 h-3.5" /> : <X className="w-3.5 h-3.5" />}
-                          </div>
-                          <div className="min-w-0">
-                            <div className="flex items-center gap-1.5">
-                              <p className="text-[12px] font-medium text-content-primary truncate">{api.name}</p>
-                              {api.required && <span className="text-[8px] px-1 bg-brand-purple/10 text-brand-purple rounded font-bold">REQ</span>}
-                            </div>
-                            <p className="text-[9px] text-content-muted truncate">{api.description}</p>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            );
-          })}
-
-          <div className="glossy rounded-2xl p-4">
-            <div className="relative z-10">
-              <p className="text-[13px] text-content-secondary">Add keys to <code className="bg-surface-raised px-1.5 py-0.5 rounded-lg text-[11px]">server/.env</code> and restart. OAuth integrations are configured in Connections.</p>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* ─── INTEGRATIONS TAB (admin only) ─── */}
+      {tab === 'api' && isAdmin && <IntegrationsTab apiStatus={apiStatus} />}
 
       {/* Invite Modal */}
       {showInvite && (
@@ -356,6 +308,85 @@ function AccountTab({ currentUser, token, setAuth }) {
       <button onClick={handleSave} disabled={saving} className="glossy-btn text-white px-5 py-2.5 rounded-xl text-[13px] font-semibold flex items-center gap-2">
         {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />} {saving ? 'Saving...' : 'Save Changes'}
       </button>
+    </div>
+  );
+}
+
+function IntegrationsTab({ apiStatus }) {
+  const [expanded, setExpanded] = useState(false);
+  const ALL_GROUPS = [...new Set(INTEGRATION_CATALOG.map((i) => i.group))];
+  const connectedCount = INTEGRATION_CATALOG.filter((i) => apiStatus?.[i.key]).length;
+
+  // Default: show first 12 items. Expanded: show all grouped.
+  const defaultItems = INTEGRATION_CATALOG.slice(0, 12);
+
+  return (
+    <div>
+      <div className="glossy rounded-xl p-2.5 mb-3">
+        <div className="relative z-10 flex items-center justify-between">
+          <span className="text-[12px] text-content-secondary">{connectedCount} of {INTEGRATION_CATALOG.length} configured</span>
+          <div className="flex items-center gap-3 text-[9px] text-content-muted">
+            <span className="flex items-center gap-1"><div className="w-1.5 h-1.5 rounded-full bg-green-500" />Connected</span>
+            <span className="flex items-center gap-1"><div className="w-1.5 h-1.5 rounded-full bg-surface-border" />Not configured</span>
+            <span className="flex items-center gap-1 text-brand-purple">S</span>
+            <span>= System</span>
+            <span className="flex items-center gap-1 text-blue-500">B</span>
+            <span>= Brand</span>
+          </div>
+        </div>
+      </div>
+
+      {expanded ? (
+        ALL_GROUPS.map((group) => {
+          const items = INTEGRATION_CATALOG.filter((i) => i.group === group);
+          return (
+            <div key={group} className="mb-3">
+              <h3 className="text-[10px] font-semibold text-content-muted uppercase tracking-wider mb-1.5">{group}</h3>
+              <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-1.5">
+                {items.map((api) => <IntegrationCard key={api.key} api={api} apiStatus={apiStatus} />)}
+              </div>
+            </div>
+          );
+        })
+      ) : (
+        <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-1.5 mb-2">
+          {defaultItems.map((api) => <IntegrationCard key={api.key} api={api} apiStatus={apiStatus} />)}
+        </div>
+      )}
+
+      <button onClick={() => setExpanded(!expanded)}
+        className="w-full py-2 rounded-xl text-[11px] font-medium text-content-muted hover:text-brand-purple hover:bg-brand-purple/5 transition-all flex items-center justify-center gap-1 mb-3">
+        {expanded ? 'Show less' : `See all ${INTEGRATION_CATALOG.length} integrations`}
+      </button>
+
+      <div className="glossy rounded-xl p-3">
+        <div className="relative z-10">
+          <p className="text-[11px] text-content-muted">Add keys to <code className="bg-surface-raised px-1 py-0.5 rounded text-[10px]">server/.env</code> and restart. OAuth integrations are configured in Connections.</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function IntegrationCard({ api, apiStatus }) {
+  const isConnected = apiStatus?.[api.key];
+  const scopeLabel = api.scope === 'global' ? 'S' : 'B';
+  const scopeColor = api.scope === 'global' ? 'text-brand-purple' : 'text-blue-500';
+
+  return (
+    <div className={`glossy rounded-lg p-2 ${isConnected ? '!border-green-500/15' : ''}`}>
+      <div className="relative z-10 flex items-center gap-2">
+        <div className={`w-5 h-5 rounded flex items-center justify-center shrink-0 ${isConnected ? 'bg-green-500/10 text-green-500' : 'bg-surface-raised text-content-muted'}`}>
+          {isConnected ? <Check className="w-3 h-3" /> : <X className="w-3 h-3" />}
+        </div>
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-1">
+            <p className="text-[11px] font-medium text-content-primary truncate">{api.name}</p>
+            {api.required && <span className="text-[7px] px-0.5 bg-brand-purple/10 text-brand-purple rounded font-bold leading-tight">REQ</span>}
+          </div>
+        </div>
+        <span className={`text-[8px] font-bold ${scopeColor} shrink-0`}>{scopeLabel}</span>
+      </div>
     </div>
   );
 }
