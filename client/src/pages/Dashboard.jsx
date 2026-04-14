@@ -200,157 +200,41 @@ export default function Dashboard() {
       </div>
 
 
-      {/* 2-Column Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-
-        {/* LEFT COLUMN — Actions + Agents */}
-        <div className="lg:col-span-1 space-y-5">
-          {/* Agents */}
-          <div>
-            <h2 className="text-[14px] font-semibold text-content-primary mb-3 flex items-center gap-2">
-              <Zap className="w-4 h-4 text-brand-purple" /> Agents
-            </h2>
-            <div className="grid grid-cols-3 gap-2">
-              {[
-                { name: 'Sales', icon: DollarSign, color: 'text-green-500', bg: 'bg-green-500/10' },
-                { name: 'Campaign', icon: Megaphone, color: 'text-blue-500', bg: 'bg-blue-500/10' },
-                { name: 'Creative', icon: Palette, color: 'text-pink-500', bg: 'bg-pink-500/10' },
-                { name: 'Projects', icon: Target, color: 'text-orange-500', bg: 'bg-orange-500/10' },
-                { name: 'Analytics', icon: BarChart3, color: 'text-brand-purple', bg: 'bg-brand-purple/10' },
-                { name: 'Retention', icon: Users, color: 'text-cyan-500', bg: 'bg-cyan-500/10' },
-              ].map((agent) => {
-                const AgentIcon = agent.icon;
-                return (
-                  <div key={agent.name} className="glossy rounded-xl p-3 opacity-70 cursor-default">
-                    <div className="relative z-10 text-center">
-                      <div className={`w-8 h-8 rounded-lg ${agent.bg} flex items-center justify-center mx-auto mb-1.5`}>
-                        <AgentIcon className={`w-4 h-4 ${agent.color}`} />
-                      </div>
-                      <p className="text-[10px] font-semibold text-content-primary">{agent.name}</p>
-                      <p className="text-[8px] text-content-muted uppercase">Soon</p>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          {error && (
-            <div className="p-3 bg-red-500/5 border border-red-500/10 rounded-2xl text-red-600 dark:text-red-400 text-[12px]">
-              {error}
-            </div>
-          )}
-
-          {/* Actions */}
-          <div className="space-y-2">
-            <h2 className="text-[14px] font-semibold mb-2 text-content-primary">Actions</h2>
-
-        {isLeadGen && (
-          <>
-            <ActionButton skipConfirm icon={Globe} label="Build Landing Page" description="Add reference links, docs & images for best results" actionKey="landing-page" completed={!!assets['landing-page']}
-              onExecute={() => handleActionWithInput('landing-page', {
-                title: 'Landing Page References',
-                subtitle: 'The more reference material you provide, the better the output.',
-                fields: [
-                  { key: 'referenceLinks', label: 'Landing pages you like (one URL per line)', type: 'textarea', placeholder: 'https://example.com/landing1\nhttps://competitor.com/offer' },
-                  { key: 'notes', label: 'What do you want on this page? Any specific sections, copy, or style?', type: 'textarea', placeholder: 'I want a hero section with a bold headline, a benefits section, testimonials, and a form...' },
-                  { key: 'files', label: 'Upload reference screenshots, PDFs, or design files', type: 'file' },
-                ],
-              })}
-            />
-            <ActionButton skipConfirm icon={Megaphone} label="Create Ad Creatives" description="Add links to ads you like for inspiration" actionKey="ad-creatives" completed={!!assets['ad-creatives']}
-              onExecute={() => handleActionWithInput('ad-creatives', {
-                title: 'Ad Creative Inspiration',
-                subtitle: 'Share ads you like so AI can match the style, tone, and format.',
-                fields: [
-                  { key: 'inspirationLinks', label: 'Links to ads you like (Facebook Ad Library, TikTok, etc.)', type: 'textarea', placeholder: 'https://www.facebook.com/ads/library/?id=...\nhttps://tiktok.com/@brand/video/...' },
-                  { key: 'adNotes', label: 'What angles or hooks do you want? Any specific offers to highlight?', type: 'textarea', placeholder: 'Focus on pain points, use urgency, highlight free consultation offer...' },
-                  { key: 'files', label: 'Upload screenshot examples of ads you like', type: 'file' },
-                ],
-              })}
-            />
-            <ActionButton icon={Mail} label="Build Email Sequences" description="Industry-specific 5-email nurture sequence" actionKey="email-sequences" completed={!!assets['email-sequences']} onExecute={() => executeAction('email-sequences')} />
-            <ActionButton icon={MessageSquare} label="Build SMS Sequences" description="5-message SMS follow-up sequence" actionKey="sms-sequences" completed={!!assets['sms-sequences']} onExecute={() => executeAction('sms-sequences')} />
-          </>
-        )}
-
-        {isBrand && (
-          <>
-            <ActionButton icon={Palette} label="Generate Logo Concepts" description="3 distinct logo variations" actionKey="logo-concepts" completed={!!assets['logo-concepts']} onExecute={() => executeAction('logo-concepts')} />
-            <ActionButton skipConfirm icon={Globe} label="Build Website" description="Add reference sites, docs & images for best results" actionKey="landing-page" completed={!!assets['landing-page']}
-              onExecute={() => handleActionWithInput('landing-page', {
-                title: 'Website References',
-                subtitle: 'The more reference material you provide, the better the output.',
-                fields: [
-                  { key: 'referenceLinks', label: 'Websites you like (one URL per line)', type: 'textarea', placeholder: 'https://example.com\nhttps://competitor.com' },
-                  { key: 'notes', label: 'What do you want on this site? Specific sections, copy, or style?', type: 'textarea', placeholder: 'I want a hero section, product showcase, about section, and contact form...' },
-                  { key: 'files', label: 'Upload reference screenshots, PDFs, or design files', type: 'file' },
-                ],
-              })}
-            />
-            <ActionButton icon={Image} label="Create Product Mockups" description="T-shirts, packaging, lifestyle shots" actionKey="product-mockups" completed={!!assets['product-mockups']} onExecute={() => executeAction('product-mockups')} />
-            <ActionButton skipConfirm icon={Megaphone} label="Create 10 Ad Creatives" description="Add links to ads you like for inspiration" actionKey="ad-creatives" completed={!!assets['ad-creatives']}
-              onExecute={() => handleActionWithInput('ad-creatives', {
-                title: 'Ad Creative Inspiration',
-                subtitle: 'Share ads you like so AI can match the style, tone, and format.',
-                fields: [
-                  { key: 'inspirationLinks', label: 'Links to ads you like (Facebook Ad Library, TikTok, etc.)', type: 'textarea', placeholder: 'https://www.facebook.com/ads/library/?id=...\nhttps://tiktok.com/@brand/video/...' },
-                  { key: 'adNotes', label: 'What angles or hooks do you want? Specific offers to highlight?', type: 'textarea', placeholder: 'Focus on pain points, use urgency, highlight free consultation offer...' },
-                  { key: 'files', label: 'Upload screenshot examples of ads you like', type: 'file' },
-                ],
-              })}
-            />
-            <ActionButton icon={Instagram} label="Set Up Instagram" description="Profile setup with content strategy" actionKey="social-instagram" completed={!!assets['social-instagram']} onExecute={() => executeAction('social-setup', { platform: 'Instagram' })} />
-            <ActionButton icon={Facebook} label="Set Up Facebook Page" description="Business page with content plan" actionKey="social-facebook" completed={!!assets['social-facebook']} onExecute={() => executeAction('social-setup', { platform: 'Facebook' })} />
-          </>
-        )}
-        {/* Meta Ads — available for both modes when configured */}
-        {metaAdsConfigured && (
-          <ActionButton
-            skipConfirm
-            icon={Megaphone}
-            label="Prepare Meta Ad Campaign"
-            description="AI designs a campaign — you approve before anything goes live"
-            actionKey="meta-campaign"
-            onExecute={() => setMetaCampaignModal(true)}
-          />
-        )}
-          </div>
-
-          {/* Generated Assets */}
-          {Object.keys(assets).length > 0 && (
-            <div>
-              <h2 className="text-[14px] font-semibold mb-2 text-content-primary">Generated Assets</h2>
-              <div className="grid grid-cols-2 gap-2">
-                {Object.entries(assets).map(([key, data]) => (
-                  <motion.button key={key} whileHover={{ y: -1 }}
-                    onClick={() => {
-                      const type = key === 'landing-page' ? 'html' : key === 'logo-concepts' || key === 'product-mockups' ? 'images' : 'json';
-                      const displayData = type === 'html' ? data.html : type === 'images' ? data.concepts || data.mockups : data;
-                      setViewing({ title: key.replace(/-/g, ' '), data: displayData, type });
-                    }}
-                    className="glossy p-3 rounded-xl hover:shadow-elevated-lg transition-all text-left"
-                  >
-                    <div className="relative z-10">
-                      <p className="text-[12px] font-semibold capitalize text-content-primary">{key.replace(/-/g, ' ')}</p>
-                      <p className="text-[10px] text-content-muted">View</p>
-                    </div>
-                  </motion.button>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* RIGHT COLUMN — Performance + Campaigns + Activity */}
-        <div className="lg:col-span-2 space-y-5">
+      {/* ─── Row 1: Performance + Agents side by side ─── */}
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-5">
+        <div className="lg:col-span-3">
           <PerformanceDashboard profileId={id} />
-          <ApprovalQueue profileId={id} />
-          <ActivityFeed profileId={id} />
+        </div>
+        <div>
+          <h2 className="text-[13px] font-semibold text-content-primary mb-2 flex items-center gap-1.5">
+            <Zap className="w-3.5 h-3.5 text-brand-purple" /> Agents
+          </h2>
+          <div className="grid grid-cols-2 gap-1.5">
+            {[
+              { name: 'Sales', icon: DollarSign, color: 'text-green-500', bg: 'bg-green-500/10' },
+              { name: 'Campaign', icon: Megaphone, color: 'text-blue-500', bg: 'bg-blue-500/10' },
+              { name: 'Creative', icon: Palette, color: 'text-pink-500', bg: 'bg-pink-500/10' },
+              { name: 'Analytics', icon: BarChart3, color: 'text-brand-purple', bg: 'bg-brand-purple/10' },
+              { name: 'Projects', icon: Target, color: 'text-orange-500', bg: 'bg-orange-500/10' },
+              { name: 'Retention', icon: Users, color: 'text-cyan-500', bg: 'bg-cyan-500/10' },
+            ].map((agent) => {
+              const AgentIcon = agent.icon;
+              return (
+                <div key={agent.name} className="glossy rounded-lg p-2 opacity-60 cursor-default">
+                  <div className="relative z-10 flex items-center gap-2">
+                    <div className={`w-6 h-6 rounded-md ${agent.bg} flex items-center justify-center`}>
+                      <AgentIcon className={`w-3 h-3 ${agent.color}`} />
+                    </div>
+                    <p className="text-[10px] font-semibold text-content-primary">{agent.name}</p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
       </div>
 
-      {/* Connected Accounts — full width below */}
+      {/* ─── Row 2: Connected Accounts (prominent — clients interact here) ─── */}
       <ProfileConnections
         profileId={id}
         connections={connections}
@@ -358,6 +242,122 @@ export default function Dashboard() {
         connectingPlatform={connectingPlatform}
         setConnectingPlatform={setConnectingPlatform}
       />
+
+      {error && (
+        <div className="my-3 p-3 bg-red-500/5 border border-red-500/10 rounded-xl text-red-600 dark:text-red-400 text-[12px]">
+          {error}
+        </div>
+      )}
+
+      {/* ─── Row 3: Actions + Assets side by side ─── */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-5">
+        <div className="lg:col-span-2">
+          <h2 className="text-[13px] font-semibold mb-2 text-content-primary">Generate</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+
+        {isLeadGen && (
+          <>
+            <ActionButton skipConfirm icon={Globe} label="Build Landing Page" description="Add reference links, docs & images" actionKey="landing-page" completed={!!assets['landing-page']}
+              onExecute={() => handleActionWithInput('landing-page', {
+                title: 'Landing Page References',
+                subtitle: 'The more reference material you provide, the better the output.',
+                fields: [
+                  { key: 'referenceLinks', label: 'Landing pages you like (one URL per line)', type: 'textarea', placeholder: 'https://example.com/landing1\nhttps://competitor.com/offer' },
+                  { key: 'notes', label: 'What do you want on this page?', type: 'textarea', placeholder: 'Hero section, benefits, testimonials, form...' },
+                  { key: 'files', label: 'Upload references', type: 'file' },
+                ],
+              })}
+            />
+            <ActionButton skipConfirm icon={Megaphone} label="Create Ad Creatives" description="10 concepts for Meta & TikTok" actionKey="ad-creatives" completed={!!assets['ad-creatives']}
+              onExecute={() => handleActionWithInput('ad-creatives', {
+                title: 'Ad Creative Inspiration',
+                subtitle: 'Share ads you like so AI can match the style.',
+                fields: [
+                  { key: 'inspirationLinks', label: 'Ads you like (one URL per line)', type: 'textarea', placeholder: 'https://facebook.com/ads/library/...' },
+                  { key: 'adNotes', label: 'Angles or hooks?', type: 'textarea', placeholder: 'Pain points, urgency, free consultation...' },
+                  { key: 'files', label: 'Upload examples', type: 'file' },
+                ],
+              })}
+            />
+            <ActionButton icon={Mail} label="Email Sequences" description="5-email nurture sequence" actionKey="email-sequences" completed={!!assets['email-sequences']} onExecute={() => executeAction('email-sequences')} />
+            <ActionButton icon={MessageSquare} label="SMS Sequences" description="5-message follow-up" actionKey="sms-sequences" completed={!!assets['sms-sequences']} onExecute={() => executeAction('sms-sequences')} />
+          </>
+        )}
+
+        {isBrand && (
+          <>
+            {/* Only show logo/website generation for NEW brands, not existing ones */}
+            {profile.mode !== 'existing-brand' && (
+              <>
+                <ActionButton icon={Palette} label="Generate Logo Concepts" description="3 distinct logo variations" actionKey="logo-concepts" completed={!!assets['logo-concepts']} onExecute={() => executeAction('logo-concepts')} />
+                <ActionButton icon={Image} label="Product Mockups" description="T-shirts, packaging, lifestyle" actionKey="product-mockups" completed={!!assets['product-mockups']} onExecute={() => executeAction('product-mockups')} />
+              </>
+            )}
+            <ActionButton skipConfirm icon={Globe} label="Build Website" description="Add reference sites & docs" actionKey="landing-page" completed={!!assets['landing-page']}
+              onExecute={() => handleActionWithInput('landing-page', {
+                title: 'Website References',
+                subtitle: 'The more reference material, the better.',
+                fields: [
+                  { key: 'referenceLinks', label: 'Websites you like', type: 'textarea', placeholder: 'https://example.com' },
+                  { key: 'notes', label: 'What do you want?', type: 'textarea', placeholder: 'Hero, product showcase, contact form...' },
+                  { key: 'files', label: 'Upload references', type: 'file' },
+                ],
+              })}
+            />
+            <ActionButton skipConfirm icon={Megaphone} label="Ad Creatives" description="10 concepts for Meta & TikTok" actionKey="ad-creatives" completed={!!assets['ad-creatives']}
+              onExecute={() => handleActionWithInput('ad-creatives', {
+                title: 'Ad Creative Inspiration',
+                subtitle: 'Share ads you like.',
+                fields: [
+                  { key: 'inspirationLinks', label: 'Ads you like', type: 'textarea', placeholder: 'https://facebook.com/ads/library/...' },
+                  { key: 'adNotes', label: 'Angles or hooks?', type: 'textarea', placeholder: 'Pain points, urgency...' },
+                  { key: 'files', label: 'Upload examples', type: 'file' },
+                ],
+              })}
+            />
+            <ActionButton icon={Mail} label="Email Sequences" description="5-email nurture sequence" actionKey="email-sequences" completed={!!assets['email-sequences']} onExecute={() => executeAction('email-sequences')} />
+            <ActionButton icon={MessageSquare} label="SMS Sequences" description="5-message follow-up" actionKey="sms-sequences" completed={!!assets['sms-sequences']} onExecute={() => executeAction('sms-sequences')} />
+          </>
+        )}
+        {metaAdsConfigured && (
+          <ActionButton
+            skipConfirm icon={Megaphone} label="Prepare Meta Campaign" description="AI designs, you approve"
+            actionKey="meta-campaign" onExecute={() => setMetaCampaignModal(true)}
+          />
+        )}
+          </div>
+        </div>
+
+        {/* Assets + Activity */}
+        <div className="space-y-4">
+          {Object.keys(assets).length > 0 && (
+            <div>
+              <h2 className="text-[13px] font-semibold mb-2 text-content-primary">Generated Assets</h2>
+              <div className="space-y-1.5">
+                {Object.entries(assets).map(([key, data]) => (
+                  <button key={key}
+                    onClick={() => {
+                      const type = key === 'landing-page' ? 'html' : key === 'logo-concepts' || key === 'product-mockups' ? 'images' : 'json';
+                      const displayData = type === 'html' ? data.html : type === 'images' ? data.concepts || data.mockups : data;
+                      setViewing({ title: key.replace(/-/g, ' '), data: displayData, type });
+                    }}
+                    className="w-full glossy rounded-xl p-2.5 hover:shadow-elevated transition-all text-left"
+                  >
+                    <div className="relative z-10 flex items-center justify-between">
+                      <p className="text-[11px] font-semibold capitalize text-content-primary">{key.replace(/-/g, ' ')}</p>
+                      <ChevronRight className="w-3 h-3 text-content-muted" />
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+          <ActivityFeed profileId={id} />
+        </div>
+      </div>
+
+      {/* Approval Queue */}
+      <ApprovalQueue profileId={id} />
 
       {/* Modals */}
       {metaCampaignModal && (
