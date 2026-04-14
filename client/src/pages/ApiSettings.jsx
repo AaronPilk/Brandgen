@@ -69,17 +69,17 @@ export default function ApiSettings() {
 
   return (
     <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
-      <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-content-muted hover:text-content-primary mb-6 transition-colors text-sm">
+      <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-content-muted hover:text-content-primary mb-4 transition-colors text-sm">
         <ArrowLeft className="w-4 h-4" /> Back
       </button>
 
-      <div className="flex items-center gap-3 mb-6">
-        <Settings className="w-6 h-6 text-brand-purple" />
+      <div className="flex items-center gap-2.5 mb-4">
+        <Settings className="w-5 h-5 text-brand-purple" />
         <h1 className="text-title">Settings</h1>
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 p-1 bg-surface-raised rounded-2xl mb-6 w-fit">
+      <div className="flex gap-1 p-1 bg-surface-raised rounded-2xl mb-4 w-fit">
         {TABS.map((t) => {
           const Icon = t.icon;
           return (
@@ -131,7 +131,7 @@ export default function ApiSettings() {
               )}
 
               {/* Role Legend */}
-              <div className="grid grid-cols-3 gap-3 mb-6">
+              <div className="grid grid-cols-3 gap-2 mb-4">
                 {ROLES.map((role) => {
                   const Icon = role.icon;
                   return (
@@ -199,7 +199,7 @@ export default function ApiSettings() {
       {/* ─── INTEGRATIONS TAB ─── */}
       {tab === 'api' && (
         <div>
-          <div className="glossy rounded-xl p-4 mb-5">
+          <div className="glossy rounded-xl p-3 mb-4">
             <div className="relative z-10 flex items-center justify-between">
               <span className="text-[13px] text-content-secondary">{GLOBAL_INTEGRATIONS.filter(a => apiStatus?.[a.key]).length} of {GLOBAL_INTEGRATIONS.length} configured</span>
               <div className="flex items-center gap-3 text-[10px] text-content-muted">
@@ -212,7 +212,7 @@ export default function ApiSettings() {
           {GLOBAL_GROUPS.map((group) => {
             const items = GLOBAL_INTEGRATIONS.filter((a) => a.group === group);
             return (
-              <div key={group} className="mb-5">
+              <div key={group} className="mb-4">
                 <h3 className="text-[11px] font-semibold text-content-muted uppercase tracking-wider mb-2">{group}</h3>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
                   {items.map((api) => {
@@ -329,10 +329,10 @@ function AccountTab({ currentUser, token, setAuth }) {
   };
 
   return (
-    <div className="max-w-md">
-      <div className="glossy rounded-2xl p-6 mb-4">
-        <div className="relative z-10 space-y-4">
-          <div className="flex items-center gap-4 mb-2">
+    <div className="max-w-lg">
+      <div className="glossy rounded-2xl p-5 mb-3">
+        <div className="relative z-10 space-y-3">
+          <div className="flex items-center gap-3 mb-1">
             <div className="w-14 h-14 rounded-full bg-brand-purple/15 flex items-center justify-center text-brand-purple text-xl font-bold">
               {(currentUser?.name || currentUser?.email || '?')[0].toUpperCase()}
             </div>
@@ -345,15 +345,15 @@ function AccountTab({ currentUser, token, setAuth }) {
           <div><label className="block text-[12px] font-medium text-content-secondary mb-1">Email</label><input value={email} onChange={(e) => setEmail(e.target.value)} type="email" /></div>
         </div>
       </div>
-      <div className="glossy rounded-2xl p-6 mb-4">
-        <div className="relative z-10 space-y-4">
-          <h3 className="text-[14px] font-semibold text-content-primary flex items-center gap-2"><Lock className="w-4 h-4" /> Change Password</h3>
+      <div className="glossy rounded-2xl p-5 mb-3">
+        <div className="relative z-10 space-y-3">
+          <h3 className="text-[13px] font-semibold text-content-primary flex items-center gap-2"><Lock className="w-3.5 h-3.5" /> Change Password</h3>
           <div><label className="block text-[12px] font-medium text-content-secondary mb-1">New Password</label><input value={password} onChange={(e) => setPassword(e.target.value)} type="password" placeholder="Leave blank to keep current" /></div>
           <div><label className="block text-[12px] font-medium text-content-secondary mb-1">Confirm Password</label><input value={confirmPw} onChange={(e) => setConfirmPw(e.target.value)} type="password" /></div>
         </div>
       </div>
-      {msg && <div className={`mb-4 p-3 rounded-xl text-[12px] ${msg.type === 'success' ? 'bg-green-500/10 text-green-500' : msg.type === 'error' ? 'bg-red-500/10 text-red-500' : 'bg-surface-raised text-content-muted'}`}>{msg.text}</div>}
-      <button onClick={handleSave} disabled={saving} className="glossy-btn text-white px-6 py-3 rounded-2xl text-[13px] font-semibold flex items-center gap-2">
+      {msg && <div className={`mb-3 p-2.5 rounded-xl text-[12px] ${msg.type === 'success' ? 'bg-green-500/10 text-green-500' : msg.type === 'error' ? 'bg-red-500/10 text-red-500' : 'bg-surface-raised text-content-muted'}`}>{msg.text}</div>}
+      <button onClick={handleSave} disabled={saving} className="glossy-btn text-white px-5 py-2.5 rounded-xl text-[13px] font-semibold flex items-center gap-2">
         {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />} {saving ? 'Saving...' : 'Save Changes'}
       </button>
     </div>

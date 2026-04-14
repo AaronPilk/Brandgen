@@ -41,9 +41,10 @@ export const INTEGRATION_CATALOG = [
   // ─── Global / system integrations (admin-only, in Settings) ───
   { key: 'anthropic', name: 'Anthropic', group: 'Core AI', scope: 'global', authType: 'api_key', required: true, priority: 1 },
   { key: 'openai', name: 'OpenAI', group: 'Core AI', scope: 'global', authType: 'api_key', priority: 2 },
-  { key: 'gemini', name: 'Google Gemini', group: 'Core AI', scope: 'global', authType: 'api_key', priority: 3 },
-  { key: 'grok', name: 'xAI / Grok', group: 'Core AI', scope: 'global', authType: 'api_key', priority: 4 },
-  { key: 'perplexity', name: 'Perplexity', group: 'Core AI', scope: 'global', authType: 'api_key', priority: 5 },
+  { key: 'dalle', name: 'DALL-E 3', group: 'Core AI', scope: 'global', authType: 'api_key', priority: 3, note: 'Uses OpenAI key' },
+  { key: 'gemini', name: 'Google Gemini', group: 'Core AI', scope: 'global', authType: 'api_key', priority: 4 },
+  { key: 'grok', name: 'xAI / Grok', group: 'Core AI', scope: 'global', authType: 'api_key', priority: 5 },
+  { key: 'perplexity', name: 'Perplexity', group: 'Core AI', scope: 'global', authType: 'api_key', priority: 6 },
 
   { key: 'elevenlabs', name: 'ElevenLabs', group: 'Voice', scope: 'global', authType: 'api_key', priority: 1 },
   { key: 'vapi', name: 'Vapi', group: 'Voice', scope: 'global', authType: 'api_key', priority: 2 },
@@ -55,8 +56,10 @@ export const INTEGRATION_CATALOG = [
   { key: 'zapier', name: 'Zapier', group: 'Automation', scope: 'global', authType: 'api_key', priority: 3 },
   { key: 'pipedream', name: 'Pipedream', group: 'Automation', scope: 'global', authType: 'api_key', priority: 4 },
 
-  { key: 'metaAds', name: 'Meta Ads System Token', group: 'Ads Platform', scope: 'global', authType: 'token', priority: 1 },
-  { key: 'googleAds', name: 'Google Ads', group: 'Ads Platform', scope: 'global', authType: 'api_key', priority: 2 },
+  { key: 'metaAds', name: 'Meta Ads System Token', group: 'Ads & Analytics', scope: 'global', authType: 'token', priority: 1 },
+  { key: 'googleAds', name: 'Google Ads', group: 'Ads & Analytics', scope: 'global', authType: 'api_key', priority: 2 },
+  { key: 'googleAnalytics', name: 'Google Analytics', group: 'Ads & Analytics', scope: 'global', authType: 'pixel', priority: 3 },
+  { key: 'gtm', name: 'Google Tag Manager', group: 'Ads & Analytics', scope: 'global', authType: 'pixel', priority: 4 },
 
   { key: 'midjourney', name: 'Midjourney', group: 'Creative AI (Global)', scope: 'global', authType: 'api_key', priority: 1 },
   { key: 'runway', name: 'Runway', group: 'Creative AI (Global)', scope: 'global', authType: 'api_key', priority: 2 },
