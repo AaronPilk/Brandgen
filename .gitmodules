@@ -1,0 +1,3 @@
+[submodule "server/agents/sales-agent"]
+	path = server/agents/sales-agent
+	url = https://github.com/skywaymediacode/BrandGenSales.git
