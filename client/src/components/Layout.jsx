@@ -11,7 +11,7 @@ export default function Layout({ children }) {
   const location = useLocation();
   const isHome = location.pathname === '/';
 
-  const isDashboard = location.pathname.startsWith('/dashboard/') || location.pathname.startsWith('/crm/');
+  const isDashboard = location.pathname.startsWith('/dashboard/') || location.pathname.startsWith('/crm/') || location.pathname.startsWith('/calendar/');
   const isWide = isDashboard || location.pathname === '/connections' || location.pathname === '/settings';
 
   return (

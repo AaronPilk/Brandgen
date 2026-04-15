@@ -16,6 +16,7 @@ import ProfilesList from './pages/ProfilesList';
 import CRM from './pages/CRM';
 import Team from './pages/Team';
 import Usage from './pages/Usage';
+import ContentCalendar from './pages/ContentCalendar';
 import DevChat from './pages/DevChat';
 
 // Client redirect — finds their assigned profile and sends them there
@@ -71,6 +72,7 @@ export default function App() {
           {/* These are accessible to all roles with access control on backend */}
           <Route path="/dashboard/:id" element={<Dashboard />} />
           <Route path="/crm/:id" element={<CRM />} />
+          <Route path="/calendar/:id" element={<ContentCalendar />} />
           <Route path="/profiles" element={<ProfilesList />} />
 
           {/* Admin/manager only */}

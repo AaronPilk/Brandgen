@@ -150,6 +150,36 @@ export const getActivityFeed = (profileId, limit) =>
 export const getAllActivity = (limit) =>
   request(`/activity?limit=${limit || 100}`);
 
+// Agents
+export const getAgentDefinitions = () => request('/agents/definitions');
+export const getWorkspaceAgents = (profileId) => request(`/agents/${profileId}/agents`);
+export const enableAgent = (profileId, agentKey, mode) => request(`/agents/${profileId}/agents/${agentKey}/enable`, { method: 'POST', body: JSON.stringify({ mode }) });
+export const disableAgent = (profileId, agentKey) => request(`/agents/${profileId}/agents/${agentKey}/disable`, { method: 'POST' });
+export const getAgentActions = (profileId, status) => request(`/agents/${profileId}/actions?status=${status || 'pending'}`);
+export const approveAgentAction = (id) => request(`/agents/actions/${id}/approve`, { method: 'POST' });
+export const rejectAgentAction = (id, reason) => request(`/agents/actions/${id}/reject`, { method: 'POST', body: JSON.stringify({ reason }) });
+export const executeAgentAction = (id) => request(`/agents/actions/${id}/execute`, { method: 'POST' });
+export const getAgentContext = (profileId, scopes) => request(`/agents/${profileId}/context?scopes=${scopes || 'brand,crm,calendar'}`);
+
+// Content Calendar
+export const getCalendarPosts = (profileId, params = {}) => {
+  const q = new URLSearchParams(params).toString();
+  return request(`/calendar/${profileId}/posts${q ? '?' + q : ''}`);
+};
+export const getCalendarStats = (profileId) => request(`/calendar/${profileId}/stats`);
+export const getUpcomingPosts = (profileId, days) => request(`/calendar/${profileId}/upcoming?days=${days || 7}`);
+export const getPendingPosts = (profileId) => request(`/calendar/${profileId}/pending`);
+export const getCalendarPost = (id) => request(`/calendar/posts/${id}`);
+export const createCalendarPost = (profileId, data) => request(`/calendar/${profileId}/posts`, { method: 'POST', body: JSON.stringify(data) });
+export const updateCalendarPost = (id, data) => request(`/calendar/posts/${id}`, { method: 'PATCH', body: JSON.stringify(data) });
+export const deleteCalendarPost = (id) => request(`/calendar/posts/${id}`, { method: 'DELETE' });
+export const submitPostForApproval = (id) => request(`/calendar/posts/${id}/submit`, { method: 'POST' });
+export const approveCalendarPost = (id) => request(`/calendar/posts/${id}/approve`, { method: 'POST' });
+export const rejectCalendarPost = (id, reason) => request(`/calendar/posts/${id}/reject`, { method: 'POST', body: JSON.stringify({ reason }) });
+export const publishCalendarPost = (id) => request(`/calendar/posts/${id}/publish`, { method: 'POST' });
+export const scheduleCalendarPost = (id, scheduledAt) => request(`/calendar/posts/${id}/schedule`, { method: 'POST', body: JSON.stringify({ scheduledAt }) });
+export const getCalendarMeta = () => request('/calendar/meta');
+
 // CRM
 export const getContacts = (profileId, params = {}) => {
   const q = new URLSearchParams(params).toString();

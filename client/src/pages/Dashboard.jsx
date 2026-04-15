@@ -5,7 +5,7 @@ import {
   ArrowLeft, Globe, Image, Mail, MessageSquare, Palette, ShoppingBag,
   Instagram, Facebook, BarChart3, Megaphone, Link2, AlertTriangle,
   Eye, Zap, Package, ChevronRight, Upload, ExternalLink, Check, Unplug, Edit3, X, DollarSign,
-  Share2, Target, Users, HardDrive, Loader2, Video, Server, Search, UserPlus,
+  Share2, Target, Users, HardDrive, Loader2, Video, Server, Search, UserPlus, Calendar,
 } from 'lucide-react';
 import { useStore } from '../store/useStore';
 import { BRAND_INTEGRATIONS, BRAND_GROUPS, TOP_BRAND_INTEGRATIONS } from '../data/integrations';
@@ -169,6 +169,12 @@ export default function Dashboard() {
                   className="text-[12px] font-semibold text-brand-purple bg-brand-purple/10 px-3 py-1 rounded-full hover:bg-brand-purple/20 transition-colors flex items-center gap-1"
                 >
                   <Users className="w-3 h-3" /> CRM
+                </button>
+                <button
+                  onClick={() => navigate(`/calendar/${id}`)}
+                  className="text-[12px] font-semibold text-blue-400 bg-blue-500/10 px-3 py-1 rounded-full hover:bg-blue-500/20 transition-colors flex items-center gap-1"
+                >
+                  <Calendar className="w-3 h-3" /> Calendar
                 </button>
                 <button
                   onClick={() => setEditProfileOpen(true)}

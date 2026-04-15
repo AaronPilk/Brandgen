@@ -32,6 +32,19 @@ const EVENT_TYPES = {
   // Performance
   PERFORMANCE_ALERT: { icon: 'trending', label: 'Performance Alert', color: 'yellow' },
   OPTIMIZATION_SUGGESTION: { icon: 'zap', label: 'Optimization Suggestion', color: 'orange' },
+
+  // Content Calendar
+  CONTENT_CREATED: { icon: 'file-plus', label: 'Content Created', color: 'blue' },
+  CONTENT_SUBMITTED: { icon: 'send', label: 'Content Submitted for Approval', color: 'purple' },
+  CONTENT_APPROVED: { icon: 'check-circle', label: 'Content Approved', color: 'green' },
+  CONTENT_REJECTED: { icon: 'x-circle', label: 'Content Rejected', color: 'red' },
+  CONTENT_SCHEDULED: { icon: 'clock', label: 'Content Scheduled', color: 'cyan' },
+  CONTENT_PUBLISHED: { icon: 'globe', label: 'Content Published', color: 'green' },
+
+  // Agent Plugin
+  AGENT_ENABLED: { icon: 'cpu', label: 'Agent Enabled', color: 'purple' },
+  AGENT_DISABLED: { icon: 'cpu', label: 'Agent Disabled', color: 'gray' },
+  AGENT_ACTION: { icon: 'zap', label: 'Agent Action', color: 'orange' },
 };
 
 export function logEvent(profileId, type, data = {}) {

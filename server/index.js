@@ -13,6 +13,8 @@ import { crmRoutes } from './routes/crm.js';
 import { devChatRoutes } from './routes/devChat.js';
 import { plannerRoutes } from './routes/planner.js';
 import { platformDataRoutes } from './routes/platformData.js';
+import { contentCalendarRoutes } from './routes/contentCalendar.js';
+import { agentRoutes } from './routes/agents.js';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -33,6 +35,8 @@ app.use('/api/crm', crmRoutes);
 app.use('/api/dev-chat', devChatRoutes);
 app.use('/api/planner', plannerRoutes);
 app.use('/api/platform-data', platformDataRoutes);
+app.use('/api/calendar', contentCalendarRoutes);
+app.use('/api/agents', agentRoutes);
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: Date.now() });
