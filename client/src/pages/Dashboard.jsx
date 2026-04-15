@@ -9,7 +9,7 @@ import {
 } from 'lucide-react';
 import { useStore } from '../store/useStore';
 import { BRAND_INTEGRATIONS, BRAND_GROUPS, TOP_BRAND_INTEGRATIONS } from '../data/integrations';
-import { getProfile, runAiAction, updateProfile, uploadFiles, getOAuthConnections, startOAuthConnect, disconnectOAuth, prepareMetaCampaign, getMetaAdsStatus, createClientInvite } from '../services/api';
+import { getProfile, runAiAction, updateProfile, uploadFiles, getOAuthConnections, startOAuthConnect, disconnectOAuth, prepareMetaCampaign, getMetaAdsStatus, createClientInvite, getAgentActions, approveAgentAction, rejectAgentAction, executeAgentAction, getAgentContext } from '../services/api';
 import ActionButton from '../components/ActionButton';
 import AssetViewer from '../components/AssetViewer';
 import LoadingOverlay from '../components/LoadingOverlay';
@@ -36,6 +36,7 @@ export default function Dashboard() {
   const [metaCampaignModal, setMetaCampaignModal] = useState(false);
   const [editProfileOpen, setEditProfileOpen] = useState(false);
   const [inviteClientOpen, setInviteClientOpen] = useState(false);
+  const [activeAgent, setActiveAgent] = useState(null);
   const profile = currentProfile;
 
   useEffect(() => {
@@ -231,23 +232,34 @@ export default function Dashboard() {
           </h2>
           <div className="grid grid-cols-2 gap-1.5">
             {[
-              { name: 'Sales', icon: DollarSign, color: 'text-green-500', bg: 'bg-green-500/10' },
-              { name: 'Campaign', icon: Megaphone, color: 'text-blue-500', bg: 'bg-blue-500/10' },
-              { name: 'Creative', icon: Palette, color: 'text-pink-500', bg: 'bg-pink-500/10' },
-              { name: 'Analytics', icon: BarChart3, color: 'text-brand-purple', bg: 'bg-brand-purple/10' },
-              { name: 'Projects', icon: Target, color: 'text-orange-500', bg: 'bg-orange-500/10' },
-              { name: 'Retention', icon: Users, color: 'text-cyan-500', bg: 'bg-cyan-500/10' },
+              { name: 'Sales', key: 'sales_agent', icon: DollarSign, color: 'text-green-500', bg: 'bg-green-500/10', border: 'border-green-500/40', glow: 'shadow-green-500/20', active: true },
+              { name: 'Campaign', key: 'campaign_agent', icon: Megaphone, color: 'text-blue-500', bg: 'bg-blue-500/10', active: false },
+              { name: 'Creative', key: 'creative_agent', icon: Palette, color: 'text-pink-500', bg: 'bg-pink-500/10', active: false },
+              { name: 'Analytics', key: 'analytics_agent', icon: BarChart3, color: 'text-brand-purple', bg: 'bg-brand-purple/10', active: false },
+              { name: 'Social Media', key: 'social_media_agent', icon: Share2, color: 'text-orange-500', bg: 'bg-orange-500/10', active: false },
+              { name: 'Retention', key: 'retention_agent', icon: Users, color: 'text-cyan-500', bg: 'bg-cyan-500/10', active: false },
             ].map((agent) => {
               const AgentIcon = agent.icon;
               return (
-                <div key={agent.name} className="glossy rounded-lg p-2 opacity-60 cursor-default">
+                <button
+                  key={agent.name}
+                  onClick={() => agent.active && setActiveAgent(agent)}
+                  className={`glossy rounded-lg p-2 text-left transition-all ${
+                    agent.active
+                      ? `opacity-100 cursor-pointer border ${agent.border} shadow-md ${agent.glow} hover:scale-[1.02]`
+                      : 'opacity-40 cursor-default border border-transparent'
+                  }`}
+                >
                   <div className="relative z-10 flex items-center gap-2">
                     <div className={`w-6 h-6 rounded-md ${agent.bg} flex items-center justify-center`}>
                       <AgentIcon className={`w-3 h-3 ${agent.color}`} />
                     </div>
-                    <p className="text-[10px] font-semibold text-content-primary">{agent.name}</p>
+                    <div>
+                      <p className="text-[10px] font-semibold text-content-primary">{agent.name}</p>
+                      {agent.active && <p className="text-[8px] text-green-400 font-medium">Active</p>}
+                    </div>
                   </div>
-                </div>
+                </button>
               );
             })}
           </div>
@@ -406,6 +418,15 @@ export default function Dashboard() {
       )}
 
       {viewing && <AssetViewer title={viewing.title} data={viewing.data} type={viewing.type} onClose={() => setViewing(null)} />}
+
+      {/* Agent Panel */}
+      {activeAgent && (
+        <AgentPanel
+          agent={activeAgent}
+          profileId={id}
+          onClose={() => setActiveAgent(null)}
+        />
+      )}
 
       {/* Input Modal for actions that need extra data */}
       <InputModal
@@ -981,6 +1002,280 @@ function InviteClientModal({ profileId, profileName, onClose }) {
                   {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <UserPlus className="w-4 h-4" />}
                   {loading ? 'Creating...' : 'Send Invite'}
                 </button>
+              </div>
+            </div>
+          )}
+        </div>
+      </motion.div>
+    </div>
+  );
+}
+
+// ─── Agent Panel ───
+function AgentPanel({ agent, profileId, onClose }) {
+  const [tab, setTab] = useState('overview');
+  const [actions, setActions] = useState([]);
+  const [context, setContext] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [executing, setExecuting] = useState(null);
+
+  useEffect(() => {
+    loadData();
+    const interval = setInterval(loadData, 10000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const loadData = async () => {
+    try {
+      const [pending, approved, executed, rejected, ctx] = await Promise.all([
+        getAgentActions(profileId, 'pending').catch(() => []),
+        getAgentActions(profileId, 'approved').catch(() => []),
+        getAgentActions(profileId, 'executed').catch(() => []),
+        getAgentActions(profileId, 'rejected').catch(() => []),
+        getAgentContext(profileId, 'brand,crm,calendar').catch(() => null),
+      ]);
+      setActions([...pending, ...approved, ...executed, ...rejected]);
+      setContext(ctx);
+      setError('');
+    } catch (err) {
+      setError(err.message);
+    }
+    setLoading(false);
+  };
+
+  const handleApprove = async (actionId) => {
+    setExecuting(actionId);
+    try {
+      await approveAgentAction(actionId);
+      await executeAgentAction(actionId);
+      await loadData();
+    } catch (err) { setError(err.message); }
+    setExecuting(null);
+  };
+
+  const handleReject = async (actionId) => {
+    setExecuting(actionId);
+    try {
+      await rejectAgentAction(actionId, 'Rejected by admin');
+      await loadData();
+    } catch (err) { setError(err.message); }
+    setExecuting(null);
+  };
+
+  const AgentIcon = agent.icon;
+  const pending = actions.filter(a => a.status === 'pending');
+  const executed = actions.filter(a => a.status === 'executed');
+  const rejected = actions.filter(a => a.status === 'rejected');
+
+  const STATUS_BADGE = {
+    pending: { bg: 'bg-yellow-500/20', text: 'text-yellow-400', label: 'Pending' },
+    approved: { bg: 'bg-blue-500/20', text: 'text-blue-400', label: 'Approved' },
+    executed: { bg: 'bg-green-500/20', text: 'text-green-400', label: 'Executed' },
+    rejected: { bg: 'bg-red-500/20', text: 'text-red-400', label: 'Rejected' },
+    auto_approved: { bg: 'bg-green-500/20', text: 'text-green-400', label: 'Auto' },
+    error: { bg: 'bg-red-500/20', text: 'text-red-400', label: 'Error' },
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center" onClick={onClose}>
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        className="relative w-full max-w-2xl bg-surface-card border border-border-subtle rounded-2xl max-h-[85vh] overflow-hidden flex flex-col"
+        onClick={e => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border-subtle">
+          <div className="flex items-center gap-3">
+            <div className={`w-10 h-10 rounded-xl ${agent.bg} flex items-center justify-center`}>
+              <AgentIcon className={`w-5 h-5 ${agent.color}`} />
+            </div>
+            <div>
+              <h2 className="text-lg font-bold text-content-primary">{agent.name} Agent</h2>
+              <div className="flex items-center gap-2 mt-0.5">
+                <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+                <span className="text-[11px] text-green-400 font-medium">Connected & Active</span>
+              </div>
+            </div>
+          </div>
+          <button onClick={onClose} className="p-2 rounded-lg hover:bg-surface-raised transition-colors">
+            <X className="w-4 h-4 text-content-muted" />
+          </button>
+        </div>
+
+        {/* Tabs */}
+        <div className="flex gap-1 px-6 pt-3 pb-2">
+          {[
+            { key: 'overview', label: 'Overview' },
+            { key: 'queue', label: `Action Queue (${pending.length})` },
+            { key: 'history', label: 'History' },
+            { key: 'health', label: 'Health' },
+          ].map(t => (
+            <button key={t.key} onClick={() => setTab(t.key)}
+              className={`px-3 py-1.5 rounded-lg text-[12px] font-semibold transition-all ${
+                tab === t.key ? 'bg-surface-raised text-content-primary' : 'text-content-muted hover:text-content-secondary'
+              }`}>
+              {t.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Content */}
+        <div className="flex-1 overflow-y-auto px-6 pb-6">
+          {error && (
+            <div className="mt-3 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-[12px] flex items-center gap-2">
+              <AlertTriangle className="w-4 h-4 flex-shrink-0" /> {error}
+            </div>
+          )}
+
+          {/* Overview Tab */}
+          {tab === 'overview' && (
+            <div className="mt-4 space-y-4">
+              <div className="grid grid-cols-4 gap-3">
+                <div className="p-3 rounded-xl bg-surface-raised text-center">
+                  <div className="text-lg font-bold text-yellow-400">{pending.length}</div>
+                  <div className="text-[10px] text-content-muted">Pending</div>
+                </div>
+                <div className="p-3 rounded-xl bg-surface-raised text-center">
+                  <div className="text-lg font-bold text-green-400">{executed.length}</div>
+                  <div className="text-[10px] text-content-muted">Executed</div>
+                </div>
+                <div className="p-3 rounded-xl bg-surface-raised text-center">
+                  <div className="text-lg font-bold text-red-400">{rejected.length}</div>
+                  <div className="text-[10px] text-content-muted">Rejected</div>
+                </div>
+                <div className="p-3 rounded-xl bg-surface-raised text-center">
+                  <div className="text-lg font-bold text-content-primary">{actions.length}</div>
+                  <div className="text-[10px] text-content-muted">Total</div>
+                </div>
+              </div>
+
+              {context && (
+                <div className="p-4 rounded-xl bg-surface-raised space-y-2">
+                  <h3 className="text-[12px] font-semibold text-content-primary">Agent Context</h3>
+                  {context.brand && (
+                    <div className="text-[11px] text-content-secondary">
+                      Brand: <span className="text-content-primary font-medium">{context.brand.name}</span> · {context.brand.mode}
+                    </div>
+                  )}
+                  {context.crm && (
+                    <div className="text-[11px] text-content-secondary">
+                      CRM: <span className="text-content-primary font-medium">{context.crm.contactStats?.total || 0}</span> contacts · <span className="text-content-primary font-medium">{context.crm.dealStats?.total || 0}</span> deals · Pipeline: <span className="text-green-400 font-medium">${(context.crm.dealStats?.totalValue || 0).toLocaleString()}</span>
+                    </div>
+                  )}
+                  {context.calendar && (
+                    <div className="text-[11px] text-content-secondary">
+                      Calendar: <span className="text-content-primary font-medium">{context.calendar.stats?.total || 0}</span> posts · <span className="text-blue-400 font-medium">{context.calendar.stats?.scheduled || 0}</span> scheduled
+                    </div>
+                  )}
+                </div>
+              )}
+
+              <div className="p-4 rounded-xl bg-surface-raised">
+                <h3 className="text-[12px] font-semibold text-content-primary mb-2">Capabilities</h3>
+                <div className="flex flex-wrap gap-1.5">
+                  {['Lead Scraping', 'Contact Enrichment', 'Lead Qualification', 'Email Sequences', 'Pipeline Analysis', 'Follow-up Automation'].map(cap => (
+                    <span key={cap} className="px-2 py-0.5 rounded-full bg-green-500/10 text-green-400 text-[10px] font-medium">{cap}</span>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Action Queue Tab */}
+          {tab === 'queue' && (
+            <div className="mt-4 space-y-2">
+              {pending.length === 0 ? (
+                <div className="p-8 text-center text-content-muted text-[13px]">
+                  No pending actions. The agent will propose actions as it analyzes your data.
+                </div>
+              ) : (
+                pending.map(action => (
+                  <div key={action.id} className="p-4 rounded-xl bg-surface-raised border border-border-subtle">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-[12px] font-semibold text-content-primary capitalize">{action.type.replace(/_/g, ' ')}</span>
+                      <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-yellow-500/20 text-yellow-400">Pending Approval</span>
+                    </div>
+                    {action.reasoning && <p className="text-[11px] text-content-secondary mb-3">{action.reasoning}</p>}
+                    {action.payload && (
+                      <div className="text-[10px] text-content-muted bg-surface-bg rounded-lg p-2 mb-3 font-mono max-h-24 overflow-y-auto whitespace-pre-wrap">
+                        {JSON.stringify(action.payload, null, 2)}
+                      </div>
+                    )}
+                    <div className="flex gap-2">
+                      <button onClick={() => handleApprove(action.id)} disabled={executing === action.id}
+                        className="px-3 py-1.5 rounded-lg bg-green-500/20 text-green-400 text-[11px] font-semibold hover:bg-green-500/30 transition-colors flex items-center gap-1">
+                        {executing === action.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <Check className="w-3 h-3" />} Approve & Execute
+                      </button>
+                      <button onClick={() => handleReject(action.id)} disabled={executing === action.id}
+                        className="px-3 py-1.5 rounded-lg bg-red-500/20 text-red-400 text-[11px] font-semibold hover:bg-red-500/30 transition-colors flex items-center gap-1">
+                        <X className="w-3 h-3" /> Reject
+                      </button>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          )}
+
+          {/* History Tab */}
+          {tab === 'history' && (
+            <div className="mt-4 space-y-2">
+              {actions.filter(a => a.status !== 'pending').length === 0 ? (
+                <div className="p-8 text-center text-content-muted text-[13px]">No action history yet.</div>
+              ) : (
+                actions.filter(a => a.status !== 'pending').map(action => {
+                  const badge = STATUS_BADGE[action.status] || STATUS_BADGE.error;
+                  return (
+                    <div key={action.id} className="p-3 rounded-xl bg-surface-raised flex items-center gap-3">
+                      <span className={`px-2 py-0.5 rounded text-[10px] font-medium ${badge.bg} ${badge.text}`}>{badge.label}</span>
+                      <span className="text-[12px] text-content-primary font-medium capitalize flex-1">{action.type.replace(/_/g, ' ')}</span>
+                      <span className="text-[10px] text-content-muted">{new Date(action.createdAt).toLocaleString()}</span>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          )}
+
+          {/* Health Tab */}
+          {tab === 'health' && (
+            <div className="mt-4 space-y-3">
+              <div className="p-4 rounded-xl bg-surface-raised">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="w-3 h-3 rounded-full bg-green-400" />
+                  <span className="text-[13px] font-semibold text-content-primary">System Status</span>
+                </div>
+                <div className="space-y-2">
+                  {[
+                    { label: 'Plugin Connection', status: 'ok', detail: 'Submodule loaded' },
+                    { label: 'BrandGen API', status: 'ok', detail: 'Responding' },
+                    { label: 'Action Queue', status: 'ok', detail: `${pending.length} pending` },
+                    { label: 'AI Provider', status: context ? 'ok' : 'warn', detail: context ? 'Available' : 'Not configured' },
+                    { label: 'Email (SMTP)', status: 'off', detail: 'Not configured' },
+                    { label: 'Scraper', status: 'off', detail: 'Not configured' },
+                  ].map(item => (
+                    <div key={item.label} className="flex items-center justify-between py-1.5 border-b border-border-subtle last:border-0">
+                      <span className="text-[12px] text-content-secondary">{item.label}</span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[11px] text-content-muted">{item.detail}</span>
+                        <span className={`w-2 h-2 rounded-full ${
+                          item.status === 'ok' ? 'bg-green-400' : item.status === 'warn' ? 'bg-yellow-400' : 'bg-gray-500'
+                        }`} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="p-4 rounded-xl bg-surface-raised">
+                <h3 className="text-[12px] font-semibold text-content-primary mb-2">Configuration Needed</h3>
+                <ul className="space-y-1.5 text-[11px] text-content-secondary">
+                  <li className="flex items-center gap-2"><AlertTriangle className="w-3 h-3 text-yellow-400" /> Add Anthropic API key to sales agent .env</li>
+                  <li className="flex items-center gap-2"><AlertTriangle className="w-3 h-3 text-yellow-400" /> Configure SMTP for email sequences</li>
+                  <li className="flex items-center gap-2"><AlertTriangle className="w-3 h-3 text-yellow-400" /> Set scrape targets (industry, location)</li>
+                </ul>
               </div>
             </div>
           )}
